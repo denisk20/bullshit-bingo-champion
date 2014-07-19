@@ -1,0 +1,3 @@
+[submodule "DynamicGrid"]
+	path = DynamicGrid
+	url = https://github.com/askerov/DynamicGrid.git
