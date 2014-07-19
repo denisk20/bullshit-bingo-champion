@@ -74,7 +74,7 @@ public class BullshitBingoActivity extends Activity {
         gridView.setAdapter(new BaseDynamicGridAdapter(this, words, dim) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
-                String text = words.get(position);
+                String text = (String) getItem(position);
                 Log.i("===", "here");
                 TextView textView;
                 if (!(convertView instanceof TextView)) {
