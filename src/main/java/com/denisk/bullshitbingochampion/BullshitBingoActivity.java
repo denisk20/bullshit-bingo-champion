@@ -1,8 +1,7 @@
-package com.denisk.bingo;
-
-import android.app.Activity;
+package com.denisk.bullshitbingochampion;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class BullshitBingoActivity extends Activity {
+public class BullshitBingoActivity extends ActionBarActivity {
 
     public static final String BULLSHIT_FILES_PATH_KEY = "bullshitFilesPath";
     public static final String DIR_NAME = "bullshitbingochamp";
@@ -75,7 +74,6 @@ public class BullshitBingoActivity extends Activity {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 String text = (String) getItem(position);
-                Log.i("===", "here");
                 TextView textView;
                 if (!(convertView instanceof TextView)) {
                     textView = new TextView(BullshitBingoActivity.this);
@@ -118,7 +116,7 @@ public class BullshitBingoActivity extends Activity {
         if(! bullshitDir.exists()) {
             throw new IllegalStateException("Can't create directory to store *.bullshit files at " + bullshitDir);
         } else {
-            Log.i(getClass().getName(), "===Bullshit dir: " + bullshitDir);
+            Log.i(BullshitBingoActivity.class.getName(), "===Bullshit dir: " + bullshitDir);
             getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().putString(BULLSHIT_FILES_PATH_KEY, bullshitDir.toString()).commit();
         }
     }
