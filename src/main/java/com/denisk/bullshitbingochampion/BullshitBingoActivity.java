@@ -37,10 +37,11 @@ public class BullshitBingoActivity extends ActionBarActivity {
         gridView = (DynamicGridView) findViewById(R.id.gridview);
         gridView.setNumColumns(dim);
 
-        final ArrayList<String> words = new ArrayList<>(dim*dim);
+        final ArrayList<StringHolder> words = new ArrayList<>(dim*dim);
         for (int i = 0; i < dim; i++) {
             for(int j = 0; j < dim; j++) {
-                words.add(i + "_" + j);
+//                words.add(new StringHolder("bb"));
+                words.add(new StringHolder(i + "_" + j));
             }
         }
         gridView.setOnDragListener(new DynamicGridView.OnDragListener() {
@@ -70,22 +71,38 @@ public class BullshitBingoActivity extends ActionBarActivity {
             }
         });
 
-        gridView.setAdapter(new BaseDynamicGridAdapter(this, words, dim) {
+        gridView.post(new Runnable() {
             @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                String text = (String) getItem(position);
-                TextView textView;
-                if (!(convertView instanceof TextView)) {
-                    textView = new TextView(BullshitBingoActivity.this);
-                } else {
-                    textView = (TextView) convertView;
-                }
+            public void run() {
+                final int gridWidth = gridView.getWidth();
+                final int gridHeight = gridView.getHeight();
+                gridView.setAdapter(new BaseDynamicGridAdapter(BullshitBingoActivity.this, words, dim) {
+                    @Override
+                    public View getView(int position, View convertView, ViewGroup parent) {
+                        StringHolder text = (StringHolder) getItem(position);
+                        TextView textView;
+                        if (!(convertView instanceof TextView)) {
+                            textView = (TextView) getLayoutInflater().inflate(R.layout.word, null);
+                            textView.setWidth(gridWidth / dim);
+                            textView.setHeight(gridHeight / dim);
 
-                textView.setText(text);
-                return textView;
+                        } else {
+                            textView = (TextView) convertView;
+                        }
+
+                        textView.setText(text.s);
+                        return textView;
+                    }
+                });
             }
         });
+    }
+    private static class StringHolder {
+        String s;
 
+        StringHolder(String s) {
+            this.s = s;
+        }
     }
     @Override
     public void onBackPressed() {

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">BullshitBingoChampion</string>
+    <string name="action_new">New Card</string>
 </resources>
