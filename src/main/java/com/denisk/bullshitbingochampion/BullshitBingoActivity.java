@@ -1,7 +1,7 @@
 package com.denisk.bullshitbingochampion;
+import android.app.Activity;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,7 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class BullshitBingoActivity extends ActionBarActivity {
+public class BullshitBingoActivity extends Activity {
 
     public static final String BULLSHIT_FILES_PATH_KEY = "bullshitFilesPath";
     public static final String DIR_NAME = "bullshitbingochamp";
