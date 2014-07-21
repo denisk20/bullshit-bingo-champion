@@ -1,1 +1,1 @@
-Emulator for [popular Bingo game](http://en.wikipedia.org/wiki/Buzzword_bingo)
+Android emulator for [popular Bingo game](http://en.wikipedia.org/wiki/Buzzword_bingo)
