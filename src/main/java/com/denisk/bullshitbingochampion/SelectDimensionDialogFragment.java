@@ -1,25 +1,36 @@
 package com.denisk.bullshitbingochampion;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.widget.NumberPicker;
 
 /**
  * @author denisk
  * @since 7/21/14.
  */
-public class SelectDimentionDialogFragment extends DialogFragment {
+public class SelectDimensionDialogFragment extends DialogFragment {
+
+    public interface DimensionSelectedListener {
+        void onDimensionSelected(int dim);
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        final Activity activity = getActivity();
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
+        final NumberPicker numberPicker = new NumberPicker(activity);
+        numberPicker.setMinValue(2);
+        numberPicker.setMaxValue(10);
         builder.setMessage(R.string.select_dim)
                 .setPositiveButton(R.string.create, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
+                        ((DimensionSelectedListener) activity).onDimensionSelected(numberPicker.getValue());
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -27,7 +38,8 @@ public class SelectDimentionDialogFragment extends DialogFragment {
                     public void onClick(DialogInterface dialog, int which) {
 
                     }
-                });
+                })
+                .setView(numberPicker);
 
         return builder.create();
     }

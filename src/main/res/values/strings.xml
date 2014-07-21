@@ -2,7 +2,10 @@
     <string name="app_name">BullshitBingoChampion</string>
     <string name="action_new">New Card</string>
     <string name="action_edit">Edit</string>
-    <string name="select_dim">Select card dimension</string>
+    <string name="select_dim">Select new card dimension</string>
     <string name="create">Create</string>
     <string name="cancel">Cancel</string>
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="long_press_to_drag">Long press then drag</string>
 </resources>
