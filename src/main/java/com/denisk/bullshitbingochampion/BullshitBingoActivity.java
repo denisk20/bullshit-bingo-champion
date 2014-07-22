@@ -65,6 +65,12 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
             public void onDragPositionsChanged(int oldPosition, int newPosition) {
             }
         });
+        gridView.setOnDropListener(new DynamicGridView.OnDropListener() {
+            @Override
+            public void onActionDrop() {
+                gridView.stopEditMode();
+            }
+        });
     }
 
     private boolean isGridFilled() {
