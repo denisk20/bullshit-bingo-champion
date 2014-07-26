@@ -173,6 +173,7 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
                         }
 
                         textView.setText(text.s);
+                        setViewVisibilityOnPosition(position, textView);
                         return textView;
                     }
                 });
