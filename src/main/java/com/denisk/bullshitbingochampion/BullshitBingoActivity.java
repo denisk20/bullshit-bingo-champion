@@ -1,16 +1,10 @@
 package com.denisk.bullshitbingochampion;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Service;
-import android.content.DialogInterface;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.*;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import org.askerov.dynamicgrid.BaseDynamicGridAdapter;
@@ -20,22 +14,30 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class BullshitBingoActivity extends Activity implements SelectDimensionDialogFragment.DimensionSelectedListener {
+public class BullshitBingoActivity extends Activity implements SelectDimensionDialogFragment.DimensionSelectedListener, EditCellDialogFragment.CellEditFinishedListener {
 
     public static final String BULLSHIT_FILES_PATH_KEY = "bullshitFilesPath";
     public static final String DIR_NAME = "bullshitbingochamp";
     public static final String PREFS_NAME = "bullshitbingochamp";
 
     private DynamicGridView gridView;
+
+    private ArrayList<StringHolder> currentWords = new ArrayList<>();
+    private BaseDynamicGridAdapter gridAdapter;
+
     private SelectDimensionDialogFragment dimensionDialog;
+    private EditCellDialogFragment editCellDialog;
 
     boolean isEditing;
     boolean isDirty;
+
+    private int dim;
 
     private MenuItem newMenuItem;
     private MenuItem editMenuItem;
     private MenuItem saveMenuItem;
     private MenuItem cancelMenuItem;
+    private MenuItem acceptItemMenuItem;
 
     private AdapterView.OnItemLongClickListener itemLongClickListener = new AdapterView.OnItemLongClickListener() {
         @Override
@@ -47,8 +49,9 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
             return true;
         }
     };
-    private ArrayList<StringHolder> currentWords = new ArrayList<>();
-    private BaseDynamicGridAdapter gridAdapter;
+    private int gridWidth;
+    private int gridHeight;
+    private float shift;
 
     /**
      * Called when the activity is first created.
@@ -63,6 +66,37 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
 
         gridView = (DynamicGridView) findViewById(R.id.gridview);
 
+        gridView.post(new Runnable() {
+            @Override
+            public void run() {
+                gridWidth = gridView.getWidth();
+                gridHeight = gridView.getHeight();
+            }
+        });
+
+        gridAdapter = new BaseDynamicGridAdapter(BullshitBingoActivity.this, currentWords, dim) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                StringHolder text = (StringHolder) getItem(position);
+                TextView textView;
+                if (!(convertView instanceof TextView)) {
+                    textView = (TextView) getLayoutInflater().inflate(R.layout.word, null);
+                    //this is set in bingo_activity
+                    textView.setWidth((int) (gridWidth / dim - shift));
+                    textView.setHeight((int) (gridHeight / dim - shift));
+
+                } else {
+                    textView = (TextView) convertView;
+                }
+
+                textView.setText(text.s);
+                setViewVisibilityOnPosition(position, textView);
+                return textView;
+            }
+        };
+
+        gridView.setAdapter(gridAdapter);
+
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(final AdapterView<?> parent, final View view, final int position, long id) {
@@ -75,35 +109,18 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
                     return;
                 }
                 CharSequence currentCellValue = itemAtPosition.s;
-                final EditText editText = new EditText(BullshitBingoActivity.this);
-                editText.setText(currentCellValue);
-                Resources res = getResources();
-                AlertDialog.Builder builder = new AlertDialog.Builder(BullshitBingoActivity.this)
-                        .setTitle(res.getString(R.string.edit_cell_title))
-                        .setView(editText)
-                        .setPositiveButton(res.getString(R.string.action_save), new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                gridAdapter.setItemAtPosition(new StringHolder(editText.getText()), position);
-                            }
-                        }).setNegativeButton(res.getString(R.string.action_cancel), new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                // Do nothing.
-                            }
-                        });
-                builder.show();
 
-                editText.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        editText.selectAll();
-                        InputMethodManager imm = (InputMethodManager) BullshitBingoActivity.this.getSystemService(Service.INPUT_METHOD_SERVICE);
-                        imm.showSoftInput(editText, 0);
-                    }
-                });
+                if(editCellDialog == null) {
+                    editCellDialog = new EditCellDialogFragment();
+                }
+                editCellDialog.setCurrentCellValue(currentCellValue);
+                editCellDialog.setPosition(position);
+
+                editCellDialog.show(getFragmentManager(), "editCell");
             }
         });
 
-        //todo we need this to be empty because https://github.com/askerov/DynamicGrid/issues/27
+        //we need this to be empty because https://github.com/askerov/DynamicGrid/issues/27
         gridView.setOnDragListener(new DynamicGridView.OnDragListener() {
             @Override
             public void onDragStarted(int position) {
@@ -120,6 +137,18 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
                 gridView.stopEditMode();
             }
         });
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+
     }
 
     private boolean isGridFilled() {
@@ -175,6 +204,7 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
         editMenuItem = menu.findItem(R.id.action_edit);
         saveMenuItem = menu.findItem(R.id.action_save);
         cancelMenuItem = menu.findItem(R.id.action_cancel);
+        acceptItemMenuItem = menu.findItem(R.id.action_accept);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -201,6 +231,12 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
     @Override
     public void onDimensionSelected(final int dim) {
         Log.i("===", "Dimension selected:" + dim);
+        this.dim = dim;
+
+        initCleanBoard();
+    }
+
+    private void initCleanBoard() {
         gridView.setNumColumns(dim);
 
         if (currentWords.size() > 0) {
@@ -212,33 +248,17 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
             }
         }
 
-        final int gridWidth = gridView.getWidth();
-        final int gridHeight = gridView.getHeight();
         final float offset = getResources().getDimension(R.dimen.cell_spacing);
-        final float shift = offset * ((float) (dim - 2) / (dim));
-        gridAdapter = new BaseDynamicGridAdapter(BullshitBingoActivity.this, currentWords, dim) {
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                StringHolder text = (StringHolder) getItem(position);
-                TextView textView;
-                if (!(convertView instanceof TextView)) {
-                    textView = (TextView) getLayoutInflater().inflate(R.layout.word, null);
-                    //this is set in bingo_activity
-                    textView.setWidth((int) (gridWidth / dim - shift));
-                    textView.setHeight((int) (gridHeight / dim - shift));
+        shift = offset * ((float) (dim - 2) / (dim));
 
-                } else {
-                    textView = (TextView) convertView;
-                }
-
-                textView.setText(text.s);
-                setViewVisibilityOnPosition(position, textView);
-                return textView;
-            }
-        };
-
-        gridView.setAdapter(gridAdapter);
+        gridAdapter.set(currentWords);
+        gridAdapter.setColumnCount(dim);
         invalidateOptionsMenu();
+    }
+
+    @Override
+    public void onCellEditFinished(CharSequence newValue, int position) {
+        gridAdapter.setItemAtPosition(new StringHolder(newValue), position);
     }
 
     private static class StringHolder {
