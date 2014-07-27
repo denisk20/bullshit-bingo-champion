@@ -20,9 +20,12 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
     public static final String DIR_NAME = "bullshitbingochamp";
     public static final String PREFS_NAME = "bullshitbingochamp";
 
+    public static final String BUNDLE_DIM = "dim";
+    public static final String BUNDLE_WORDS = "words";
+    public static final String BUNDLE_IS_EDITING = "isEditing";
+
     private DynamicGridView gridView;
 
-    private ArrayList<StringHolder> currentWords = new ArrayList<>();
     private BaseDynamicGridAdapter gridAdapter;
 
     private SelectDimensionDialogFragment dimensionDialog;
@@ -38,6 +41,7 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
     private MenuItem saveMenuItem;
     private MenuItem cancelMenuItem;
     private MenuItem acceptItemMenuItem;
+
 
     private AdapterView.OnItemLongClickListener itemLongClickListener = new AdapterView.OnItemLongClickListener() {
         @Override
@@ -74,7 +78,7 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
             }
         });
 
-        gridAdapter = new BaseDynamicGridAdapter(BullshitBingoActivity.this, currentWords, dim) {
+        gridAdapter = new BaseDynamicGridAdapter(BullshitBingoActivity.this, new ArrayList<>(), dim) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 StringHolder text = (StringHolder) getItem(position);
@@ -137,18 +141,54 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
                 gridView.stopEditMode();
             }
         });
+
+        restoreFromBundle(savedInstanceState);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
+
+        restoreFromBundle(savedInstanceState);
+    }
+
+    private void restoreFromBundle(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            dim = savedInstanceState.getInt(BUNDLE_DIM);
+            isEditing = savedInstanceState.getBoolean(BUNDLE_IS_EDITING);
+            if(isEditing) {
+                prepareForEdit();
+            }
+            ArrayList<String> wordsArrayList = savedInstanceState.getStringArrayList(BUNDLE_WORDS);
+            if(wordsArrayList == null) {
+                return;
+            }
+            ArrayList<StringHolder> currentWords = new ArrayList<>(wordsArrayList.size());
+            for(String s: wordsArrayList) {
+                currentWords.add(new StringHolder(s));
+            }
+
+            initBoardFromPresetData(currentWords);
+        }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
+        outState.putStringArrayList(BUNDLE_WORDS, getCharSequenceListFromCurrentWords());
+        outState.putInt(BUNDLE_DIM, dim);
+        outState.putBoolean(BUNDLE_IS_EDITING, isEditing);
+    }
 
+    private ArrayList<String> getCharSequenceListFromCurrentWords() {
+        ArrayList<String> words = new ArrayList<>();
+        for (Object o : gridAdapter.getItems()) {
+            StringHolder h = (StringHolder) o;
+            words.add(h.s.toString());
+        }
+
+        return words;
     }
 
     private boolean isGridFilled() {
@@ -163,9 +203,7 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
                 return true;
             case R.id.action_edit:
                 isEditing = true;
-                Toast.makeText(this, R.string.long_press_to_drag, Toast.LENGTH_SHORT).show();
-                invalidateOptionsMenu();
-                gridView.setOnItemLongClickListener(itemLongClickListener);
+                prepareForEdit();
                 return true;
             case R.id.action_save:
                 exitEditMode();
@@ -176,6 +214,12 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void prepareForEdit() {
+        Toast.makeText(this, R.string.long_press_to_drag, Toast.LENGTH_SHORT).show();
+        invalidateOptionsMenu();
+        gridView.setOnItemLongClickListener(itemLongClickListener);
     }
 
     private void exitEditMode() {
@@ -237,23 +281,30 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
     }
 
     private void initCleanBoard() {
-        gridView.setNumColumns(dim);
-
-        if (currentWords.size() > 0) {
-            currentWords.clear();
-        }
+        ArrayList<StringHolder> currentWords = new ArrayList<>(dim*dim);
         for (int i = 0; i < dim; i++) {
             for(int j = 0; j < dim; j++) {
                 currentWords.add(new StringHolder(""));
             }
         }
 
-        final float offset = getResources().getDimension(R.dimen.cell_spacing);
-        shift = offset * ((float) (dim - 2) / (dim));
-
-        gridAdapter.set(currentWords);
-        gridAdapter.setColumnCount(dim);
+        initBoardFromPresetData(currentWords);
         invalidateOptionsMenu();
+    }
+
+    private void initBoardFromPresetData(final ArrayList<StringHolder> currentWords) {
+        gridView.post(new Runnable() {
+            @Override
+            public void run() {
+                gridView.setNumColumns(dim);
+
+                final float offset = getResources().getDimension(R.dimen.cell_spacing);
+                shift = offset * ((float) (dim - 2) / (dim));
+
+                gridAdapter.set(currentWords);
+                gridAdapter.setColumnCount(dim);
+            }
+        });
     }
 
     @Override
@@ -261,6 +312,11 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
         gridAdapter.setItemAtPosition(new StringHolder(newValue), position);
     }
 
+    /**
+     * DynamicGridView can't hold equal objects, so we wrap
+     * Strings so that even equal strings look like unequal
+     * objects for it
+     */
     private static class StringHolder {
         CharSequence s;
 
