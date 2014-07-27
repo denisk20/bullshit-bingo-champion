@@ -29,7 +29,7 @@ public class EditCellDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity)
                 .setTitle(res.getString(R.string.edit_cell_title))
                 .setView(editText)
-                .setPositiveButton(res.getString(R.string.action_save), new DialogInterface.OnClickListener() {
+                .setPositiveButton(res.getString(R.string.ok), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         ((CellEditFinishedListener) activity).onCellEditFinished(editText.getText(), position);
                     }

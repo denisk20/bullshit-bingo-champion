@@ -12,15 +12,9 @@
           android:showAsAction="ifRoom"
           android:visible="false"
           />
-    <item android:id="@+id/action_save"
-          android:icon="@drawable/ic_action_save"
-          android:title="@string/action_save"
-          android:showAsAction="ifRoom"
-          android:visible="false"
-          />
     <item android:id="@+id/action_accept"
           android:icon="@drawable/ic_action_accept"
-          android:title="@string/action_ok"
+          android:title="@string/action_accept"
           android:showAsAction="ifRoom"
           android:visible="false"
           />
@@ -30,4 +24,22 @@
           android:showAsAction="ifRoom"
           android:visible="false"
           />
+    <item android:id="@+id/action_save_as"
+          android:icon="@drawable/ic_action_save"
+          android:title="@string/action_save"
+          android:showAsAction="ifRoom"
+          android:visible="false"
+            />
+    <item android:id="@+id/action_share"
+          android:icon="@drawable/ic_action_share"
+          android:title="@string/action_share"
+          android:showAsAction="ifRoom"
+          android:visible="false"
+            />
+    <item android:id="@+id/action_shuffle"
+          android:icon="@drawable/ic_action_shuffle"
+          android:title="@string/action_shuffle"
+          android:showAsAction="ifRoom"
+          android:visible="false"
+            />
 </menu>

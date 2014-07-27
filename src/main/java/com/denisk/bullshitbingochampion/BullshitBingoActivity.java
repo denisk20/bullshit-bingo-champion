@@ -31,17 +31,23 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
     private SelectDimensionDialogFragment dimensionDialog;
     private EditCellDialogFragment editCellDialog;
 
-    boolean isEditing;
-    boolean isDirty;
+    boolean isEditing; //are we in edit mode?
+    boolean isDirty; //are there unsaved changes?
+    boolean isPersisted; //was the card persisted with 'save as...' at least once?
 
     private int dim;
 
     private MenuItem newMenuItem;
     private MenuItem editMenuItem;
-    private MenuItem saveMenuItem;
+    private MenuItem saveAsMenuItem;
     private MenuItem cancelMenuItem;
     private MenuItem acceptItemMenuItem;
+    private MenuItem shareMenuItem;
+    private MenuItem shuffleMenuItem;
 
+    private int gridWidth;
+    private int gridHeight;
+    private float shift;
 
     private AdapterView.OnItemLongClickListener itemLongClickListener = new AdapterView.OnItemLongClickListener() {
         @Override
@@ -53,10 +59,6 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
             return true;
         }
     };
-    private int gridWidth;
-    private int gridHeight;
-    private float shift;
-
     /**
      * Called when the activity is first created.
      */
@@ -139,6 +141,8 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
             @Override
             public void onActionDrop() {
                 gridView.stopEditMode();
+                isDirty = true;
+                invalidateOptionsMenu();
             }
         });
 
@@ -192,8 +196,9 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
     }
 
     private boolean isGridFilled() {
-        return gridView != null && gridView.getAdapter() != null;
+        return gridAdapter != null && gridAdapter.getItems().size() > 0;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle presses on the action bar items
@@ -205,12 +210,29 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
                 isEditing = true;
                 prepareForEdit();
                 return true;
-            case R.id.action_save:
+            case R.id.action_save_as:
                 exitEditMode();
-                //todo save thing
+                //todo save thing as
+                isDirty = false;
+                isPersisted = true;
+                return true;
+            case R.id.action_accept:
+                exitEditMode();
+                if(isPersisted) {
+                    //todo save thing
+                    isDirty = false;
+                }
                 return true;
             case R.id.action_cancel:
                 exitEditMode();
+                return true;
+            case R.id.action_share:
+                //todo
+                return true;
+            case R.id.action_shuffle:
+                isDirty = true;
+                //todo
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -246,9 +268,11 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
 
         newMenuItem = menu.findItem(R.id.action_new);
         editMenuItem = menu.findItem(R.id.action_edit);
-        saveMenuItem = menu.findItem(R.id.action_save);
+        saveAsMenuItem = menu.findItem(R.id.action_save_as);
         cancelMenuItem = menu.findItem(R.id.action_cancel);
         acceptItemMenuItem = menu.findItem(R.id.action_accept);
+        shareMenuItem = menu.findItem(R.id.action_share);
+        shuffleMenuItem = menu.findItem(R.id.action_shuffle);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -259,15 +283,19 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
         if (isEditing) {
             newMenuItem.setVisible(false);
             editMenuItem.setVisible(false);
-            saveMenuItem.setVisible(true);
+            saveAsMenuItem.setVisible(true);
+            acceptItemMenuItem.setVisible(true);
             cancelMenuItem.setVisible(true);
+            shareMenuItem.setVisible(false);
+            shuffleMenuItem.setVisible(true);
         } else {
             newMenuItem.setVisible(true);
-            if (isGridFilled()) {
-                editMenuItem.setVisible(true);
-            }
-            saveMenuItem.setVisible(false);
+            editMenuItem.setVisible(isGridFilled());
+            saveAsMenuItem.setVisible(isGridFilled() && isDirty);
+            acceptItemMenuItem.setVisible(false);
             cancelMenuItem.setVisible(false);
+            shareMenuItem.setVisible(isGridFilled() && isPersisted);
+            shuffleMenuItem.setVisible(false);
         }
         return super.onPrepareOptionsMenu(menu);
     }
@@ -281,6 +309,8 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
     }
 
     private void initCleanBoard() {
+        isDirty = true;
+        isPersisted = false;
         ArrayList<StringHolder> currentWords = new ArrayList<>(dim*dim);
         for (int i = 0; i < dim; i++) {
             for(int j = 0; j < dim; j++) {
@@ -310,6 +340,8 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
     @Override
     public void onCellEditFinished(CharSequence newValue, int position) {
         gridAdapter.setItemAtPosition(new StringHolder(newValue), position);
+        isDirty = true;
+        invalidateOptionsMenu();
     }
 
     /**

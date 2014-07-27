@@ -4,10 +4,13 @@
     <string name="action_edit">Edit</string>
     <string name="select_dim">Select new card dimension</string>
     <string name="create">Create</string>
+    <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
-    <string name="action_save">Save</string>
+    <string name="action_save">Save as…</string>
     <string name="action_cancel">Cancel</string>
-    <string name="long_press_to_drag">Long press then drag</string>
+    <string name="long_press_to_drag">Tap to edit. Long press to drag</string>
     <string name="edit_cell_title">Edit cell</string>
-    <string name="action_ok">OK</string>
+    <string name="action_accept">Accept</string>
+    <string name="action_share">Share</string>
+    <string name="action_shuffle">Shuffle</string>
 </resources>
