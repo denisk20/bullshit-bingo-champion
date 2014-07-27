@@ -18,6 +18,12 @@
           android:showAsAction="ifRoom"
           android:visible="false"
           />
+    <item android:id="@+id/action_accept"
+          android:icon="@drawable/ic_action_accept"
+          android:title="@string/action_ok"
+          android:showAsAction="ifRoom"
+          android:visible="false"
+          />
     <item android:id="@+id/action_cancel"
           android:icon="@drawable/ic_action_cancel"
           android:title="@string/action_cancel"

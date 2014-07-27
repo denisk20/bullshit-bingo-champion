@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Environment;
-import android.text.Editable;
 import android.util.Log;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
@@ -31,6 +30,8 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
     private SelectDimensionDialogFragment dimensionDialog;
 
     boolean isEditing;
+    boolean isDirty;
+
     private MenuItem newMenuItem;
     private MenuItem editMenuItem;
     private MenuItem saveMenuItem;
@@ -65,6 +66,10 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(final AdapterView<?> parent, final View view, final int position, long id) {
+                if(! isEditing) {
+                    //todo handle the game
+                    return;
+                }
                 StringHolder itemAtPosition = (StringHolder) parent.getItemAtPosition(position);
                 if(itemAtPosition == null) {
                     return;
@@ -203,7 +208,7 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
         }
         for (int i = 0; i < dim; i++) {
             for(int j = 0; j < dim; j++) {
-                currentWords.add(new StringHolder(i + " " + j));
+                currentWords.add(new StringHolder(""));
             }
         }
 
