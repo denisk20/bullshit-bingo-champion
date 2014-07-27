@@ -8,4 +8,5 @@
     <string name="action_save">Save</string>
     <string name="action_cancel">Cancel</string>
     <string name="long_press_to_drag">Long press then drag</string>
+    <string name="edit_cell_title">Edit cell</string>
 </resources>

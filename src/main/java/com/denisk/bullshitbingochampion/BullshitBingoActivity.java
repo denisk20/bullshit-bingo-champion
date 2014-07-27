@@ -1,10 +1,17 @@
 package com.denisk.bullshitbingochampion;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Service;
+import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.Editable;
 import android.util.Log;
 import android.view.*;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import org.askerov.dynamicgrid.BaseDynamicGridAdapter;
@@ -39,6 +46,8 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
             return true;
         }
     };
+    private ArrayList<StringHolder> currentWords = new ArrayList<>();
+    private BaseDynamicGridAdapter gridAdapter;
 
     /**
      * Called when the activity is first created.
@@ -52,13 +61,44 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
         setContentView(R.layout.bingo_activity);
 
         gridView = (DynamicGridView) findViewById(R.id.gridview);
+
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.i("===", "Clicked");
-                //todo editing
+            public void onItemClick(final AdapterView<?> parent, final View view, final int position, long id) {
+                StringHolder itemAtPosition = (StringHolder) parent.getItemAtPosition(position);
+                if(itemAtPosition == null) {
+                    return;
+                }
+                CharSequence currentCellValue = itemAtPosition.s;
+                final EditText editText = new EditText(BullshitBingoActivity.this);
+                editText.setText(currentCellValue);
+                Resources res = getResources();
+                AlertDialog.Builder builder = new AlertDialog.Builder(BullshitBingoActivity.this)
+                        .setTitle(res.getString(R.string.edit_cell_title))
+                        .setView(editText)
+                        .setPositiveButton(res.getString(R.string.action_save), new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                gridAdapter.setItemAtPosition(new StringHolder(editText.getText()), position);
+                            }
+                        }).setNegativeButton(res.getString(R.string.action_cancel), new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                // Do nothing.
+                            }
+                        });
+                builder.show();
+
+                editText.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        editText.selectAll();
+                        InputMethodManager imm = (InputMethodManager) BullshitBingoActivity.this.getSystemService(Service.INPUT_METHOD_SERVICE);
+                        imm.showSoftInput(editText, 0);
+                    }
+                });
             }
         });
+
+        //todo we need this to be empty because https://github.com/askerov/DynamicGrid/issues/27
         gridView.setOnDragListener(new DynamicGridView.OnDragListener() {
             @Override
             public void onDragStarted(int position) {
@@ -68,6 +108,7 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
             public void onDragPositionsChanged(int oldPosition, int newPosition) {
             }
         });
+
         gridView.setOnDropListener(new DynamicGridView.OnDropListener() {
             @Override
             public void onActionDrop() {
@@ -157,18 +198,20 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
         Log.i("===", "Dimension selected:" + dim);
         gridView.setNumColumns(dim);
 
-        final ArrayList<StringHolder> words = new ArrayList<>(dim*dim);
+        if (currentWords.size() > 0) {
+            currentWords.clear();
+        }
         for (int i = 0; i < dim; i++) {
             for(int j = 0; j < dim; j++) {
-//                words.add(new StringHolder("bb"));
-                words.add(new StringHolder(i + "_" + j));
+                currentWords.add(new StringHolder(i + " " + j));
             }
         }
 
         final int gridWidth = gridView.getWidth();
         final int gridHeight = gridView.getHeight();
         final float offset = getResources().getDimension(R.dimen.cell_spacing);
-        gridView.setAdapter(new BaseDynamicGridAdapter(BullshitBingoActivity.this, words, dim) {
+        final float shift = offset * ((float) (dim - 2) / (dim));
+        gridAdapter = new BaseDynamicGridAdapter(BullshitBingoActivity.this, currentWords, dim) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 StringHolder text = (StringHolder) getItem(position);
@@ -176,8 +219,8 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
                 if (!(convertView instanceof TextView)) {
                     textView = (TextView) getLayoutInflater().inflate(R.layout.word, null);
                     //this is set in bingo_activity
-                    textView.setWidth((int) (gridWidth / dim - offset*((float)(dim-2)/(dim))));
-                    textView.setHeight((int) (gridHeight / dim - offset*((float)(dim-2)/(dim))));
+                    textView.setWidth((int) (gridWidth / dim - shift));
+                    textView.setHeight((int) (gridHeight / dim - shift));
 
                 } else {
                     textView = (TextView) convertView;
@@ -187,14 +230,16 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
                 setViewVisibilityOnPosition(position, textView);
                 return textView;
             }
-        });
+        };
+
+        gridView.setAdapter(gridAdapter);
         invalidateOptionsMenu();
     }
 
     private static class StringHolder {
-        String s;
+        CharSequence s;
 
-        StringHolder(String s) {
+        StringHolder(CharSequence s) {
             this.s = s;
         }
     }
