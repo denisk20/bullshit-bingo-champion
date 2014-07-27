@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.widget.NumberPicker;
 
@@ -24,8 +25,9 @@ public class SelectDimensionDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
         final NumberPicker numberPicker = new NumberPicker(activity);
-        numberPicker.setMinValue(2);
-        numberPicker.setMaxValue(10);
+        Resources res = getResources();
+        numberPicker.setMinValue(res.getInteger(R.integer.min_cells));
+        numberPicker.setMaxValue(res.getInteger(R.integer.max_cells));
         builder.setMessage(R.string.select_dim)
                 .setPositiveButton(R.string.create, new DialogInterface.OnClickListener() {
                     @Override

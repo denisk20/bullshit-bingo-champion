@@ -29,26 +29,29 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
     private MenuItem saveMenuItem;
     private MenuItem cancelMenuItem;
 
+    private AdapterView.OnItemLongClickListener itemLongClickListener = new AdapterView.OnItemLongClickListener() {
+        @Override
+        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+            Log.e("***", "Long click");
+            if (isEditing) {
+                gridView.startEditMode(position);
+            }
+            return true;
+        }
+    };
+
     /**
      * Called when the activity is first created.
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Log.e("***", "Creating");
         super.onCreate(savedInstanceState);
         createDirIfNeeded();
 
         setContentView(R.layout.bingo_activity);
 
         gridView = (DynamicGridView) findViewById(R.id.gridview);
-        gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                if (isEditing) {
-                    gridView.startEditMode(position);
-                }
-                return true;
-            }
-        });
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -87,17 +90,26 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
                 isEditing = true;
                 Toast.makeText(this, R.string.long_press_to_drag, Toast.LENGTH_SHORT).show();
                 invalidateOptionsMenu();
+                gridView.setOnItemLongClickListener(itemLongClickListener);
                 return true;
             case R.id.action_save:
-                isEditing = false;
-                if (gridView.isEditMode()) {
-                    gridView.stopEditMode();
-                }
-                invalidateOptionsMenu();
+                exitEditMode();
+                //todo save thing
                 return true;
+            case R.id.action_cancel:
+                exitEditMode();
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void exitEditMode() {
+        isEditing = false;
+        if (gridView.isEditMode()) {
+            gridView.stopEditMode();
+        }
+        invalidateOptionsMenu();
+        gridView.setOnItemLongClickListener(null);
     }
 
     private void showSelectNewCardDimensionDialog() {
@@ -153,33 +165,30 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
             }
         }
 
-        gridView.post(new Runnable() {
+        final int gridWidth = gridView.getWidth();
+        final int gridHeight = gridView.getHeight();
+        final float offset = getResources().getDimension(R.dimen.cell_spacing);
+        gridView.setAdapter(new BaseDynamicGridAdapter(BullshitBingoActivity.this, words, dim) {
             @Override
-            public void run() {
-                final int gridWidth = gridView.getWidth();
-                final int gridHeight = gridView.getHeight();
-                gridView.setAdapter(new BaseDynamicGridAdapter(BullshitBingoActivity.this, words, dim) {
-                    @Override
-                    public View getView(int position, View convertView, ViewGroup parent) {
-                        StringHolder text = (StringHolder) getItem(position);
-                        TextView textView;
-                        if (!(convertView instanceof TextView)) {
-                            textView = (TextView) getLayoutInflater().inflate(R.layout.word, null);
-                            textView.setWidth(gridWidth / dim);
-                            textView.setHeight(gridHeight / dim);
+            public View getView(int position, View convertView, ViewGroup parent) {
+                StringHolder text = (StringHolder) getItem(position);
+                TextView textView;
+                if (!(convertView instanceof TextView)) {
+                    textView = (TextView) getLayoutInflater().inflate(R.layout.word, null);
+                    //this is set in bingo_activity
+                    textView.setWidth((int) (gridWidth / dim - offset*((float)(dim-2)/(dim))));
+                    textView.setHeight((int) (gridHeight / dim - offset*((float)(dim-2)/(dim))));
 
-                        } else {
-                            textView = (TextView) convertView;
-                        }
+                } else {
+                    textView = (TextView) convertView;
+                }
 
-                        textView.setText(text.s);
-                        setViewVisibilityOnPosition(position, textView);
-                        return textView;
-                    }
-                });
-                invalidateOptionsMenu();
+                textView.setText(text.s);
+                setViewVisibilityOnPosition(position, textView);
+                return textView;
             }
         });
+        invalidateOptionsMenu();
     }
 
     private static class StringHolder {

@@ -2,4 +2,6 @@
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
           android:id="@+id/word"
           android:gravity="center"
-          android:background="@drawable/back"/>
+          android:background="@drawable/back"
+          android:text="test"
+          android:layout_height="wrap_content" android:layout_width="wrap_content"/>
