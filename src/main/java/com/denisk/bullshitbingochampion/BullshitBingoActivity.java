@@ -48,6 +48,7 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
     private int gridWidth;
     private int gridHeight;
     private float shift;
+    private float offset;
 
     private AdapterView.OnItemLongClickListener itemLongClickListener = new AdapterView.OnItemLongClickListener() {
         @Override
@@ -59,6 +60,7 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
             return true;
         }
     };
+
     /**
      * Called when the activity is first created.
      */
@@ -71,6 +73,8 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
         setContentView(R.layout.bingo_activity);
 
         gridView = (DynamicGridView) findViewById(R.id.gridview);
+
+        offset = getResources().getDimension(R.dimen.cell_spacing);
 
         gridView.post(new Runnable() {
             @Override
@@ -88,12 +92,12 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
                 if (!(convertView instanceof TextView)) {
                     textView = (TextView) getLayoutInflater().inflate(R.layout.word, null);
                     //this is set in bingo_activity
-                    textView.setWidth((int) (gridWidth / dim - shift));
-                    textView.setHeight((int) (gridHeight / dim - shift));
 
                 } else {
                     textView = (TextView) convertView;
                 }
+                textView.setWidth((int) (gridWidth / dim - shift));
+                textView.setHeight((int) (gridHeight / dim - shift));
 
                 textView.setText(text.s);
                 setViewVisibilityOnPosition(position, textView);
@@ -305,6 +309,7 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
         Log.i("===", "Dimension selected:" + dim);
         this.dim = dim;
 
+        gridView.invalidateViews();
         initCleanBoard();
     }
 
@@ -323,18 +328,12 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
     }
 
     private void initBoardFromPresetData(final ArrayList<StringHolder> currentWords) {
-        gridView.post(new Runnable() {
-            @Override
-            public void run() {
-                gridView.setNumColumns(dim);
+        gridView.setNumColumns(dim);
 
-                final float offset = getResources().getDimension(R.dimen.cell_spacing);
-                shift = offset * ((float) (dim - 2) / (dim));
+        shift = offset * ((float) (dim - 2) / (dim));
 
-                gridAdapter.set(currentWords);
-                gridAdapter.setColumnCount(dim);
-            }
-        });
+        gridAdapter.set(currentWords);
+        gridAdapter.setColumnCount(dim);
     }
 
     @Override
