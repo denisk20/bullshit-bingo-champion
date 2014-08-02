@@ -1,6 +1,8 @@
 package com.denisk.bullshitbingochampion;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.res.Configuration;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -26,6 +28,7 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
     public static final String BUNDLE_DIM = "dim";
     public static final String BUNDLE_WORDS = "words";
     public static final String BUNDLE_IS_EDITING = "isEditing";
+    public static final ColorDrawable LIGHT_ERROR_COLOR = new ColorDrawable(0xFFFFF0F0);
 
     private DynamicGridView gridView;
 
@@ -45,7 +48,6 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
     private MenuItem newMenuItem;
     private MenuItem editMenuItem;
     private MenuItem saveAsMenuItem;
-    private MenuItem cancelMenuItem;
     private MenuItem acceptItemMenuItem;
     private MenuItem shareMenuItem;
     private MenuItem shuffleMenuItem;
@@ -58,14 +60,13 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
     //Offset between cells. This is calculated dynamically based on dim size
     private float offset;
 
-    private String currentCardName;
+    private String newCardName;
 
     private boolean gridViewInitFinished; //have obtained gridWidth and gridHeight?
 
     private AdapterView.OnItemLongClickListener itemLongClickListener = new AdapterView.OnItemLongClickListener() {
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-            Log.e("***", "Long click");
             if (isEditing) {
                 gridView.startEditMode(position);
             }
@@ -74,6 +75,7 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
     };
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
+    private ActionBar actionBar;
 
     /**
      * Called when the activity is first created.
@@ -81,14 +83,17 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
     @Override
     public void onCreate(Bundle savedInstanceState) {
         gridViewInitFinished = false;
-
-        Log.e("***", "Creating");
         super.onCreate(savedInstanceState);
+
+        newCardName = getResources().getString(R.string.new_card_name);
+
         createDirIfNeeded();
 
         setContentView(R.layout.bingo_activity);
 
-        initDrawer();
+        actionBar = getActionBar();
+
+        initActionBar();
 
         gridView = (DynamicGridView) findViewById(R.id.gridview);
 
@@ -171,7 +176,7 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
         restoreFromBundle(savedInstanceState);
     }
 
-    private void initDrawer() {
+    private void initActionBar() {
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.app_name){
             @Override
@@ -186,9 +191,12 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
         };
 
         drawerLayout.setDrawerListener(drawerToggle);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
         drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.LEFT);
+
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
+        actionBar.setTitle("");
+        actionBar.setDisplayShowTitleEnabled(true);
     }
 
     @Override
@@ -275,16 +283,16 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
                 //todo save thing as
                 isDirty = false;
                 isPersisted = true;
+                actionBarTitleSaved();
                 return true;
             case R.id.action_accept:
                 exitEditMode();
                 if(isPersisted) {
                     //todo save thing
                     isDirty = false;
+                } else {
+                    actionBarTitleNotSaved();
                 }
-                return true;
-            case R.id.action_cancel:
-                exitEditMode();
                 return true;
             case R.id.action_share:
                 //todo
@@ -296,6 +304,21 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void actionBarTitleNotSaved() {
+        actionBar.setTitle(getCardName() + "*");
+        actionBar.setBackgroundDrawable(LIGHT_ERROR_COLOR);
+    }
+
+    private void actionBarTitleSaved() {
+        actionBar.setTitle(getCardName());
+        actionBar.setBackgroundDrawable(null);
+    }
+
+    private String getCardName() {
+        //todo
+        return newCardName;
     }
 
     private void prepareForEdit() {
@@ -329,7 +352,6 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
         newMenuItem = menu.findItem(R.id.action_new);
         editMenuItem = menu.findItem(R.id.action_edit);
         saveAsMenuItem = menu.findItem(R.id.action_save_as);
-        cancelMenuItem = menu.findItem(R.id.action_cancel);
         acceptItemMenuItem = menu.findItem(R.id.action_accept);
         shareMenuItem = menu.findItem(R.id.action_share);
         shuffleMenuItem = menu.findItem(R.id.action_shuffle);
@@ -339,13 +361,11 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        Log.i("===", "Preparing menu");
         if (isEditing) {
             newMenuItem.setVisible(false);
             editMenuItem.setVisible(false);
             saveAsMenuItem.setVisible(true);
             acceptItemMenuItem.setVisible(true);
-            cancelMenuItem.setVisible(true);
             shareMenuItem.setVisible(false);
             shuffleMenuItem.setVisible(true);
         } else {
@@ -353,7 +373,6 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
             editMenuItem.setVisible(isGridFilled());
             saveAsMenuItem.setVisible(isGridFilled() && isDirty);
             acceptItemMenuItem.setVisible(false);
-            cancelMenuItem.setVisible(false);
             shareMenuItem.setVisible(isGridFilled() && isPersisted);
             shuffleMenuItem.setVisible(false);
         }
@@ -362,10 +381,10 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
 
     @Override
     public void onDimensionSelected(final int dim) {
-        Log.i("===", "Dimension selected:" + dim);
         this.dim = dim;
 
-        gridView.invalidateViews();
+        actionBarTitleSaved();
+
         initCleanBoard();
     }
 

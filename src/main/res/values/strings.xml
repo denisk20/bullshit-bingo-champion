@@ -14,4 +14,5 @@
     <string name="action_share">Share</string>
     <string name="action_shuffle">Shuffle</string>
     <string name="drawer_open">Select card</string>
+    <string name="new_card_name"><![CDATA[<new card>]]></string>
 </resources>
