@@ -1,7 +1,10 @@
 package com.denisk.bullshitbingochampion;
 import android.app.Activity;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.*;
 import android.widget.AdapterView;
@@ -33,8 +36,10 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
 
     boolean isEditing; //are we in edit mode?
     boolean isDirty; //are there unsaved changes?
+    //todo check currentCardName, remove this
     boolean isPersisted; //was the card persisted with 'save as...' at least once?
 
+    //current card dimension
     private int dim;
 
     private MenuItem newMenuItem;
@@ -45,10 +50,17 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
     private MenuItem shareMenuItem;
     private MenuItem shuffleMenuItem;
 
+    //the width and the height (not counting action bar) of the grid
     private int gridWidth;
     private int gridHeight;
+    //this is constant, got from resources
     private float shift;
+    //Offset between cells. This is calculated dynamically based on dim size
     private float offset;
+
+    private String currentCardName;
+
+    private boolean gridViewInitFinished; //have obtained gridWidth and gridHeight?
 
     private AdapterView.OnItemLongClickListener itemLongClickListener = new AdapterView.OnItemLongClickListener() {
         @Override
@@ -60,17 +72,23 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
             return true;
         }
     };
+    private DrawerLayout drawerLayout;
+    private ActionBarDrawerToggle drawerToggle;
 
     /**
      * Called when the activity is first created.
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        gridViewInitFinished = false;
+
         Log.e("***", "Creating");
         super.onCreate(savedInstanceState);
         createDirIfNeeded();
 
         setContentView(R.layout.bingo_activity);
+
+        initDrawer();
 
         gridView = (DynamicGridView) findViewById(R.id.gridview);
 
@@ -81,6 +99,7 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
             public void run() {
                 gridWidth = gridView.getWidth();
                 gridHeight = gridView.getHeight();
+                gridViewInitFinished = true;
             }
         });
 
@@ -91,8 +110,6 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
                 TextView textView;
                 if (!(convertView instanceof TextView)) {
                     textView = (TextView) getLayoutInflater().inflate(R.layout.word, null);
-                    //this is set in bingo_activity
-
                 } else {
                     textView = (TextView) convertView;
                 }
@@ -101,6 +118,7 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
 
                 textView.setText(text.s);
                 setViewVisibilityOnPosition(position, textView);
+
                 return textView;
             }
         };
@@ -151,6 +169,38 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
         });
 
         restoreFromBundle(savedInstanceState);
+    }
+
+    private void initDrawer() {
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.app_name){
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+            }
+        };
+
+        drawerLayout.setDrawerListener(drawerToggle);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
+        drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.LEFT);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        drawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        drawerToggle.syncState();
     }
 
     @Override
@@ -205,6 +255,12 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if(! gridViewInitFinished) {
+            return false;
+        }
+        if(drawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
         // Handle presses on the action bar items
         switch (item.getItemId()) {
             case R.id.action_new:
