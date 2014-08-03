@@ -17,7 +17,6 @@ import org.askerov.dynamicgrid.DynamicGridView;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class BullshitBingoActivity extends Activity
         implements SelectDimensionDialogFragment.DimensionSelectedListener, EditCellDialogFragment.CellEditFinishedListener, SaveCardDialogFragment.SaveCardDialogListener {
@@ -81,6 +80,7 @@ public class BullshitBingoActivity extends Activity
     private ActionBar actionBar;
     private SharedPreferences sharedPreferences;
     private File bullshitDir;
+    private ArrayAdapter<String> cardListAdapter;
 
     /**
      * Called when the activity is first created.
@@ -102,19 +102,35 @@ public class BullshitBingoActivity extends Activity
 
         initActionBar();
 
-        ListView cardListView = (ListView) findViewById(R.id.left_drawer);
-        cardListView.setAdapter(new ArrayAdapter<>(this, R.id.card_name, getCardNames()));
-        cardListView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        final ListView cardListView = (ListView) findViewById(R.id.left_drawer);
+        cardListAdapter = new ArrayAdapter<>(this, R.layout.card, getCardNames());
+        cardListView.setAdapter(cardListAdapter);
+        cardListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String card = (String) parent.getItemAtPosition(position);
                 List<String> words = getWordsForCard(card);
-                //todo  set dim etc.
-            }
+                if(words.size() == 0) {
+                    Toast.makeText(BullshitBingoActivity.this, getResources().getString(R.string.error_empty_cart) + card, Toast.LENGTH_LONG).show();
+                    return;
+                }
+                double sqrt = Math.sqrt(words.size());
+                double floor = Math.floor(sqrt + 0.5);
+                if(Math.abs(floor - sqrt) > 0.1) {
+                    Toast.makeText(BullshitBingoActivity.this, getResources().getString(R.string.error_wrong_word_count) + card, Toast.LENGTH_LONG).show();
+                    return;
+                }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
+                dim = (int) Math.round(sqrt);
+                currentCardName = card;
+                actionBarTitleSaved();
+                initBoardFromWords(getStringHolders(words));
 
+                drawerLayout.closeDrawers();
+
+                reloadCardList();
+
+                invalidateOptionsMenu();
             }
         });
         gridView = (DynamicGridView) findViewById(R.id.gridview);
@@ -198,6 +214,11 @@ public class BullshitBingoActivity extends Activity
         restoreFromBundle(savedInstanceState);
     }
 
+    private void reloadCardList() {
+        cardListAdapter.clear();
+        cardListAdapter.addAll(getCardNames());
+    }
+
     private List<String> getWordsForCard(String pureCard) {
         checkDir();
         File file = new File(bullshitDir, pureCard + FILE_SUFFIX);
@@ -211,10 +232,9 @@ public class BullshitBingoActivity extends Activity
         String word;
         try {
             while((word = br.readLine()) != null) {
-                if(word.startsWith(COMMENT_MARK)) {
-                    continue;
+                if(! word.startsWith(COMMENT_MARK)) {
+                    result.add(word);
                 }
-                result.add(word);
             }
         } catch (IOException e) {
             throw new IllegalStateException("Can't read file " + file);
@@ -228,7 +248,7 @@ public class BullshitBingoActivity extends Activity
         return result;
     }
 
-    private String[] getCardNames() {
+    private List<String> getCardNames() {
         checkDir();
         String[] cards = bullshitDir.list(new FilenameFilter() {
             @Override
@@ -236,14 +256,15 @@ public class BullshitBingoActivity extends Activity
                 return filename.endsWith(FILE_SUFFIX);
             }
         });
+        ArrayList<String> result = new ArrayList<>(cards.length);
         for (int i = 0; i < cards.length; i++) {
             String card = cards[i];
             if (card.endsWith(FILE_SUFFIX)) {
                 card = card.substring(0, card.indexOf(FILE_SUFFIX));
-                cards[i] = card;
+                result.add(card);
             }
         }
-        return cards;
+        return result;
     }
 
     private void setNewCardName() {
@@ -303,13 +324,16 @@ public class BullshitBingoActivity extends Activity
             if(wordsArrayList == null) {
                 return;
             }
-            ArrayList<StringHolder> currentWords = new ArrayList<>(wordsArrayList.size());
-            for(String s: wordsArrayList) {
-                currentWords.add(new StringHolder(s));
-            }
-
-            initBoardFromWords(currentWords);
+            initBoardFromWords(getStringHolders(wordsArrayList));
         }
+    }
+
+    private ArrayList<StringHolder> getStringHolders(List<String> wordsArrayList) {
+        ArrayList<StringHolder> currentWords = new ArrayList<>(wordsArrayList.size());
+        for(String s: wordsArrayList) {
+            currentWords.add(new StringHolder(s));
+        }
+        return currentWords;
     }
 
     @Override
@@ -343,6 +367,8 @@ public class BullshitBingoActivity extends Activity
         if(drawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
+        drawerLayout.closeDrawers();
+
         // Handle presses on the action bar items
         switch (item.getItemId()) {
             case R.id.action_new:
@@ -499,6 +525,7 @@ public class BullshitBingoActivity extends Activity
         isDirty = false;
         currentCardName = name;
         actionBarTitleSaved();
+        reloadCardList();
     }
 
     private void persistWords(CharSequence fileName) {
@@ -518,8 +545,8 @@ public class BullshitBingoActivity extends Activity
         try {
             writer.append(COMMENT_MARK + getResources().getString(R.string.file_comment) + "\n");
             for(Object o: gridAdapter.getItems()) {
-                String word = (String) o;
-                writer.append(word);
+                String word = ((StringHolder) o).s.toString();
+                writer.append(word + "\n");
             }
         } catch (IOException e) {
             throw new IllegalStateException("Can't write to bullshitbingo file " + file);

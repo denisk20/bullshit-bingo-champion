@@ -8,7 +8,7 @@ import android.widget.Toast;
  * @since 03.08.14.
  */
 public class SaveCardDialogFragment extends EditTextDialogFragment {
-    private static final char[] ILLEGAL_CHARACTERS = { '/', '\n', '\r', '\t', '\0', '\f', '`', '?', '*', '\\', '<', '>', '|', '\"', ':' };
+    private static final char[] ILLEGAL_CHARACTERS = { '/', '\n', '\r', '\t', '\0', '\f', '`', '?', '*', '\\', '<', '>', '|', '\"', ':', '#' };
 
     public interface SaveCardDialogListener {
         void onCardNamePopulated(CharSequence name);
@@ -22,7 +22,7 @@ public class SaveCardDialogFragment extends EditTextDialogFragment {
                 String text = editText.getText().toString();
                 for(char c: ILLEGAL_CHARACTERS) {
                     if(text.indexOf(c) >= 0) {
-                        Toast.makeText(getActivity(), getResources().getString(R.string.error_wrong_filename), Toast.LENGTH_SHORT);
+                        Toast.makeText(getActivity(), getResources().getString(R.string.error_wrong_filename), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
