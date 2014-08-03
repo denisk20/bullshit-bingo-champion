@@ -1,18 +1,13 @@
 package com.denisk.bullshitbingochampion;
 
-import android.app.*;
 import android.content.DialogInterface;
-import android.content.res.Resources;
-import android.os.Bundle;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
+import android.widget.Toast;
 
 /**
  * @author denisk
  * @since 27.07.14.
  */
-public class EditCellDialogFragment extends DialogFragment {
-    private CharSequence currentCellValue;
+public class EditCellDialogFragment extends EditTextDialogFragment {
     private int position;
 
     public interface CellEditFinishedListener {
@@ -20,42 +15,26 @@ public class EditCellDialogFragment extends DialogFragment {
     }
 
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        final Activity activity = getActivity();
-
-        final EditText editText = new EditText(activity);
-        editText.setText(currentCellValue);
-        Resources res = getResources();
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity)
-                .setTitle(res.getString(R.string.edit_cell_title))
-                .setView(editText)
-                .setPositiveButton(res.getString(R.string.ok), new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        ((CellEditFinishedListener) activity).onCellEditFinished(editText.getText(), position);
-                    }
-                }).setNegativeButton(res.getString(R.string.action_cancel), new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        // Do nothing.
-                    }
-                });
-
-        editText.post(new Runnable() {
-            @Override
-            public void run() {
-                editText.selectAll();
-                InputMethodManager imm = (InputMethodManager) activity.getSystemService(Service.INPUT_METHOD_SERVICE);
-                imm.showSoftInput(editText, 0);
+    protected DialogInterface.OnClickListener getOKListener() {
+        return new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                String text = editText.getText().toString();
+                if(text.startsWith(BullshitBingoActivity.COMMENT_MARK)) {
+                    Toast.makeText(getActivity(), getResources().getString(R.string.error_cant_start_comment) + BullshitBingoActivity.COMMENT_MARK, Toast.LENGTH_SHORT);
+                    return;
+                }
+                ((CellEditFinishedListener) getActivity()).onCellEditFinished(text, position);
             }
-        });
+        };
+    }
 
-        return builder.create();
+    @Override
+    public String getTitle() {
+        return getResources().getString(R.string.edit_cell_title);
     }
 
     public void setPosition(int position) {
         this.position = position;
     }
 
-    public void setCurrentCellValue(CharSequence currentCellValue) {
-        this.currentCellValue = currentCellValue;
-    }
 }

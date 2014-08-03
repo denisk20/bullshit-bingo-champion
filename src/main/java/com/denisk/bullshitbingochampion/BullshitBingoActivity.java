@@ -1,6 +1,7 @@
 package com.denisk.bullshitbingochampion;
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -15,55 +16,57 @@ import android.widget.Toast;
 import org.askerov.dynamicgrid.BaseDynamicGridAdapter;
 import org.askerov.dynamicgrid.DynamicGridView;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 
-public class BullshitBingoActivity extends Activity implements SelectDimensionDialogFragment.DimensionSelectedListener, EditCellDialogFragment.CellEditFinishedListener {
+public class BullshitBingoActivity extends Activity
+        implements SelectDimensionDialogFragment.DimensionSelectedListener, EditCellDialogFragment.CellEditFinishedListener, SaveCardDialogFragment.SaveCardDialogListener {
 
-    public static final String BULLSHIT_FILES_PATH_KEY = "bullshitFilesPath";
-    public static final String DIR_NAME = "bullshitbingochamp";
     public static final String PREFS_NAME = "bullshitbingochamp";
+    //todo do we need it?
+    public static final String DIR_NAME = "bullshitbingochamp";
 
     public static final String BUNDLE_DIM = "dim";
     public static final String BUNDLE_WORDS = "words";
     public static final String BUNDLE_IS_EDITING = "isEditing";
     public static final ColorDrawable LIGHT_ERROR_COLOR = new ColorDrawable(0xFFFFF0F0);
+    public static final String COMMENT_MARK = "#";
 
     private DynamicGridView gridView;
 
     private BaseDynamicGridAdapter gridAdapter;
 
     private SelectDimensionDialogFragment dimensionDialog;
+    private SaveCardDialogFragment saveCardDialog;
     private EditCellDialogFragment editCellDialog;
 
     boolean isEditing; //are we in edit mode?
     boolean isDirty; //are there unsaved changes?
+
     //todo check currentCardName, remove this
     boolean isPersisted; //was the card persisted with 'save as...' at least once?
 
     //current card dimension
     private int dim;
-
     private MenuItem newMenuItem;
     private MenuItem editMenuItem;
     private MenuItem saveAsMenuItem;
     private MenuItem acceptItemMenuItem;
     private MenuItem shareMenuItem;
-    private MenuItem shuffleMenuItem;
 
+    private MenuItem shuffleMenuItem;
     //the width and the height (not counting action bar) of the grid
     private int gridWidth;
     private int gridHeight;
     //this is constant, got from resources
     private float shift;
+
     //Offset between cells. This is calculated dynamically based on dim size
     private float offset;
 
-    private String newCardName;
+    private CharSequence currentCardName;
 
     private boolean gridViewInitFinished; //have obtained gridWidth and gridHeight?
-
     private AdapterView.OnItemLongClickListener itemLongClickListener = new AdapterView.OnItemLongClickListener() {
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
@@ -76,6 +79,8 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
     private ActionBar actionBar;
+    private SharedPreferences sharedPreferences;
+    private File bullshitDir;
 
     /**
      * Called when the activity is first created.
@@ -85,7 +90,9 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
         gridViewInitFinished = false;
         super.onCreate(savedInstanceState);
 
-        newCardName = getResources().getString(R.string.new_card_name);
+        currentCardName = getResources().getString(R.string.new_card_name);
+
+        sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
         createDirIfNeeded();
 
@@ -279,11 +286,10 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
                 prepareForEdit();
                 return true;
             case R.id.action_save_as:
-                exitEditMode();
-                //todo save thing as
-                isDirty = false;
-                isPersisted = true;
-                actionBarTitleSaved();
+                if (saveCardDialog == null) {
+                    saveCardDialog = new SaveCardDialogFragment();
+                }
+                saveCardDialog.show(getFragmentManager(), "saveCard");
                 return true;
             case R.id.action_accept:
                 exitEditMode();
@@ -307,18 +313,13 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
     }
 
     private void actionBarTitleNotSaved() {
-        actionBar.setTitle(getCardName() + "*");
+        actionBar.setTitle(currentCardName + "*");
         actionBar.setBackgroundDrawable(LIGHT_ERROR_COLOR);
     }
 
     private void actionBarTitleSaved() {
-        actionBar.setTitle(getCardName());
+        actionBar.setTitle(currentCardName);
         actionBar.setBackgroundDrawable(null);
-    }
-
-    private String getCardName() {
-        //todo
-        return newCardName;
     }
 
     private void prepareForEdit() {
@@ -418,6 +419,51 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
         invalidateOptionsMenu();
     }
 
+    @Override
+    public void onCardNamePopulated(CharSequence name) {
+        persistWords(name);
+
+        exitEditMode();
+        isDirty = false;
+        isPersisted = true;
+        currentCardName = name;
+        actionBarTitleSaved();
+    }
+
+    private void persistWords(CharSequence fileName) {
+        if(bullshitDir == null || ! bullshitDir.exists()) {
+            throw new IllegalStateException("Directory for saving files does not exist: " + bullshitDir);
+        }
+
+        FileWriter writer;
+        File file = new File(bullshitDir, fileName.toString());
+        if(file.exists()) {
+            file.delete();
+        }
+        try {
+            writer = new FileWriter(file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        try {
+            writer.append(COMMENT_MARK + getResources().getString(R.string.file_comment) + "\n");
+            for(Object o: gridAdapter.getItems()) {
+                String word = (String) o;
+                writer.append(word);
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Can't write to bullshitbingo file " + file);
+        } finally {
+            try {
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Log.d(BullshitBingoActivity.class.getName(), "===Persisted card to " + file);
+        }
+    }
+
     /**
      * DynamicGridView can't hold equal objects, so we wrap
      * Strings so that even equal strings look like unequal
@@ -440,7 +486,6 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
     }
 
     private void createDirIfNeeded() {
-        File bullshitDir;
         if(isExternalStorageWritable()) {
             bullshitDir = Environment.getExternalStoragePublicDirectory(DIR_NAME);
         } else {
@@ -459,8 +504,7 @@ public class BullshitBingoActivity extends Activity implements SelectDimensionDi
         if(! bullshitDir.exists()) {
             throw new IllegalStateException("Can't create directory to store *.bullshit files at " + bullshitDir);
         } else {
-            Log.i(BullshitBingoActivity.class.getName(), "===Bullshit dir: " + bullshitDir);
-            getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().putString(BULLSHIT_FILES_PATH_KEY, bullshitDir.toString()).commit();
+            Log.d(BullshitBingoActivity.class.getName(), "===Bullshit dir: " + bullshitDir);
         }
     }
 
