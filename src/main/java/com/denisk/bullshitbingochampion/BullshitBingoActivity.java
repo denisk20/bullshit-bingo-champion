@@ -10,14 +10,14 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.*;
-import android.widget.AdapterView;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 import org.askerov.dynamicgrid.BaseDynamicGridAdapter;
 import org.askerov.dynamicgrid.DynamicGridView;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 public class BullshitBingoActivity extends Activity
         implements SelectDimensionDialogFragment.DimensionSelectedListener, EditCellDialogFragment.CellEditFinishedListener, SaveCardDialogFragment.SaveCardDialogListener {
@@ -31,6 +31,9 @@ public class BullshitBingoActivity extends Activity
     public static final String BUNDLE_IS_EDITING = "isEditing";
     public static final ColorDrawable LIGHT_ERROR_COLOR = new ColorDrawable(0xFFFFF0F0);
     public static final String COMMENT_MARK = "#";
+    public static final String NEW_CARD_PREFIX = "<";
+    public static final String NEW_CARD_SUFFIX = ">";
+    public static final String FILE_SUFFIX = ".bullshit";
 
     private DynamicGridView gridView;
 
@@ -42,9 +45,6 @@ public class BullshitBingoActivity extends Activity
 
     boolean isEditing; //are we in edit mode?
     boolean isDirty; //are there unsaved changes?
-
-    //todo check currentCardName, remove this
-    boolean isPersisted; //was the card persisted with 'save as...' at least once?
 
     //current card dimension
     private int dim;
@@ -90,7 +90,7 @@ public class BullshitBingoActivity extends Activity
         gridViewInitFinished = false;
         super.onCreate(savedInstanceState);
 
-        currentCardName = getResources().getString(R.string.new_card_name);
+        setNewCardName();
 
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
@@ -102,6 +102,21 @@ public class BullshitBingoActivity extends Activity
 
         initActionBar();
 
+        ListView cardListView = (ListView) findViewById(R.id.left_drawer);
+        cardListView.setAdapter(new ArrayAdapter<>(this, R.id.card_name, getCardNames()));
+        cardListView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String card = (String) parent.getItemAtPosition(position);
+                List<String> words = getWordsForCard(card);
+                //todo  set dim etc.
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
         gridView = (DynamicGridView) findViewById(R.id.gridview);
 
         offset = getResources().getDimension(R.dimen.cell_spacing);
@@ -183,6 +198,58 @@ public class BullshitBingoActivity extends Activity
         restoreFromBundle(savedInstanceState);
     }
 
+    private List<String> getWordsForCard(String pureCard) {
+        checkDir();
+        File file = new File(bullshitDir, pureCard + FILE_SUFFIX);
+        BufferedReader br;
+        try {
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+        ArrayList<String> result = new ArrayList<>();
+        String word;
+        try {
+            while((word = br.readLine()) != null) {
+                if(word.startsWith(COMMENT_MARK)) {
+                    continue;
+                }
+                result.add(word);
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Can't read file " + file);
+        } finally {
+            try {
+                br.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return result;
+    }
+
+    private String[] getCardNames() {
+        checkDir();
+        String[] cards = bullshitDir.list(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String filename) {
+                return filename.endsWith(FILE_SUFFIX);
+            }
+        });
+        for (int i = 0; i < cards.length; i++) {
+            String card = cards[i];
+            if (card.endsWith(FILE_SUFFIX)) {
+                card = card.substring(0, card.indexOf(FILE_SUFFIX));
+                cards[i] = card;
+            }
+        }
+        return cards;
+    }
+
+    private void setNewCardName() {
+        currentCardName = NEW_CARD_PREFIX + getResources().getString(R.string.new_card_name) + NEW_CARD_SUFFIX;
+    }
+
     private void initActionBar() {
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.app_name){
@@ -241,7 +308,7 @@ public class BullshitBingoActivity extends Activity
                 currentWords.add(new StringHolder(s));
             }
 
-            initBoardFromPresetData(currentWords);
+            initBoardFromWords(currentWords);
         }
     }
 
@@ -293,8 +360,8 @@ public class BullshitBingoActivity extends Activity
                 return true;
             case R.id.action_accept:
                 exitEditMode();
-                if(isPersisted) {
-                    //todo save thing
+                if(isPersisted()) {
+                    persistWords(currentCardName);
                     isDirty = false;
                 } else {
                     actionBarTitleNotSaved();
@@ -310,6 +377,10 @@ public class BullshitBingoActivity extends Activity
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private boolean isPersisted() {
+        return ! currentCardName.toString().startsWith(NEW_CARD_PREFIX);
     }
 
     private void actionBarTitleNotSaved() {
@@ -374,7 +445,7 @@ public class BullshitBingoActivity extends Activity
             editMenuItem.setVisible(isGridFilled());
             saveAsMenuItem.setVisible(isGridFilled() && isDirty);
             acceptItemMenuItem.setVisible(false);
-            shareMenuItem.setVisible(isGridFilled() && isPersisted);
+            shareMenuItem.setVisible(isGridFilled() && isPersisted());
             shuffleMenuItem.setVisible(false);
         }
         return super.onPrepareOptionsMenu(menu);
@@ -384,6 +455,8 @@ public class BullshitBingoActivity extends Activity
     public void onDimensionSelected(final int dim) {
         this.dim = dim;
 
+        setNewCardName();
+
         actionBarTitleSaved();
 
         initCleanBoard();
@@ -391,7 +464,6 @@ public class BullshitBingoActivity extends Activity
 
     private void initCleanBoard() {
         isDirty = true;
-        isPersisted = false;
         ArrayList<StringHolder> currentWords = new ArrayList<>(dim*dim);
         for (int i = 0; i < dim; i++) {
             for(int j = 0; j < dim; j++) {
@@ -399,11 +471,11 @@ public class BullshitBingoActivity extends Activity
             }
         }
 
-        initBoardFromPresetData(currentWords);
+        initBoardFromWords(currentWords);
         invalidateOptionsMenu();
     }
 
-    private void initBoardFromPresetData(final ArrayList<StringHolder> currentWords) {
+    private void initBoardFromWords(final List<StringHolder> currentWords) {
         gridView.setNumColumns(dim);
 
         shift = offset * ((float) (dim - 2) / (dim));
@@ -425,23 +497,20 @@ public class BullshitBingoActivity extends Activity
 
         exitEditMode();
         isDirty = false;
-        isPersisted = true;
         currentCardName = name;
         actionBarTitleSaved();
     }
 
     private void persistWords(CharSequence fileName) {
-        if(bullshitDir == null || ! bullshitDir.exists()) {
-            throw new IllegalStateException("Directory for saving files does not exist: " + bullshitDir);
-        }
+        checkDir();
 
-        FileWriter writer;
-        File file = new File(bullshitDir, fileName.toString());
+        File file = new File(bullshitDir, fileName.toString() + FILE_SUFFIX);
         if(file.exists()) {
             file.delete();
         }
+        BufferedWriter writer;
         try {
-            writer = new FileWriter(file);
+            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -461,6 +530,12 @@ public class BullshitBingoActivity extends Activity
                 e.printStackTrace();
             }
             Log.d(BullshitBingoActivity.class.getName(), "===Persisted card to " + file);
+        }
+    }
+
+    private void checkDir() {
+        if(bullshitDir == null || ! bullshitDir.exists()) {
+            throw new IllegalStateException("Directory for saving files does not exist: " + bullshitDir);
         }
     }
 
