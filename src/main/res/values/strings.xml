@@ -7,7 +7,6 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="action_save">Save as…</string>
-    <string name="action_cancel">Cancel</string>
     <string name="long_press_to_drag">Tap to edit. Long press to drag</string>
     <string name="edit_cell_title">Edit cell</string>
     <string name="action_accept">Accept</string>
@@ -23,4 +22,7 @@
     <string name="error_wrong_filename">Illegal file name</string>
     <string name="error_wrong_word_count">Count of words is wrong, should be able to create NxN grid. Card: </string>
     <string name="error_empty_cart">Card is empty: </string>
+    <string name="action_delete">Delete</string>
+    <string name="delete_prompt">Delete card:</string>
+    <string name="error_empty_card_name">C\'mon, type something</string>
 </resources>

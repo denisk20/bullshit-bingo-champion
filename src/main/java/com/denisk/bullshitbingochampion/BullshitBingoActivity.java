@@ -1,6 +1,8 @@
 package com.denisk.bullshitbingochampion;
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.drawable.ColorDrawable;
@@ -52,6 +54,7 @@ public class BullshitBingoActivity extends Activity
     private MenuItem saveAsMenuItem;
     private MenuItem acceptItemMenuItem;
     private MenuItem shareMenuItem;
+    private MenuItem deleteMenuItem;
 
     private MenuItem shuffleMenuItem;
     //the width and the height (not counting action bar) of the grid
@@ -131,6 +134,13 @@ public class BullshitBingoActivity extends Activity
                 reloadCardList();
 
                 invalidateOptionsMenu();
+            }
+        });
+        cardListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                showDeleteCardDialog((CharSequence) parent.getItemAtPosition(position));
+                return true;
             }
         });
         gridView = (DynamicGridView) findViewById(R.id.gridview);
@@ -217,6 +227,7 @@ public class BullshitBingoActivity extends Activity
     private void reloadCardList() {
         cardListAdapter.clear();
         cardListAdapter.addAll(getCardNames());
+        cardListAdapter.notifyDataSetChanged();
     }
 
     private List<String> getWordsForCard(String pureCard) {
@@ -396,6 +407,9 @@ public class BullshitBingoActivity extends Activity
             case R.id.action_share:
                 //todo
                 return true;
+            case R.id.action_delete:
+                showDeleteCardDialog(currentCardName);
+                return true;
             case R.id.action_shuffle:
                 isDirty = true;
                 //todo
@@ -403,6 +417,39 @@ public class BullshitBingoActivity extends Activity
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void showDeleteCardDialog(final CharSequence cardName) {
+        DialogInterface.OnClickListener deleteCardListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case DialogInterface.BUTTON_POSITIVE:
+                        checkDir();
+                        File cardFile = new File(bullshitDir, cardName + FILE_SUFFIX);
+                        cardFile.delete();
+                        drawerLayout.closeDrawers();
+                        reloadCardList();
+                        if (currentCardName.equals(cardName)) {
+                            dim = 0;
+                            initCleanBoard();
+                            currentCardName = "";
+                            actionBarTitleSaved();
+                        }
+                        break;
+
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        //No button clicked
+                        break;
+                }
+
+            }
+        };
+        new AlertDialog.Builder(this)
+                .setMessage(getResources().getString(R.string.delete_prompt) + cardName)
+                .setPositiveButton(R.string.ok, deleteCardListener)
+                .setNegativeButton(R.string.cancel, deleteCardListener)
+                .show();
     }
 
     private boolean isPersisted() {
@@ -453,6 +500,7 @@ public class BullshitBingoActivity extends Activity
         acceptItemMenuItem = menu.findItem(R.id.action_accept);
         shareMenuItem = menu.findItem(R.id.action_share);
         shuffleMenuItem = menu.findItem(R.id.action_shuffle);
+        deleteMenuItem = menu.findItem(R.id.action_delete);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -466,6 +514,7 @@ public class BullshitBingoActivity extends Activity
             acceptItemMenuItem.setVisible(true);
             shareMenuItem.setVisible(false);
             shuffleMenuItem.setVisible(true);
+            deleteMenuItem.setVisible(false);
         } else {
             newMenuItem.setVisible(true);
             editMenuItem.setVisible(isGridFilled());
@@ -473,6 +522,7 @@ public class BullshitBingoActivity extends Activity
             acceptItemMenuItem.setVisible(false);
             shareMenuItem.setVisible(isGridFilled() && isPersisted());
             shuffleMenuItem.setVisible(false);
+            deleteMenuItem.setVisible(isGridFilled() && isPersisted());
         }
         return super.onPrepareOptionsMenu(menu);
     }

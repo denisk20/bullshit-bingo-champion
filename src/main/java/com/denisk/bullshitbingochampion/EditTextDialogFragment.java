@@ -25,7 +25,7 @@ public abstract class EditTextDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity)
                 .setTitle(getTitle())
                 .setView(editText)
-                .setPositiveButton(res.getString(R.string.ok), getOKListener()).setNegativeButton(res.getString(R.string.action_cancel), new DialogInterface.OnClickListener() {
+                .setPositiveButton(res.getString(R.string.ok), getOKListener()).setNegativeButton(res.getString(R.string.cancel), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         // Do nothing.
                     }

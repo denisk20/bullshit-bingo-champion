@@ -30,6 +30,12 @@
           android:showAsAction="ifRoom"
           android:visible="false"
             />
+    <item android:id="@+id/action_delete"
+          android:icon="@drawable/ic_action_delete"
+          android:title="@string/action_delete"
+          android:showAsAction="ifRoom"
+          android:visible="false"
+            />
     <item android:id="@+id/action_shuffle"
           android:icon="@drawable/ic_action_shuffle"
           android:title="@string/action_shuffle"
