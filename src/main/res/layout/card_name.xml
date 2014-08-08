@@ -10,5 +10,5 @@
         android:paddingBottom="3dp"
         android:paddingTop="3dp"
         >
-
+<!--todo adjust text size-->
 </TextView>

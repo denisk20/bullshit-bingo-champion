@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -104,7 +103,7 @@ public class BullshitBingoActivity extends Activity
         initActionBar();
 
         final ListView cardListView = (ListView) findViewById(R.id.left_drawer);
-        cardListAdapter = new ArrayAdapter<>(this, R.layout.card, getCardNames());
+        cardListAdapter = new ArrayAdapter<>(this, R.layout.card_name, getCardNames());
         cardListView.setAdapter(cardListAdapter);
         cardListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
