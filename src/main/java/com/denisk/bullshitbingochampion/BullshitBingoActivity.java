@@ -30,7 +30,6 @@ public class BullshitBingoActivity extends Activity
     public static final String BUNDLE_DIM = "dim";
     public static final String BUNDLE_WORDS = "words";
     public static final String BUNDLE_IS_EDITING = "isEditing";
-    public static final ColorDrawable LIGHT_ERROR_COLOR = new ColorDrawable(0xFFFFF0F0);
     public static final String COMMENT_MARK = "#";
     public static final String NEW_CARD_PREFIX = "<";
     public static final String NEW_CARD_SUFFIX = ">";
@@ -45,7 +44,6 @@ public class BullshitBingoActivity extends Activity
     private EditCellDialogFragment editCellDialog;
 
     boolean isEditing; //are we in edit mode?
-    boolean isDirty; //are there unsaved changes?
 
     //current card dimension
     private int dim;
@@ -216,7 +214,6 @@ public class BullshitBingoActivity extends Activity
             @Override
             public void onActionDrop() {
                 gridView.stopEditMode();
-                isDirty = true;
                 invalidateOptionsMenu();
             }
         });
@@ -399,7 +396,6 @@ public class BullshitBingoActivity extends Activity
                 exitEditMode();
                 if(isPersisted()) {
                     persistWords(currentCardName);
-                    isDirty = false;
                 } else {
                     actionBarTitleNotSaved();
                 }
@@ -411,7 +407,6 @@ public class BullshitBingoActivity extends Activity
                 showDeleteCardDialog(currentCardName);
                 return true;
             case R.id.action_shuffle:
-                isDirty = true;
                 //todo
                 return true;
             default:
@@ -458,12 +453,10 @@ public class BullshitBingoActivity extends Activity
 
     private void actionBarTitleNotSaved() {
         actionBar.setTitle(currentCardName + "*");
-        actionBar.setBackgroundDrawable(LIGHT_ERROR_COLOR);
     }
 
     private void actionBarTitleSaved() {
         actionBar.setTitle(currentCardName);
-        actionBar.setBackgroundDrawable(null);
     }
 
     private void prepareForEdit() {
@@ -518,7 +511,7 @@ public class BullshitBingoActivity extends Activity
         } else {
             newMenuItem.setVisible(true);
             editMenuItem.setVisible(isGridFilled());
-            saveAsMenuItem.setVisible(isGridFilled() && isDirty);
+            saveAsMenuItem.setVisible(isGridFilled());
             acceptItemMenuItem.setVisible(false);
             shareMenuItem.setVisible(isGridFilled() && isPersisted());
             shuffleMenuItem.setVisible(false);
@@ -539,7 +532,6 @@ public class BullshitBingoActivity extends Activity
     }
 
     private void initCleanBoard() {
-        isDirty = true;
         ArrayList<StringHolder> currentWords = new ArrayList<>(dim*dim);
         for (int i = 0; i < dim; i++) {
             for(int j = 0; j < dim; j++) {
@@ -563,7 +555,6 @@ public class BullshitBingoActivity extends Activity
     @Override
     public void onCellEditFinished(CharSequence newValue, int position) {
         gridAdapter.setItemAtPosition(new StringHolder(newValue), position);
-        isDirty = true;
         invalidateOptionsMenu();
     }
 
@@ -572,7 +563,6 @@ public class BullshitBingoActivity extends Activity
         persistWords(name);
 
         exitEditMode();
-        isDirty = false;
         currentCardName = name;
         actionBarTitleSaved();
         reloadCardList();
