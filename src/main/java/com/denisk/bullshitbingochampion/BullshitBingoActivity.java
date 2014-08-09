@@ -337,8 +337,8 @@ public class BullshitBingoActivity extends Activity
             if(wordsArrayList == null) {
                 return;
             }
-            initCleanBoard();
-//            initBoardFromWords(getStringHolders(wordsArrayList));
+//            initCleanBoard();
+            initBoardFromWords(getStringHolders(wordsArrayList));
         }
     }
 
@@ -549,12 +549,18 @@ public class BullshitBingoActivity extends Activity
     }
 
     private void initBoardFromWords(final List<StringHolder> currentWords) {
+
         gridView.setNumColumns(dim);
 
         shift = offset * ((float) (dim - 2) / (dim));
 
-        gridAdapter.set(currentWords);
         gridAdapter.setColumnCount(dim);
+
+        gridView.post(new Runnable() {
+            public void run() {
+                gridAdapter.set(currentWords);
+            }
+        });
     }
 
     @Override
