@@ -6,9 +6,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
@@ -91,14 +93,16 @@ public class BullshitBingoActivity extends Activity
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        gridViewInitFinished = false;
         super.onCreate(savedInstanceState);
+
+        createDirIfNeeded();
+
+        gridViewInitFinished = false;
 
         setNewCardName();
 
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
-        createDirIfNeeded();
 
         setContentView(R.layout.bingo_activity);
 
@@ -114,27 +118,7 @@ public class BullshitBingoActivity extends Activity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String card = (String) parent.getItemAtPosition(position);
                 List<String> words = getWordsForCard(card);
-                if(words.size() == 0) {
-                    Toast.makeText(BullshitBingoActivity.this, getResources().getString(R.string.error_empty_cart) + card, Toast.LENGTH_LONG).show();
-                    return;
-                }
-                double sqrt = Math.sqrt(words.size());
-                double floor = Math.floor(sqrt + 0.5);
-                if(Math.abs(floor - sqrt) > 0.1) {
-                    Toast.makeText(BullshitBingoActivity.this, getResources().getString(R.string.error_wrong_word_count) + card, Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-                dim = (int) Math.round(sqrt);
-                currentCardName = card;
-                actionBarTitle();
-                initBoardFromWords(getStringHolders(words));
-
-                drawerLayout.closeDrawers();
-
-                reloadCardList();
-
-                invalidateOptionsMenu();
+                showWords(card, words);
             }
         });
         cardListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -223,7 +207,82 @@ public class BullshitBingoActivity extends Activity
             }
         });
 
-        restoreFromBundle(savedInstanceState);
+        if(getIntent() != null && getIntent().getData() != null) {
+            Uri data = getIntent().getData();
+
+            String cardName = null;
+            String scheme = data.getScheme();
+            if (scheme.equals("file")) {
+                cardName = data.getLastPathSegment();
+            } else if (scheme.equals("content")) {
+                //known column names. Need to add more for more apps to support
+                String[] knownColNames = {
+                        "_display_name", //gmail
+                        "filename"      //evernote
+                };
+                Cursor cursor = getContentResolver().query(data, null, null, null, null);
+                if (cursor != null && cursor.getCount() != 0) {
+                    cursor.moveToFirst();
+                    for(String p: knownColNames) {
+                        int columnIndex = cursor.getColumnIndex(p);
+                        if(columnIndex > -1) {
+                            cardName = cursor.getString(columnIndex);
+                            break;
+                        }
+                    }
+                }
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+            if(cardName == null) {
+                cardName = "imported_" + System.currentTimeMillis();
+            }
+            InputStream inputStream = null;
+            try {
+                inputStream = getContentResolver().openInputStream(data);
+            } catch (FileNotFoundException e) {
+                Toast.makeText(this, "Can't open input stream to data", Toast.LENGTH_SHORT).show();
+            }
+
+            if(inputStream != null) {
+                String shortCardName = cardName.substring(0, cardName.indexOf(FILE_SUFFIX));
+                List<String> words = readCardFromInputStream(inputStream);
+                showWords(shortCardName, words);
+                initBoardFromWords(getStringHolders(words));
+
+                persistWords(shortCardName);
+                reloadCardList();
+            }
+
+        } else {
+            restoreFromBundle(savedInstanceState);
+        }
+    }
+
+    //todo better name pls
+    private void showWords(String card, List<String> words) {
+        if(words.size() == 0) {
+            Toast.makeText(this, getResources().getString(R.string.error_empty_cart) + card, Toast.LENGTH_LONG).show();
+            return;
+        }
+        double sqrt = Math.sqrt(words.size());
+        double floor = Math.floor(sqrt + 0.5);
+        if(Math.abs(floor - sqrt) > 0.1) {
+            Toast.makeText(this, getResources().getString(R.string.error_wrong_word_count) + card, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        dim = (int) Math.round(sqrt);
+        currentCardName = card;
+        actionBarTitle();
+        initBoardFromWords(getStringHolders(words));
+
+        drawerLayout.closeDrawers();
+
+        reloadCardList();
+
+        invalidateOptionsMenu();
     }
 
     private void reloadCardList() {
@@ -236,9 +295,21 @@ public class BullshitBingoActivity extends Activity
         checkDir();
         File file = new File(bullshitDir, pureCard + FILE_SUFFIX);
         BufferedReader br;
+        FileInputStream is = null;
         try {
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
-        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            is = new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            Toast.makeText(this, "File can't be opened for read: " + file, Toast.LENGTH_SHORT).show();
+            throw new RuntimeException(e);
+        }
+        return readCardFromInputStream(is);
+    }
+
+    private List<String> readCardFromInputStream(InputStream is) {
+        BufferedReader br;
+        try {
+            br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
         ArrayList<String> result = new ArrayList<>();
@@ -250,7 +321,7 @@ public class BullshitBingoActivity extends Activity
                 }
             }
         } catch (IOException e) {
-            throw new IllegalStateException("Can't read file " + file);
+            throw new IllegalStateException("Can't read word file ");
         } finally {
             try {
                 br.close();
@@ -576,10 +647,12 @@ public class BullshitBingoActivity extends Activity
 
         gridAdapter.setColumnCount(dim);
 
+        gridAdapter.set(currentWords);
+        invalidateOptionsMenu();
+        //hack: need to repeat it, otherwise it doesn't work when rotating the screen
         gridView.post(new Runnable() {
             public void run() {
                 gridAdapter.set(currentWords);
-                invalidateOptionsMenu();
             }
         });
     }
