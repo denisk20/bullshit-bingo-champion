@@ -392,7 +392,6 @@ public class BullshitBingoActivity extends Activity
                 showSelectNewCardDimensionDialog();
                 return true;
             case R.id.action_edit:
-                //todo edit mode activity kill - empty screen
                 isEditing = true;
                 prepareForEdit();
                 return true;
@@ -412,17 +411,7 @@ public class BullshitBingoActivity extends Activity
                 }
                 return true;
             case R.id.action_share:
-                checkDir();
-                Intent sendIntent = new Intent();
-                sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_TEXT, "text");
-                File file = new File(bullshitDir, currentCardName + FILE_SUFFIX);
-                if(! file.exists()) {
-                    throw new IllegalStateException("No bullshit file: " + file);
-                }
-                sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
-                sendIntent.setType("text/plain");
-                startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.share_with)));
+                shareCurrentCard();
                 return true;
             case R.id.action_delete:
                 showDeleteCardDialog(currentCardName);
@@ -433,6 +422,23 @@ public class BullshitBingoActivity extends Activity
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void shareCurrentCard() {
+        checkDir();
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        String cardName = currentCardName + FILE_SUFFIX;
+        String title = getResources().getString(R.string.share_title) + " " + cardName;
+        sendIntent.putExtra(Intent.EXTRA_TITLE, title);
+        sendIntent.putExtra(Intent.EXTRA_SUBJECT, title);
+        File file = new File(bullshitDir, cardName);
+        if(! file.exists()) {
+            throw new IllegalStateException("No bullshit file: " + file);
+        }
+        sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+        sendIntent.setType("text/plain");
+        startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.share_with)));
     }
 
     private void showDeleteCardDialog(final CharSequence cardName) {
