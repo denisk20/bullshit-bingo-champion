@@ -29,6 +29,8 @@ public class BullshitBingoActivity extends Activity
     public static final String BUNDLE_DIM = "dim";
     public static final String BUNDLE_WORDS = "words";
     public static final String BUNDLE_IS_EDITING = "isEditing";
+    public static final String BUNDLE_CURRENT_CARD_NAME = "currentCard";
+
     public static final String COMMENT_MARK = "#";
     public static final String NEW_CARD_PREFIX = "<";
     public static final String NEW_CARD_SUFFIX = ">";
@@ -63,7 +65,7 @@ public class BullshitBingoActivity extends Activity
     //Offset between cells. This is calculated dynamically based on dim size
     private float offset;
 
-    private CharSequence currentCardName;
+    private String currentCardName;
 
     private boolean gridViewInitFinished; //have obtained gridWidth and gridHeight?
     private AdapterView.OnItemLongClickListener itemLongClickListener = new AdapterView.OnItemLongClickListener() {
@@ -123,7 +125,7 @@ public class BullshitBingoActivity extends Activity
 
                 dim = (int) Math.round(sqrt);
                 currentCardName = card;
-                actionBarTitleSaved();
+                actionBarTitle();
                 initBoardFromWords(getStringHolders(words));
 
                 drawerLayout.closeDrawers();
@@ -326,6 +328,8 @@ public class BullshitBingoActivity extends Activity
         if (savedInstanceState != null) {
             dim = savedInstanceState.getInt(BUNDLE_DIM);
             isEditing = savedInstanceState.getBoolean(BUNDLE_IS_EDITING);
+            currentCardName = savedInstanceState.getString(BUNDLE_CURRENT_CARD_NAME);
+            actionBarTitle();
             if(isEditing) {
                 prepareForEdit();
             }
@@ -333,7 +337,8 @@ public class BullshitBingoActivity extends Activity
             if(wordsArrayList == null) {
                 return;
             }
-            initBoardFromWords(getStringHolders(wordsArrayList));
+            initCleanBoard();
+//            initBoardFromWords(getStringHolders(wordsArrayList));
         }
     }
 
@@ -349,12 +354,13 @@ public class BullshitBingoActivity extends Activity
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putStringArrayList(BUNDLE_WORDS, getCharSequenceListFromCurrentWords());
+        outState.putStringArrayList(BUNDLE_WORDS, getStringListFromCurrentWords());
         outState.putInt(BUNDLE_DIM, dim);
         outState.putBoolean(BUNDLE_IS_EDITING, isEditing);
+        outState.putString(BUNDLE_CURRENT_CARD_NAME, currentCardName.toString());
     }
 
-    private ArrayList<String> getCharSequenceListFromCurrentWords() {
+    private ArrayList<String> getStringListFromCurrentWords() {
         ArrayList<String> words = new ArrayList<>();
         for (Object o : gridAdapter.getItems()) {
             StringHolder h = (StringHolder) o;
@@ -399,7 +405,8 @@ public class BullshitBingoActivity extends Activity
                 if(isPersisted()) {
                     persistWords(currentCardName);
                 } else {
-                    actionBarTitleNotSaved();
+                    currentCardName += "*";
+                    actionBarTitle();
                 }
                 return true;
             case R.id.action_share:
@@ -431,7 +438,7 @@ public class BullshitBingoActivity extends Activity
                             dim = 0;
                             initCleanBoard();
                             currentCardName = "";
-                            actionBarTitleSaved();
+                            actionBarTitle();
                         }
                         break;
 
@@ -453,11 +460,7 @@ public class BullshitBingoActivity extends Activity
         return ! currentCardName.toString().startsWith(NEW_CARD_PREFIX);
     }
 
-    private void actionBarTitleNotSaved() {
-        actionBar.setTitle(currentCardName + "*");
-    }
-
-    private void actionBarTitleSaved() {
+    private void actionBarTitle() {
         actionBar.setTitle(currentCardName);
     }
 
@@ -528,7 +531,7 @@ public class BullshitBingoActivity extends Activity
 
         setNewCardName();
 
-        actionBarTitleSaved();
+        actionBarTitle();
 
         initCleanBoard();
     }
@@ -561,12 +564,12 @@ public class BullshitBingoActivity extends Activity
     }
 
     @Override
-    public void onCardNamePopulated(CharSequence name) {
+    public void onCardNamePopulated(String name) {
         persistWords(name);
 
         exitEditMode();
         currentCardName = name;
-        actionBarTitleSaved();
+        actionBarTitle();
         reloadCardList();
     }
 

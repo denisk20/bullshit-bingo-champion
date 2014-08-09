@@ -11,7 +11,7 @@ public class SaveCardDialogFragment extends EditTextDialogFragment {
     private static final char[] ILLEGAL_CHARACTERS = { '/', '\n', '\r', '\t', '\0', '\f', '`', '?', '*', '\\', '<', '>', '|', '\"', ':', '#' };
 
     public interface SaveCardDialogListener {
-        void onCardNamePopulated(CharSequence name);
+        void onCardNamePopulated(String name);
     }
 
     @Override
