@@ -167,6 +167,8 @@ public class BullshitBingoActivity extends Activity
                 textView.setHeight((int) (gridHeight / dim - shift));
 
                 textView.setText(text.s);
+                textView.setTranslationX(0);
+                textView.setTranslationY(0);
                 setViewVisibilityOnPosition(position, textView);
 
                 return textView;
@@ -382,6 +384,7 @@ public class BullshitBingoActivity extends Activity
                 showSelectNewCardDimensionDialog();
                 return true;
             case R.id.action_edit:
+                //todo edit mode activity kill - empty screen
                 isEditing = true;
                 prepareForEdit();
                 return true;
@@ -406,7 +409,7 @@ public class BullshitBingoActivity extends Activity
                 showDeleteCardDialog(currentCardName);
                 return true;
             case R.id.action_shuffle:
-                //todo
+                gridView.shuffle();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -615,6 +618,13 @@ public class BullshitBingoActivity extends Activity
 
         StringHolder(CharSequence s) {
             this.s = s;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder();
+            sb.append("s=").append(s);
+            return sb.toString();
         }
     }
     @Override
