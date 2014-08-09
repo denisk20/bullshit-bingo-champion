@@ -25,4 +25,5 @@
     <string name="action_delete">Delete</string>
     <string name="delete_prompt">Delete card:</string>
     <string name="error_empty_card_name">C\'mon, type something</string>
+    <string name="share_with">Share the words...</string>
 </resources>

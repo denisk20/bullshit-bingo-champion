@@ -3,8 +3,10 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -410,7 +412,17 @@ public class BullshitBingoActivity extends Activity
                 }
                 return true;
             case R.id.action_share:
-                //todo
+                checkDir();
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, "text");
+                File file = new File(bullshitDir, currentCardName + FILE_SUFFIX);
+                if(! file.exists()) {
+                    throw new IllegalStateException("No bullshit file: " + file);
+                }
+                sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+                sendIntent.setType("text/plain");
+                startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.share_with)));
                 return true;
             case R.id.action_delete:
                 showDeleteCardDialog(currentCardName);
@@ -561,6 +573,7 @@ public class BullshitBingoActivity extends Activity
         gridView.post(new Runnable() {
             public void run() {
                 gridAdapter.set(currentWords);
+                invalidateOptionsMenu();
             }
         });
     }
