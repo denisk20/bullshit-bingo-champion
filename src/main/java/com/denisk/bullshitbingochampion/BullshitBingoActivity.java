@@ -87,6 +87,26 @@ public class BullshitBingoActivity extends Activity
     private ArrayAdapter<String> cardListAdapter;
     private float finalFontSize;
 
+    private CardPositionState[] cardState;
+
+    static class CardPositionState {
+        int position;
+        boolean checked;
+
+        CardPositionState(int position) {
+            this.position = position;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("CardPositionState{");
+            sb.append("position=").append(position);
+            sb.append(", checked=").append(checked);
+            sb.append('}');
+            return sb.toString();
+        }
+    }
+
     /**
      * Called when the activity is first created.
      */
@@ -147,6 +167,9 @@ public class BullshitBingoActivity extends Activity
                 textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, finalFontSize);
                 textView.setTranslationX(0);
                 textView.setTranslationY(0);
+
+                setCardColor(position, textView);
+
                 setViewVisibilityOnPosition(position, textView);
 
                 return textView;
@@ -159,7 +182,9 @@ public class BullshitBingoActivity extends Activity
             @Override
             public void onItemClick(final AdapterView<?> parent, final View view, final int position, long id) {
                 if(! isEditing) {
-                    //todo handle the game
+                    cardState[position].checked = !cardState[position].checked;
+                    setCardColor(position, view);
+                    //todo check for bingo
                     return;
                 }
                 StringHolder itemAtPosition = (StringHolder) parent.getItemAtPosition(position);
@@ -196,6 +221,17 @@ public class BullshitBingoActivity extends Activity
                 invalidateOptionsMenu();
             }
         });
+    }
+
+    private void setCardColor(int position, View view) {
+        int background;
+        if(cardState[position].checked) {
+            background = R.drawable.back_selected;
+        } else {
+            background = R.drawable.back;
+        }
+
+        view.setBackgroundResource(background);
     }
 
     private void initCardList() {
@@ -283,6 +319,11 @@ public class BullshitBingoActivity extends Activity
         }
 
         dim = (int) Math.round(sqrt);
+
+        cardState = new CardPositionState[dim*dim];
+        for(int i = 0; i < dim*dim; i++) {
+            cardState[i] = new CardPositionState(i);
+        }
         currentCardName = card;
         updateTitle();
         initBoardFromWords(getStringHolders(words));
