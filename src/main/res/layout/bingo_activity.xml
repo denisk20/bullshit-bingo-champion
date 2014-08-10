@@ -12,11 +12,30 @@
                                              android:verticalSpacing="@dimen/cell_spacing"
             />
     <!-- The navigation drawer -->
-    <ListView android:id="@+id/left_drawer"
-              android:layout_width="240dp"
-              android:layout_height="match_parent"
-              android:layout_gravity="start"
-              android:choiceMode="singleChoice"
-              android:background="#111"/>
+    <RelativeLayout
+                    android:id="@+id/left_drawer_wrapper"
+                    android:layout_width="240dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="start"
+                    android:background="#111"
+            >
+        <ListView android:id="@+id/left_drawer"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:layout_marginBottom="20dp"
+                  android:choiceMode="singleChoice"
+                  android:background="#111"/>
+
+        <TextView android:layout_width="match_parent"
+                  android:layout_height="15dp"
+                  android:textSize="12sp"
+                  android:text="@string/long_press_to_delete"
+                    android:textColor="#FFF"
+                    android:background="#111"
+                   android:layout_alignParentEnd="false"
+                   android:layout_alignParentBottom="true" android:gravity="center"
+                   android:layout_marginRight="10dp" android:layout_marginBottom="8dp"/>
+
+    </RelativeLayout>
     <!--todo label for deletion-->
 </android.support.v4.widget.DrawerLayout>

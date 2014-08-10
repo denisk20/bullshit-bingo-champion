@@ -215,6 +215,7 @@ public class BullshitBingoActivity extends Activity
             if (scheme.equals("file")) {
                 cardName = data.getLastPathSegment();
             } else if (scheme.equals("content")) {
+                //todo this is probably never executed
                 //known column names. Need to add more for more apps to support
                 String[] knownColNames = {
                         "_display_name", //gmail
@@ -507,6 +508,7 @@ public class BullshitBingoActivity extends Activity
         if(! file.exists()) {
             throw new IllegalStateException("No bullshit file: " + file);
         }
+        //todo this seems to be useless, gmail strips it
         sendIntent.setType("text/bullshit");
         sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
         startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.share_with)));

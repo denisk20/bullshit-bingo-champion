@@ -27,4 +27,5 @@
     <string name="error_empty_card_name">C\'mon, type something</string>
     <string name="share_with">Share the words...</string>
     <string name="share_title">Bullshit Bingo card:</string>
+    <string name="long_press_to_delete">Long press to delete</string>
 </resources>
