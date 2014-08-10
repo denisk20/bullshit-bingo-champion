@@ -507,8 +507,8 @@ public class BullshitBingoActivity extends Activity
         if(! file.exists()) {
             throw new IllegalStateException("No bullshit file: " + file);
         }
+        sendIntent.setType("text/bullshit");
         sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
-        sendIntent.setType("text/plain");
         startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.share_with)));
     }
 
