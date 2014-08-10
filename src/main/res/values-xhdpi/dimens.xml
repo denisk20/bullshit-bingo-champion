@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="cell_spacing">2dp</dimen>
+    <dimen name="card_list_hint_size">12sp</dimen>
 </resources>

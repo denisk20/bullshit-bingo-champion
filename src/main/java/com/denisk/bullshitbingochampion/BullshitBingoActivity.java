@@ -4,14 +4,11 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
@@ -101,32 +98,25 @@ public class BullshitBingoActivity extends Activity
 
         gridViewInitFinished = false;
 
-        setNewCardName();
-
         setContentView(R.layout.bingo_activity);
 
         actionBar = getActionBar();
 
         initActionBar();
 
-        final ListView cardListView = (ListView) findViewById(R.id.left_drawer);
-        cardListAdapter = new ArrayAdapter<>(this, R.layout.card_name, getCardNames());
-        cardListView.setAdapter(cardListAdapter);
-        cardListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String card = (String) parent.getItemAtPosition(position);
-                List<String> words = getWordsForCard(card);
-                showWords(card, words);
-            }
-        });
-        cardListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                showDeleteCardDialog((CharSequence) parent.getItemAtPosition(position));
-                return true;
-            }
-        });
+        initCardList();
+
+        initGridView();
+
+        if(getIntent() != null && getIntent().getData() != null) {
+            openFromIntent();
+
+        } else {
+            restoreFromBundle(savedInstanceState);
+        }
+    }
+
+    private void initGridView() {
         gridView = (DynamicGridView) findViewById(R.id.gridview);
 
         offset = getResources().getDimension(R.dimen.cell_spacing);
@@ -206,63 +196,81 @@ public class BullshitBingoActivity extends Activity
                 invalidateOptionsMenu();
             }
         });
+    }
 
-        if(getIntent() != null && getIntent().getData() != null) {
-            Uri data = getIntent().getData();
+    private void initCardList() {
+        final ListView cardListView = (ListView) findViewById(R.id.left_drawer);
+        cardListAdapter = new ArrayAdapter<>(this, R.layout.card_name, getCardNames());
+        cardListView.setAdapter(cardListAdapter);
+        cardListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String card = (String) parent.getItemAtPosition(position);
+                List<String> words = getWordsForCard(card);
+                setDimAndRenderWords(card, words);
+                isEditing = false;
+            }
+        });
+        cardListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                showDeleteCardDialog((CharSequence) parent.getItemAtPosition(position));
+                return true;
+            }
+        });
+    }
 
-            String cardName = null;
-            String scheme = data.getScheme();
-            if (scheme.equals("file")) {
-                cardName = data.getLastPathSegment();
-            } else if (scheme.equals("content")) {
-                //todo this is probably never executed
-                //known column names. Need to add more for more apps to support
-                String[] knownColNames = {
-                        "_display_name", //gmail
-                        "filename"      //evernote
-                };
-                Cursor cursor = getContentResolver().query(data, null, null, null, null);
-                if (cursor != null && cursor.getCount() != 0) {
-                    cursor.moveToFirst();
-                    for(String p: knownColNames) {
-                        int columnIndex = cursor.getColumnIndex(p);
-                        if(columnIndex > -1) {
-                            cardName = cursor.getString(columnIndex);
-                            break;
-                        }
+    private void openFromIntent() {
+        Uri data = getIntent().getData();
+
+        String cardName = null;
+        String scheme = data.getScheme();
+        if (scheme.equals("file")) {
+            cardName = data.getLastPathSegment();
+        } else if (scheme.equals("content")) {
+            //todo this is probably never executed
+            //known column names. Need to add more for more apps to support
+            String[] knownColNames = {
+                    "_display_name", //gmail
+                    "filename"      //evernote
+            };
+            Cursor cursor = getContentResolver().query(data, null, null, null, null);
+            if (cursor != null && cursor.getCount() != 0) {
+                cursor.moveToFirst();
+                for(String p: knownColNames) {
+                    int columnIndex = cursor.getColumnIndex(p);
+                    if(columnIndex > -1) {
+                        cardName = cursor.getString(columnIndex);
+                        break;
                     }
                 }
-                if (cursor != null) {
-                    cursor.close();
-                }
             }
-            if(cardName == null) {
-                cardName = "imported_" + System.currentTimeMillis();
+            if (cursor != null) {
+                cursor.close();
             }
-            InputStream inputStream = null;
-            try {
-                inputStream = getContentResolver().openInputStream(data);
-            } catch (FileNotFoundException e) {
-                Toast.makeText(this, "Can't open input stream to data", Toast.LENGTH_SHORT).show();
-            }
+        }
+        if(cardName == null) {
+            cardName = "imported_" + System.currentTimeMillis();
+        }
+        InputStream inputStream = null;
+        try {
+            inputStream = getContentResolver().openInputStream(data);
+        } catch (FileNotFoundException e) {
+            Toast.makeText(this, "Can't open input stream to data", Toast.LENGTH_SHORT).show();
+        }
 
-            if(inputStream != null) {
-                String shortCardName = cardName.substring(0, cardName.indexOf(FILE_SUFFIX));
-                List<String> words = readCardFromInputStream(inputStream);
-                showWords(shortCardName, words);
-                initBoardFromWords(getStringHolders(words));
+        if(inputStream != null) {
+            String shortCardName = cardName.substring(0, cardName.indexOf(FILE_SUFFIX));
+            List<String> words = readCardFromInputStream(inputStream);
+            setDimAndRenderWords(shortCardName, words);
+            initBoardFromWords(getStringHolders(words));
 
-                persistWords(shortCardName);
-                reloadCardList();
-            }
-
-        } else {
-            restoreFromBundle(savedInstanceState);
+            persistWords(shortCardName);
+            reloadCardList();
         }
     }
 
-    //todo better name pls
-    private void showWords(String card, List<String> words) {
+    private void setDimAndRenderWords(String card, List<String> words) {
         if(words.size() == 0) {
             Toast.makeText(this, getResources().getString(R.string.error_empty_cart) + card, Toast.LENGTH_LONG).show();
             return;
@@ -276,7 +284,7 @@ public class BullshitBingoActivity extends Activity
 
         dim = (int) Math.round(sqrt);
         currentCardName = card;
-        actionBarTitle();
+        updateTitle();
         initBoardFromWords(getStringHolders(words));
 
         drawerLayout.closeDrawers();
@@ -295,8 +303,7 @@ public class BullshitBingoActivity extends Activity
     private List<String> getWordsForCard(String pureCard) {
         checkDir();
         File file = new File(bullshitDir, pureCard + FILE_SUFFIX);
-        BufferedReader br;
-        FileInputStream is = null;
+        FileInputStream is;
         try {
             is = new FileInputStream(file);
         } catch (FileNotFoundException e) {
@@ -322,7 +329,7 @@ public class BullshitBingoActivity extends Activity
                 }
             }
         } catch (IOException e) {
-            throw new IllegalStateException("Can't read word file ");
+            throw new IllegalStateException("Can't read word file ", e);
         } finally {
             try {
                 br.close();
@@ -342,8 +349,7 @@ public class BullshitBingoActivity extends Activity
             }
         });
         ArrayList<String> result = new ArrayList<>(cards.length);
-        for (int i = 0; i < cards.length; i++) {
-            String card = cards[i];
+        for (String card: cards) {
             if (card.endsWith(FILE_SUFFIX)) {
                 card = card.substring(0, card.indexOf(FILE_SUFFIX));
                 result.add(card);
@@ -403,7 +409,7 @@ public class BullshitBingoActivity extends Activity
             dim = savedInstanceState.getInt(BUNDLE_DIM);
             isEditing = savedInstanceState.getBoolean(BUNDLE_IS_EDITING);
             currentCardName = savedInstanceState.getString(BUNDLE_CURRENT_CARD_NAME);
-            actionBarTitle();
+            updateTitle();
             if(isEditing) {
                 prepareForEdit();
             }
@@ -431,7 +437,7 @@ public class BullshitBingoActivity extends Activity
         outState.putStringArrayList(BUNDLE_WORDS, getStringListFromCurrentWords());
         outState.putInt(BUNDLE_DIM, dim);
         outState.putBoolean(BUNDLE_IS_EDITING, isEditing);
-        outState.putString(BUNDLE_CURRENT_CARD_NAME, currentCardName.toString());
+        outState.putString(BUNDLE_CURRENT_CARD_NAME, currentCardName);
     }
 
     private ArrayList<String> getStringListFromCurrentWords() {
@@ -479,7 +485,7 @@ public class BullshitBingoActivity extends Activity
                     persistWords(currentCardName);
                 } else {
                     currentCardName += "*";
-                    actionBarTitle();
+                    updateTitle();
                 }
                 return true;
             case R.id.action_share:
@@ -529,7 +535,7 @@ public class BullshitBingoActivity extends Activity
                             dim = 0;
                             initCleanBoard();
                             currentCardName = "";
-                            actionBarTitle();
+                            updateTitle();
                         }
                         break;
 
@@ -551,7 +557,7 @@ public class BullshitBingoActivity extends Activity
         return ! currentCardName.toString().startsWith(NEW_CARD_PREFIX);
     }
 
-    private void actionBarTitle() {
+    private void updateTitle() {
         actionBar.setTitle(currentCardName);
     }
 
@@ -624,7 +630,7 @@ public class BullshitBingoActivity extends Activity
         isEditing = true;
         setNewCardName();
 
-        actionBarTitle();
+        updateTitle();
 
         initCleanBoard();
     }
@@ -679,7 +685,7 @@ public class BullshitBingoActivity extends Activity
 
         exitEditMode();
         currentCardName = name;
-        actionBarTitle();
+        updateTitle();
         reloadCardList();
     }
 

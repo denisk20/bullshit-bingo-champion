@@ -18,6 +18,7 @@
                     android:layout_height="match_parent"
                     android:layout_gravity="start"
                     android:background="#111"
+                    android:paddingBottom="5dp"
             >
         <ListView android:id="@+id/left_drawer"
                   android:layout_width="match_parent"
@@ -27,14 +28,15 @@
                   android:background="#111"/>
 
         <TextView android:layout_width="match_parent"
-                  android:layout_height="15dp"
-                  android:textSize="12sp"
+                  android:layout_height="wrap_content"
+                  android:gravity="center"
+                  android:textSize="@dimen/card_list_hint_size"
                   android:text="@string/long_press_to_delete"
-                    android:textColor="#FFF"
-                    android:background="#111"
-                   android:layout_alignParentEnd="false"
-                   android:layout_alignParentBottom="true" android:gravity="center"
-                   android:layout_marginRight="10dp" android:layout_marginBottom="8dp"/>
+                  android:textColor="#FFF"
+                  android:background="#111"
+                  android:layout_alignParentBottom="true"
+                  android:layout_marginRight="10dp"
+                  android:layout_marginBottom="0dp"/>
 
     </RelativeLayout>
     <!--todo label for deletion-->
