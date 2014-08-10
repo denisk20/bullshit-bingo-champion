@@ -14,6 +14,7 @@ import android.provider.MediaStore;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.*;
 import android.widget.*;
 import org.askerov.dynamicgrid.BaseDynamicGridAdapter;
@@ -26,8 +27,6 @@ import java.util.List;
 public class BullshitBingoActivity extends Activity
         implements SelectDimensionDialogFragment.DimensionSelectedListener, EditCellDialogFragment.CellEditFinishedListener, SaveCardDialogFragment.SaveCardDialogListener {
 
-    public static final String PREFS_NAME = "bullshitbingochamp";
-    //todo do we need it?
     public static final String DIR_NAME = "bullshitbingochamp";
 
     public static final String BUNDLE_DIM = "dim";
@@ -84,9 +83,9 @@ public class BullshitBingoActivity extends Activity
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
     private ActionBar actionBar;
-    private SharedPreferences sharedPreferences;
     private File bullshitDir;
     private ArrayAdapter<String> cardListAdapter;
+    private float finalFontSize;
 
     /**
      * Called when the activity is first created.
@@ -100,9 +99,6 @@ public class BullshitBingoActivity extends Activity
         gridViewInitFinished = false;
 
         setNewCardName();
-
-        sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-
 
         setContentView(R.layout.bingo_activity);
 
@@ -155,6 +151,7 @@ public class BullshitBingoActivity extends Activity
                 textView.setHeight((int) (gridHeight / dim - shift));
 
                 textView.setText(text.s);
+                textView.setTextSize(finalFontSize);
                 textView.setTranslationX(0);
                 textView.setTranslationY(0);
                 setViewVisibilityOnPosition(position, textView);
@@ -629,6 +626,18 @@ public class BullshitBingoActivity extends Activity
         initCleanBoard();
     }
 
+    private void initCardFontSize(int dim) {
+        TypedValue v = new TypedValue();
+        getResources().getValue(R.dimen.cell_font_size_coefficient, v, true);
+
+        finalFontSize = getResources().getInteger(R.integer.max_cells) + 10 - dim;
+        finalFontSize *= v.getFloat();
+
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            finalFontSize *= 1.5;
+        }
+    }
+
     private void initCleanBoard() {
         ArrayList<StringHolder> currentWords = new ArrayList<>(dim*dim);
         for (int i = 0; i < dim; i++) {
@@ -642,6 +651,7 @@ public class BullshitBingoActivity extends Activity
     }
 
     private void initBoardFromWords(final List<StringHolder> currentWords) {
+        initCardFontSize(dim);
 
         gridView.setNumColumns(dim);
 
