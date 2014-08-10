@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -38,6 +39,8 @@ public class BullshitBingoActivity extends Activity
     public static final String NEW_CARD_PREFIX = "<";
     public static final String NEW_CARD_SUFFIX = ">";
     public static final String FILE_SUFFIX = ".bullshit";
+    public static final float IDEAL_FONT_SIZE_PX_FOR_1280_800 = 170f;
+    public static final double LANDSCAPE_WIDTH_HEIGHT_COEFF = 1280/800;
 
     private DynamicGridView gridView;
 
@@ -151,7 +154,7 @@ public class BullshitBingoActivity extends Activity
                 textView.setHeight((int) (gridHeight / dim - shift));
 
                 textView.setText(text.s);
-                textView.setTextSize(finalFontSize);
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, finalFontSize);
                 textView.setTranslationX(0);
                 textView.setTranslationY(0);
                 setViewVisibilityOnPosition(position, textView);
@@ -627,14 +630,9 @@ public class BullshitBingoActivity extends Activity
     }
 
     private void initCardFontSize(int dim) {
-        TypedValue v = new TypedValue();
-        getResources().getValue(R.dimen.cell_font_size_coefficient, v, true);
-
-        finalFontSize = getResources().getInteger(R.integer.max_cells) + 10 - dim;
-        finalFontSize *= v.getFloat();
-
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            finalFontSize *= 1.5;
+        finalFontSize = IDEAL_FONT_SIZE_PX_FOR_1280_800 /dim;
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            finalFontSize *= LANDSCAPE_WIDTH_HEIGHT_COEFF;
         }
     }
 
