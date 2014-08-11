@@ -2,6 +2,7 @@ package com.denisk.bullshitbingochampion;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -9,6 +10,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Vibrator;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
@@ -31,6 +33,7 @@ public class BullshitBingoActivity extends Activity
     public static final String BUNDLE_WORDS = "words";
     public static final String BUNDLE_IS_EDITING = "isEditing";
     public static final String BUNDLE_CURRENT_CARD_NAME = "currentCard";
+    public static final String BUNDLE_MARKS = "marks";
 
     public static final String COMMENT_MARK = "#";
     public static final String NEW_CARD_PREFIX = "<";
@@ -87,25 +90,8 @@ public class BullshitBingoActivity extends Activity
     private ArrayAdapter<String> cardListAdapter;
     private float finalFontSize;
 
-    private CardPositionState[] cardState;
-
-    static class CardPositionState {
-        int position;
-        boolean checked;
-
-        CardPositionState(int position) {
-            this.position = position;
-        }
-
-        @Override
-        public String toString() {
-            final StringBuilder sb = new StringBuilder("CardPositionState{");
-            sb.append("position=").append(position);
-            sb.append(", checked=").append(checked);
-            sb.append('}');
-            return sb.toString();
-        }
-    }
+    private boolean[] cardState;
+    private Vibrator vibrator;
 
     /**
      * Called when the activity is first created.
@@ -115,6 +101,8 @@ public class BullshitBingoActivity extends Activity
         super.onCreate(savedInstanceState);
 
         createDirIfNeeded();
+
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         gridViewInitFinished = false;
 
@@ -182,8 +170,10 @@ public class BullshitBingoActivity extends Activity
             @Override
             public void onItemClick(final AdapterView<?> parent, final View view, final int position, long id) {
                 if(! isEditing) {
-                    cardState[position].checked = !cardState[position].checked;
+                    cardState[position] = !cardState[position];
                     setCardColor(position, view);
+                    //todo create a setting for it
+                    vibrator.vibrate(30);
                     //todo check for bingo
                     return;
                 }
@@ -225,7 +215,7 @@ public class BullshitBingoActivity extends Activity
 
     private void setCardColor(int position, View view) {
         int background;
-        if(cardState[position].checked) {
+        if(cardState[position]) {
             background = R.drawable.back_selected;
         } else {
             background = R.drawable.back;
@@ -330,10 +320,8 @@ public class BullshitBingoActivity extends Activity
 
         dim = (int) Math.round(sqrt);
 
-        cardState = new CardPositionState[dim*dim];
-        for(int i = 0; i < dim*dim; i++) {
-            cardState[i] = new CardPositionState(i);
-        }
+        initCardState();
+
         currentCardName = card;
         updateTitle();
         initBoardFromWords(getStringHolders(words));
@@ -345,6 +333,10 @@ public class BullshitBingoActivity extends Activity
         invalidateOptionsMenu();
 
         return true;
+    }
+
+    private void initCardState() {
+        cardState = new boolean[dim*dim];
     }
 
     private void reloadCardList() {
@@ -464,6 +456,7 @@ public class BullshitBingoActivity extends Activity
             dim = savedInstanceState.getInt(BUNDLE_DIM);
             isEditing = savedInstanceState.getBoolean(BUNDLE_IS_EDITING);
             currentCardName = savedInstanceState.getString(BUNDLE_CURRENT_CARD_NAME);
+            cardState = savedInstanceState.getBooleanArray(BUNDLE_MARKS);
             updateTitle();
             if(isEditing) {
                 prepareForEdit();
@@ -493,6 +486,7 @@ public class BullshitBingoActivity extends Activity
         outState.putInt(BUNDLE_DIM, dim);
         outState.putBoolean(BUNDLE_IS_EDITING, isEditing);
         outState.putString(BUNDLE_CURRENT_CARD_NAME, currentCardName);
+        outState.putBooleanArray(BUNDLE_MARKS, cardState);
     }
 
     private ArrayList<String> getStringListFromCurrentWords() {
@@ -535,13 +529,7 @@ public class BullshitBingoActivity extends Activity
                 saveCardDialog.show(getFragmentManager(), "saveCard");
                 return true;
             case R.id.action_accept:
-                exitEditMode();
-                if(isPersisted()) {
-                    persistWords(currentCardName);
-                } else {
-                    currentCardName += "*";
-                    updateTitle();
-                }
+                accept();
                 return true;
             case R.id.action_share:
                 shareCurrentCard();
@@ -550,10 +538,21 @@ public class BullshitBingoActivity extends Activity
                 showDeleteCardDialog(currentCardName);
                 return true;
             case R.id.action_shuffle:
+                initCardState();
                 gridView.shuffle();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void accept() {
+        exitEditMode();
+        if(isPersisted()) {
+            persistWords(currentCardName);
+        } else {
+            currentCardName += "*";
+            updateTitle();
         }
     }
 
@@ -803,8 +802,8 @@ public class BullshitBingoActivity extends Activity
     }
     @Override
     public void onBackPressed() {
-        if (gridView.isEditMode()) {
-            gridView.stopEditMode();
+        if (isEditing) {
+            accept();
         } else {
             super.onBackPressed();
         }
