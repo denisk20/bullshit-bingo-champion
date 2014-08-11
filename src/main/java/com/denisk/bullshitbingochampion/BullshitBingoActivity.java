@@ -243,6 +243,9 @@ public class BullshitBingoActivity extends Activity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String card = (String) parent.getItemAtPosition(position);
                 List<String> words = getWordsForCard(card);
+                if(words == null) {
+                    return;
+                }
                 setDimAndRenderWords(card, words);
                 isEditing = false;
             }
@@ -296,26 +299,33 @@ public class BullshitBingoActivity extends Activity
         }
 
         if(inputStream != null) {
-            String shortCardName = cardName.substring(0, cardName.indexOf(FILE_SUFFIX));
+            if (cardName.contains(FILE_SUFFIX)) {
+                cardName = cardName.substring(0, cardName.indexOf(FILE_SUFFIX));
+            }
             List<String> words = readCardFromInputStream(inputStream);
-            setDimAndRenderWords(shortCardName, words);
+            if(words == null) {
+                return;
+            }
+            if(!setDimAndRenderWords(cardName, words)) {
+                return;
+            }
             initBoardFromWords(getStringHolders(words));
 
-            persistWords(shortCardName);
+            persistWords(cardName);
             reloadCardList();
         }
     }
 
-    private void setDimAndRenderWords(String card, List<String> words) {
+    private boolean setDimAndRenderWords(String card, List<String> words) {
         if(words.size() == 0) {
             Toast.makeText(this, getResources().getString(R.string.error_empty_cart) + card, Toast.LENGTH_LONG).show();
-            return;
+            return false;
         }
         double sqrt = Math.sqrt(words.size());
         double floor = Math.floor(sqrt + 0.5);
         if(Math.abs(floor - sqrt) > 0.1) {
             Toast.makeText(this, getResources().getString(R.string.error_wrong_word_count) + card, Toast.LENGTH_LONG).show();
-            return;
+            return false;
         }
 
         dim = (int) Math.round(sqrt);
@@ -333,6 +343,8 @@ public class BullshitBingoActivity extends Activity
         reloadCardList();
 
         invalidateOptionsMenu();
+
+        return true;
     }
 
     private void reloadCardList() {
@@ -370,7 +382,9 @@ public class BullshitBingoActivity extends Activity
                 }
             }
         } catch (IOException e) {
-            throw new IllegalStateException("Can't read word file ", e);
+            Log.e(BullshitBingoActivity.class.getName(), "Can't open card", e);
+            Toast.makeText(this, R.string.error_wrong_card_format, Toast.LENGTH_SHORT).show();
+            return null;
         } finally {
             try {
                 br.close();
@@ -595,7 +609,7 @@ public class BullshitBingoActivity extends Activity
     }
 
     private boolean isPersisted() {
-        return ! currentCardName.toString().startsWith(NEW_CARD_PREFIX);
+        return !currentCardName.startsWith(NEW_CARD_PREFIX);
     }
 
     private void updateTitle() {

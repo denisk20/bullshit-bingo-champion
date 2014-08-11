@@ -28,4 +28,5 @@
     <string name="share_with">Share the words...</string>
     <string name="share_title">Bullshit Bingo card:</string>
     <string name="long_press_to_delete">Long press to delete</string>
+    <string name="error_wrong_card_format">Wrong card format</string>
 </resources>
