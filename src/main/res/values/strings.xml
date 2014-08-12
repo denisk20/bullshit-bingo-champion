@@ -29,4 +29,8 @@
     <string name="share_title">Bullshit Bingo card:</string>
     <string name="long_press_to_delete">Long press to delete</string>
     <string name="error_wrong_card_format">Wrong card format</string>
+    <string name="pref_vibrate">Vibration</string>
+    <string name="pref_vibrate_summ">Whether to vibrate when selecting a word</string>
+    <string name="action_settings">Settings</string>
+    <string name="pref_title">Settings</string>
 </resources>

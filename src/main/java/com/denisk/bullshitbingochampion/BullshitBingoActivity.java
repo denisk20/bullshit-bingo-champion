@@ -5,12 +5,14 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
@@ -42,6 +44,8 @@ public class BullshitBingoActivity extends Activity
     public static final float IDEAL_FONT_SIZE_PX_FOR_1280_800 = 170f;
     public static final double LANDSCAPE_WIDTH_HEIGHT_COEFF = 1280./800;
 
+    private SharedPreferences sharedPreferences;
+
     private DynamicGridView gridView;
 
     private BaseDynamicGridAdapter gridAdapter;
@@ -60,6 +64,7 @@ public class BullshitBingoActivity extends Activity
     private MenuItem acceptItemMenuItem;
     private MenuItem shareMenuItem;
     private MenuItem deleteMenuItem;
+    private MenuItem settingsMenuItem;
 
     private MenuItem shuffleMenuItem;
     //the width and the height (not counting action bar) of the grid
@@ -102,13 +107,16 @@ public class BullshitBingoActivity extends Activity
 
         createDirIfNeeded();
 
-        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         gridViewInitFinished = false;
 
         setContentView(R.layout.bingo_activity);
 
         actionBar = getActionBar();
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         initActionBar();
 
@@ -170,7 +178,9 @@ public class BullshitBingoActivity extends Activity
                      cardState[position] = !cardState[position];
                      setCardColor(position, view);
                      //todo create a setting for it
-                     vibrator.vibrate(30);
+                     if (shouldVibrate()) {
+                         vibrator.vibrate(30);
+                     }
                      //todo check for bingo
                      return true;
                  }
@@ -180,6 +190,11 @@ public class BullshitBingoActivity extends Activity
              return false;
          }
      }
+
+    private boolean shouldVibrate() {
+        return sharedPreferences.getBoolean("pref_vibrate", true);
+    }
+
     private void initGridView() {
         gridView = (DynamicGridView) findViewById(R.id.gridview);
 
@@ -568,6 +583,9 @@ public class BullshitBingoActivity extends Activity
                 initCardState();
                 gridView.shuffle();
                 return true;
+            case R.id.action_settings:
+                Intent intent = new Intent(this, PreferencesActivity.class);
+                startActivity(intent);
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -679,6 +697,7 @@ public class BullshitBingoActivity extends Activity
         shareMenuItem = menu.findItem(R.id.action_share);
         shuffleMenuItem = menu.findItem(R.id.action_shuffle);
         deleteMenuItem = menu.findItem(R.id.action_delete);
+        settingsMenuItem = menu.findItem(R.id.action_settings);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -693,6 +712,7 @@ public class BullshitBingoActivity extends Activity
             shareMenuItem.setVisible(false);
             shuffleMenuItem.setVisible(true);
             deleteMenuItem.setVisible(false);
+            settingsMenuItem.setVisible(true);
         } else {
             newMenuItem.setVisible(true);
             editMenuItem.setVisible(isGridFilled());
@@ -701,6 +721,7 @@ public class BullshitBingoActivity extends Activity
             shareMenuItem.setVisible(isGridFilled() && isPersisted());
             shuffleMenuItem.setVisible(false);
             deleteMenuItem.setVisible(isGridFilled() && isPersisted());
+            settingsMenuItem.setVisible(true);
         }
         return super.onPrepareOptionsMenu(menu);
     }

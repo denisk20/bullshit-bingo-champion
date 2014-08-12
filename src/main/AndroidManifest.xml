@@ -7,7 +7,8 @@
     <application android:allowBackup="true"
         android:label="@string/app_name"
         android:icon="@drawable/ic_launcher"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        >
         <activity android:name=".BullshitBingoActivity"
                   android:label="@string/app_name">
             <intent-filter>
@@ -49,6 +50,11 @@
                 <data android:pathPattern=".*\\..*\\..*\\..*\\.bullshit"/>
                 <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.bullshit"/>
             </intent-filter>
+        </activity>
+        <activity android:name=".PreferencesActivity">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.denisk.bullshitbingochampion.BullshitBingoActivity" />
         </activity>
     </application>
 
