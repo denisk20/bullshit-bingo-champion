@@ -124,6 +124,62 @@ public class BullshitBingoActivity extends Activity
         }
     }
 
+     class CardDynamicGridAdapter extends BaseDynamicGridAdapter implements View.OnTouchListener {
+         protected CardDynamicGridAdapter(Context context, int columnCount) {
+             super(context, columnCount);
+         }
+
+         public CardDynamicGridAdapter(Context context, List<?> items, int columnCount) {
+             super(context, items, columnCount);
+         }
+
+         @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            StringHolder text = (StringHolder) getItem(position);
+            TextView textView;
+            if (!(convertView instanceof TextView)) {
+                textView = (TextView) getLayoutInflater().inflate(R.layout.word, null);
+            } else {
+                textView = (TextView) convertView;
+            }
+            textView.setWidth((int) (gridWidth / dim - shift));
+            textView.setHeight((int) (gridHeight / dim - shift));
+
+            textView.setText(text.s);
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, finalFontSize);
+            textView.setTranslationX(0);
+            textView.setTranslationY(0);
+
+            setCardColor(position, textView);
+
+            setViewVisibilityOnPosition(position, textView);
+
+            textView.setOnTouchListener(this);
+
+            textView.setTag(position);
+
+            return textView;
+        }
+
+
+         @Override
+         public boolean onTouch(View view, MotionEvent event) {
+             if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                 int position = (int) view.getTag();
+                 if (!isEditing) {
+                     cardState[position] = !cardState[position];
+                     setCardColor(position, view);
+                     //todo create a setting for it
+                     vibrator.vibrate(30);
+                     //todo check for bingo
+                     return true;
+                 }
+
+                 return false;
+             }
+             return false;
+         }
+     }
     private void initGridView() {
         gridView = (DynamicGridView) findViewById(R.id.gridview);
 
@@ -138,31 +194,7 @@ public class BullshitBingoActivity extends Activity
             }
         });
 
-        gridAdapter = new BaseDynamicGridAdapter(BullshitBingoActivity.this, new ArrayList<>(), dim) {
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                StringHolder text = (StringHolder) getItem(position);
-                TextView textView;
-                if (!(convertView instanceof TextView)) {
-                    textView = (TextView) getLayoutInflater().inflate(R.layout.word, null);
-                } else {
-                    textView = (TextView) convertView;
-                }
-                textView.setWidth((int) (gridWidth / dim - shift));
-                textView.setHeight((int) (gridHeight / dim - shift));
-
-                textView.setText(text.s);
-                textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, finalFontSize);
-                textView.setTranslationX(0);
-                textView.setTranslationY(0);
-
-                setCardColor(position, textView);
-
-                setViewVisibilityOnPosition(position, textView);
-
-                return textView;
-            }
-        };
+        gridAdapter = new CardDynamicGridAdapter(BullshitBingoActivity.this, new ArrayList<>(), dim);
 
         gridView.setAdapter(gridAdapter);
 
@@ -170,20 +202,15 @@ public class BullshitBingoActivity extends Activity
             @Override
             public void onItemClick(final AdapterView<?> parent, final View view, final int position, long id) {
                 if(! isEditing) {
-                    cardState[position] = !cardState[position];
-                    setCardColor(position, view);
-                    //todo create a setting for it
-                    vibrator.vibrate(30);
-                    //todo check for bingo
                     return;
                 }
-                StringHolder itemAtPosition = (StringHolder) parent.getItemAtPosition(position);
-                if(itemAtPosition == null) {
+                StringHolder itemAtPosition = (StringHolder) gridView.getItemAtPosition(position);
+                if (itemAtPosition == null) {
                     return;
                 }
                 CharSequence currentCellValue = itemAtPosition.s;
 
-                if(editCellDialog == null) {
+                if (editCellDialog == null) {
                     editCellDialog = new EditCellDialogFragment();
                 }
                 editCellDialog.setCurrentCellValue(currentCellValue);
@@ -619,6 +646,8 @@ public class BullshitBingoActivity extends Activity
         Toast.makeText(this, R.string.long_press_to_drag, Toast.LENGTH_SHORT).show();
         invalidateOptionsMenu();
         gridView.setOnItemLongClickListener(itemLongClickListener);
+        initCardState();
+        gridAdapter.notifyDataSetChanged();
     }
 
     private void exitEditMode() {
