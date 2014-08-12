@@ -40,7 +40,7 @@ public class BullshitBingoActivity extends Activity
     public static final String NEW_CARD_SUFFIX = ">";
     public static final String FILE_SUFFIX = ".bullshit";
     public static final float IDEAL_FONT_SIZE_PX_FOR_1280_800 = 170f;
-    public static final double LANDSCAPE_WIDTH_HEIGHT_COEFF = 1280/800;
+    public static final double LANDSCAPE_WIDTH_HEIGHT_COEFF = 1280./800;
 
     private DynamicGridView gridView;
 
@@ -691,7 +691,7 @@ public class BullshitBingoActivity extends Activity
 
     private void initCardFontSize(int dim) {
         finalFontSize = IDEAL_FONT_SIZE_PX_FOR_1280_800 /dim;
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             finalFontSize *= LANDSCAPE_WIDTH_HEIGHT_COEFF;
         }
     }
