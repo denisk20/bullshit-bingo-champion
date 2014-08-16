@@ -126,7 +126,6 @@ public class BullshitBingoActivity extends Activity
 
         if(getIntent() != null && getIntent().getData() != null) {
             openFromIntent();
-
         } else {
             restoreFromBundle(savedInstanceState);
         }
@@ -141,7 +140,7 @@ public class BullshitBingoActivity extends Activity
              super(context, items, columnCount);
          }
 
-         @Override
+        @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             StringHolder text = (StringHolder) getItem(position);
             TextView textView;
@@ -177,11 +176,30 @@ public class BullshitBingoActivity extends Activity
                  if (!isEditing) {
                      cardState[position] = !cardState[position];
                      setCardColor(position, view);
-                     //todo create a setting for it
                      if (shouldVibrate()) {
                          vibrator.vibrate(30);
                      }
-                     //todo check for bingo
+                     //look for bingo among columns and lines
+                     for(int i = 0; i < dim; i++) {
+                         boolean bingo = true;
+                         //check i-th row for bingo
+                         for(int j = 0; j < dim; j++) {
+                            bingo &= cardState[i*dim + j];
+                         }
+                         if(bingo) {
+                             Toast.makeText(BullshitBingoActivity.this, "Bingo at row " + i, Toast.LENGTH_LONG).show();
+                             return true;
+                         }
+                         //check i-th column for bingo
+                         bingo = true;
+                         for(int j = 0; j < dim; j++) {
+                             bingo &= cardState[j*dim + i];
+                         }
+                         if(bingo) {
+                             Toast.makeText(BullshitBingoActivity.this, "Bingo at column " + i, Toast.LENGTH_LONG).show();
+                             return true;
+                         }
+                     }
                      return true;
                  }
 
@@ -299,7 +317,6 @@ public class BullshitBingoActivity extends Activity
         if (scheme.equals("file")) {
             cardName = data.getLastPathSegment();
         } else if (scheme.equals("content")) {
-            //todo this is probably never executed
             //known column names. Need to add more for more apps to support
             String[] knownColNames = {
                     "_display_name", //gmail
@@ -394,7 +411,7 @@ public class BullshitBingoActivity extends Activity
         try {
             is = new FileInputStream(file);
         } catch (FileNotFoundException e) {
-            Toast.makeText(this, "File can't be opened for read: " + file, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getResources().getString(R.string.error_cant_read_file) + file, Toast.LENGTH_SHORT).show();
             throw new RuntimeException(e);
         }
         return readCardFromInputStream(is);
