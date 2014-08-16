@@ -730,6 +730,7 @@ public class BullshitBingoActivity extends Activity
     public void onDimensionSelected(final int dim) {
         this.dim = dim;
 
+        initCardState();
         //go into edit mode immediately
         isEditing = true;
         setNewCardName();
