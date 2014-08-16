@@ -4,13 +4,22 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         >
-    <org.askerov.dynamicgrid.DynamicGridView xmlns:android="http://schemas.android.com/apk/res/android"
-                                             android:id="@+id/gridview"
-                                             android:layout_width="match_parent"
-                                             android:layout_height="match_parent"
-                                             android:horizontalSpacing="@dimen/cell_spacing"
-                                             android:verticalSpacing="@dimen/cell_spacing"
-            />
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        <org.askerov.dynamicgrid.DynamicGridView xmlns:android="http://schemas.android.com/apk/res/android"
+                                                 android:id="@+id/gridview"
+                                                 android:layout_width="match_parent"
+                                                 android:layout_height="match_parent"
+                                                 android:horizontalSpacing="@dimen/cell_spacing"
+                                                 android:verticalSpacing="@dimen/cell_spacing"
+                />
+        <TextView
+                android:id="@+id/bingo_view"
+                android:background="@drawable/bingo"
+                android:layout_width="0dp"
+                android:layout_height="0dp"/>
+    </RelativeLayout>
     <!-- The navigation drawer -->
     <RelativeLayout
                     android:id="@+id/left_drawer_wrapper"
@@ -39,5 +48,4 @@
                   android:layout_marginBottom="0dp"/>
 
     </RelativeLayout>
-    <!--todo label for deletion-->
 </android.support.v4.widget.DrawerLayout>

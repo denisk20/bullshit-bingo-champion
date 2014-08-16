@@ -8,6 +8,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -187,7 +191,20 @@ public class BullshitBingoActivity extends Activity
                             bingo &= cardState[i*dim + j];
                          }
                          if(bingo) {
-                             Toast.makeText(BullshitBingoActivity.this, "Bingo at row " + i, Toast.LENGTH_LONG).show();
+                             //reset color for bingo row (column)
+                             for(int j = 0; j < dim; j++) {
+                                 cardState[i*dim + j] = false;
+                             }
+                             gridAdapter.notifyDataSetChanged();
+
+                             TextView bingoView = (TextView) findViewById(R.id.bingo_view);
+
+                             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) bingoView.getLayoutParams();
+                             layoutParams.setMargins(100, 100, 0, 0);
+                             layoutParams.width = gridWidth;
+                             layoutParams.height = gridHeight / 2;
+
+                             bingoView.setVisibility(View.VISIBLE);
                              return true;
                          }
                          //check i-th column for bingo
@@ -578,7 +595,6 @@ public class BullshitBingoActivity extends Activity
                 showSelectNewCardDimensionDialog();
                 return true;
             case R.id.action_edit:
-                isEditing = true;
                 prepareForEdit();
                 return true;
             case R.id.action_save_as:
@@ -678,6 +694,7 @@ public class BullshitBingoActivity extends Activity
     }
 
     private void prepareForEdit() {
+        isEditing = true;
         Toast.makeText(this, R.string.long_press_to_drag, Toast.LENGTH_SHORT).show();
         invalidateOptionsMenu();
         gridView.setOnItemLongClickListener(itemLongClickListener);
@@ -749,7 +766,8 @@ public class BullshitBingoActivity extends Activity
 
         initCardState();
         //go into edit mode immediately
-        isEditing = true;
+        prepareForEdit();
+
         setNewCardName();
 
         updateTitle();
