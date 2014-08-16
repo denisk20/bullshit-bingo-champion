@@ -1,4 +1,6 @@
 package com.denisk.bullshitbingochampion;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -200,11 +202,21 @@ public class BullshitBingoActivity extends Activity
                              TextView bingoView = (TextView) findViewById(R.id.bingo_view);
 
                              RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) bingoView.getLayoutParams();
-                             layoutParams.setMargins(100, 100, 0, 0);
                              layoutParams.width = gridWidth;
-                             layoutParams.height = gridHeight / 2;
+                             layoutParams.height = gridHeight / dim;
+                             layoutParams.setMargins(0, (gridHeight / dim) * i, 0, 0);
+
+                             bingoView.setAlpha(0);
+
+                             ObjectAnimator animator = ObjectAnimator.ofFloat(bingoView, "alpha", 0, 1);
+                             animator.setRepeatMode(ValueAnimator.REVERSE);
+                             animator.setRepeatCount(ValueAnimator.INFINITE);
+                             animator.setDuration(300);
+
 
                              bingoView.setVisibility(View.VISIBLE);
+
+                             animator.start();
                              return true;
                          }
                          //check i-th column for bingo
