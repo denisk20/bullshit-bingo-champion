@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BullshitBingoChampion</string>
+    <string name="app_name">Bullshit Bingo Champion</string>
     <string name="action_new">New Card</string>
     <string name="action_edit">Edit</string>
     <string name="select_dim">Select new card dimension</string>
@@ -25,7 +25,7 @@
     <string name="action_delete">Delete</string>
     <string name="delete_prompt">Delete card:</string>
     <string name="error_empty_card_name">C\'mon, type something</string>
-    <string name="share_with">Share the words...</string>
+    <string name="share_with">Share the words…</string>
     <string name="share_title">Bullshit Bingo card:</string>
     <string name="long_press_to_delete">Long press to delete</string>
     <string name="error_wrong_card_format">Wrong card format</string>
