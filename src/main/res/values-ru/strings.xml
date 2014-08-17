@@ -1,0 +1,39 @@
+<resources>
+    <string name="app_name">Bullshit Bingo Champion</string>
+    <string name="action_new">Новая карта</string>
+    <string name="action_edit">Редактировать</string>
+    <string name="select_dim">Выберите размерность новой карты</string>
+    <string name="create">Создать</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Отмена</string>
+    <string name="action_save">Сохранить как…</string>
+    <string name="long_press_to_drag">Коснитесь для редактирования. Длинное прикосновение для упорядочения</string>
+    <string name="edit_cell_title">Редактировать слово</string>
+    <string name="action_accept">Принять</string>
+    <string name="action_share">Поделиться</string>
+    <string name="action_shuffle">Перемешать</string>
+    <string name="drawer_open">Выберите карту</string>
+    <string name="new_card_name">новая карта</string>
+    <string name="save_card_title">Сохранить карту</string>
+    <string name="file_comment">Это файл приложения Bullshit Bingo Champion. Он содержит описание квадратной карты слов и
+        может быть использован чтобы играть в популярную игру в слова http://url.here. Должен быть в кодировке UTF-8.
+        Пустые строки тоже считаются словами!
+    </string>
+    <string name="error_cant_start_comment">Не может начинаться с </string>
+    <string name="error_wrong_filename">Неверное имя файла</string>
+    <string name="error_wrong_word_count">Количество слов неверное, должна быть квадратная матрица. Карта: </string>
+    <string name="error_empty_cart">Карта пуста: </string>
+    <string name="action_delete">Удалить</string>
+    <string name="delete_prompt">Удалить карту: </string>
+    <string name="error_empty_card_name">Ну же, введи что-нибудь</string>
+    <string name="share_with">Поделиться словами…</string>
+    <string name="share_title">Карта: </string>
+    <string name="long_press_to_delete">Длительное нажатие для удаления</string>
+    <string name="error_wrong_card_format">Неверный формат карты</string>
+    <string name="pref_vibrate">Вибрация</string>
+    <string name="pref_vibrate_summ">Вибрировать или нет когда выбрано слово или когда партия выиграна</string>
+    <string name="action_settings">Настройки</string>
+    <string name="pref_title">Настройки</string>
+    <string name="error_cant_read_file">Нельзя открыть файл для чтения: </string>
+    <string name="game_bingo">Бинго!</string>
+</resources>
