@@ -15,10 +15,21 @@
                                                  android:verticalSpacing="@dimen/cell_spacing"
                 />
         <TextView
-                android:id="@+id/bingo_view"
-                android:background="@drawable/bingo"
+                android:id="@+id/game_bingo_mark"
+                android:background="@drawable/bingo_mark"
                 android:layout_width="0dp"
                 android:layout_height="0dp"/>
+        <TextView
+                android:id="@+id/game_bingo_title"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:background="@android:color/transparent"
+                android:text="@string/game_bingo"
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:visibility="invisible"
+                android:textSize="0sp" android:shadowColor="#ffff7521" android:typeface="monospace"
+                android:textStyle="bold|italic" android:textColor="#ff1d15fb"/>
     </RelativeLayout>
     <!-- The navigation drawer -->
     <RelativeLayout

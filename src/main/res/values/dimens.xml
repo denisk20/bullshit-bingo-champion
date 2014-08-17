@@ -2,4 +2,5 @@
 <resources>
     <dimen name="card_list_hint_size">12sp</dimen>
     <dimen name="cell_spacing">2dp</dimen>
+    <item name="bingo_title_size" format="float" type="dimen">80.0</item>
 </resources>

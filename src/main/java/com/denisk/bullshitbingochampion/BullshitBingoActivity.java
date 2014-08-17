@@ -1,4 +1,5 @@
 package com.denisk.bullshitbingochampion;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.ActionBar;
@@ -10,10 +11,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -104,6 +101,8 @@ public class BullshitBingoActivity extends Activity
     private boolean[] cardState;
     private Vibrator vibrator;
 
+    private boolean isPlayingBingo = false;
+
     /**
      * Called when the activity is first created.
      */
@@ -180,6 +179,9 @@ public class BullshitBingoActivity extends Activity
              if (event.getAction() == MotionEvent.ACTION_DOWN) {
                  int position = (int) view.getTag();
                  if (!isEditing) {
+                     if(isPlayingBingo) {
+                         return false;
+                     }
                      cardState[position] = !cardState[position];
                      setCardColor(position, view);
                      if (shouldVibrate()) {
@@ -199,24 +201,13 @@ public class BullshitBingoActivity extends Activity
                              }
                              gridAdapter.notifyDataSetChanged();
 
-                             TextView bingoView = (TextView) findViewById(R.id.bingo_view);
-
-                             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) bingoView.getLayoutParams();
-                             layoutParams.width = gridWidth;
-                             layoutParams.height = gridHeight / dim;
-                             layoutParams.setMargins(0, (gridHeight / dim) * i, 0, 0);
-
-                             bingoView.setAlpha(0);
-
-                             ObjectAnimator animator = ObjectAnimator.ofFloat(bingoView, "alpha", 0, 1);
-                             animator.setRepeatMode(ValueAnimator.REVERSE);
-                             animator.setRepeatCount(ValueAnimator.INFINITE);
-                             animator.setDuration(300);
+                             int width = gridWidth;
+                             int height = gridHeight / dim;
+                             int leftMargin = 0;
+                             int topMargin = (gridHeight / dim) * i;
 
 
-                             bingoView.setVisibility(View.VISIBLE);
-
-                             animator.start();
+                             animateBingoMark(width, height, leftMargin, topMargin);
                              return true;
                          }
                          //check i-th column for bingo
@@ -225,7 +216,19 @@ public class BullshitBingoActivity extends Activity
                              bingo &= cardState[j*dim + i];
                          }
                          if(bingo) {
-                             Toast.makeText(BullshitBingoActivity.this, "Bingo at column " + i, Toast.LENGTH_LONG).show();
+                             //reset color for bingo row (column)
+                             for(int j = 0; j < dim; j++) {
+                                 cardState[j*dim + i] = false;
+                             }
+                             gridAdapter.notifyDataSetChanged();
+
+                             int width = gridWidth / dim;
+                             int height = gridHeight;
+                             int leftMargin = (gridWidth / dim) * i;
+                             int topMargin = 0;
+
+                             animateBingoMark(width, height, leftMargin, topMargin);
+
                              return true;
                          }
                      }
@@ -237,6 +240,52 @@ public class BullshitBingoActivity extends Activity
              return false;
          }
      }
+
+    private void animateBingoMark(int width, int height, int leftMargin, int topMargin) {
+        TextView bingoView = (TextView) findViewById(R.id.game_bingo_mark);
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) bingoView.getLayoutParams();
+        layoutParams.setMargins(leftMargin, topMargin, 0, 0);
+        layoutParams.width = width;
+        layoutParams.height = height;
+
+        bingoView.setAlpha(0);
+
+        ObjectAnimator bingoMarkAnimator = ObjectAnimator.ofFloat(bingoView, "alpha", 0, 1);
+        bingoMarkAnimator.setRepeatMode(ValueAnimator.REVERSE);
+        bingoMarkAnimator.setRepeatCount(ValueAnimator.INFINITE);
+        bingoMarkAnimator.setDuration(400);
+
+
+        final TextView bingoTitle = (TextView) findViewById(R.id.game_bingo_title);
+        TypedValue titleFinalSize = new TypedValue();
+        getResources().getValue(R.dimen.bingo_title_size, titleFinalSize, true);
+
+        ValueAnimator textAnimator = ValueAnimator.ofFloat(0, titleFinalSize.getFloat());
+        textAnimator.setDuration(1000);
+        textAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                bingoTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, (Float) animation.getAnimatedValue());
+            }
+        });
+
+        AnimatorSet animations = new AnimatorSet();
+        animations.playTogether(bingoMarkAnimator, textAnimator);
+
+        bingoView.setVisibility(View.VISIBLE);
+        bingoTitle.setVisibility(View.VISIBLE);
+
+        animations.start();
+        if(shouldVibrate()) {
+            vibrator.vibrate(VibrationPatterns.PUTIN_PATTERN, -1);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        vibrator.cancel();
+        super.onPause();
+    }
 
     private boolean shouldVibrate() {
         return sharedPreferences.getBoolean("pref_vibrate", true);
