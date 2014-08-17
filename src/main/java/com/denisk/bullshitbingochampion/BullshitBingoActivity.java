@@ -419,8 +419,8 @@ public class BullshitBingoActivity extends Activity
                 if(words == null) {
                     return;
                 }
-                setDimAndRenderWords(card, words);
                 isEditing = false;
+                setDimAndRenderWords(card, words);
             }
         });
         cardListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -739,7 +739,7 @@ public class BullshitBingoActivity extends Activity
         exitEditMode();
         if(isPersisted()) {
             persistWords(currentCardName);
-        } else {
+        } else if(! currentCardName.endsWith("*")) {
             currentCardName += "*";
             updateTitle();
         }
@@ -790,7 +790,7 @@ public class BullshitBingoActivity extends Activity
             }
         };
         new AlertDialog.Builder(this)
-                .setMessage(getResources().getString(R.string.delete_prompt) + cardName)
+                .setMessage(getResources().getString(R.string.delete_prompt)+ " " + cardName)
                 .setPositiveButton(R.string.ok, deleteCardListener)
                 .setNegativeButton(R.string.cancel, deleteCardListener)
                 .show();
@@ -914,7 +914,7 @@ public class BullshitBingoActivity extends Activity
 
         gridAdapter.setColumnCount(dim);
 
-//        gridAdapter.set(currentWords);
+        gridAdapter.set(currentWords);
         invalidateOptionsMenu();
         //hack: need to repeat it, otherwise it doesn't work when rotating the screen
         gridView.post(new Runnable() {
