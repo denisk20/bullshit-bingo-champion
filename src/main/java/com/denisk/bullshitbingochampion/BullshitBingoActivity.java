@@ -414,6 +414,7 @@ public class BullshitBingoActivity extends Activity
         cardListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                cancelBingoAnimation();
                 String card = (String) parent.getItemAtPosition(position);
                 List<String> words = getWordsForCard(card);
                 if(words == null) {
@@ -874,6 +875,8 @@ public class BullshitBingoActivity extends Activity
     @Override
     public void onDimensionSelected(final int dim) {
         this.dim = dim;
+
+        cancelBingoAnimation();
 
         initCardState();
         //go into edit mode immediately
