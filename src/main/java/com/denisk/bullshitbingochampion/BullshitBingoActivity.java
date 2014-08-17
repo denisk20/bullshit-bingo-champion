@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
@@ -39,6 +40,9 @@ public class BullshitBingoActivity extends Activity
     public static final String BUNDLE_IS_EDITING = "isEditing";
     public static final String BUNDLE_CURRENT_CARD_NAME = "currentCard";
     public static final String BUNDLE_MARKS = "marks";
+    public static final String BUNDLE_IS_PLAYING_BINGO = "isBingoPlaying";
+    public static final String BUNDLE_IS_BINGO_ROW = "isBingoRow";
+    public static final String BUNDLE_BINGO_INDEX = "bingoIndex";
 
     public static final String COMMENT_MARK = "#";
     public static final String NEW_CARD_PREFIX = "<";
@@ -102,6 +106,11 @@ public class BullshitBingoActivity extends Activity
     private Vibrator vibrator;
 
     private boolean isPlayingBingo = false;
+    private int bingoIndex = -1;
+    private boolean isBingoRow; //if false then it is column
+    private AnimatorSet bingoAnimatorSet;
+    private TextView bingoMark;
+    private TextView bingoTitle;
 
     /**
      * Called when the activity is first created.
@@ -122,6 +131,9 @@ public class BullshitBingoActivity extends Activity
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+        bingoMark = (TextView) findViewById(R.id.game_bingo_mark);
+        bingoTitle = (TextView) findViewById(R.id.game_bingo_title);
 
         initActionBar();
 
@@ -180,6 +192,8 @@ public class BullshitBingoActivity extends Activity
                  int position = (int) view.getTag();
                  if (!isEditing) {
                      if(isPlayingBingo) {
+                         cancelBingoAnimation();
+
                          return false;
                      }
                      cardState[position] = !cardState[position];
@@ -195,19 +209,11 @@ public class BullshitBingoActivity extends Activity
                             bingo &= cardState[i*dim + j];
                          }
                          if(bingo) {
-                             //reset color for bingo row (column)
-                             for(int j = 0; j < dim; j++) {
-                                 cardState[i*dim + j] = false;
-                             }
-                             gridAdapter.notifyDataSetChanged();
+                             isBingoRow = true;
+                             bingoIndex = i;
 
-                             int width = gridWidth;
-                             int height = gridHeight / dim;
-                             int leftMargin = 0;
-                             int topMargin = (gridHeight / dim) * i;
+                             animateBingoIfNeeded();
 
-
-                             animateBingoMark(width, height, leftMargin, topMargin);
                              return true;
                          }
                          //check i-th column for bingo
@@ -216,18 +222,10 @@ public class BullshitBingoActivity extends Activity
                              bingo &= cardState[j*dim + i];
                          }
                          if(bingo) {
-                             //reset color for bingo row (column)
-                             for(int j = 0; j < dim; j++) {
-                                 cardState[j*dim + i] = false;
-                             }
-                             gridAdapter.notifyDataSetChanged();
+                             isBingoRow = false;
+                             bingoIndex = i;
 
-                             int width = gridWidth / dim;
-                             int height = gridHeight;
-                             int leftMargin = (gridWidth / dim) * i;
-                             int topMargin = 0;
-
-                             animateBingoMark(width, height, leftMargin, topMargin);
+                             animateBingoIfNeeded();
 
                              return true;
                          }
@@ -241,22 +239,65 @@ public class BullshitBingoActivity extends Activity
          }
      }
 
-    private void animateBingoMark(int width, int height, int leftMargin, int topMargin) {
-        TextView bingoView = (TextView) findViewById(R.id.game_bingo_mark);
-        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) bingoView.getLayoutParams();
+    private void cancelBingoAnimation() {
+        if(bingoAnimatorSet != null) {
+            bingoAnimatorSet.cancel();
+        }
+        bingoMark.setVisibility(View.INVISIBLE);
+        bingoTitle.setVisibility(View.INVISIBLE);
+
+        cancelVibration();
+
+        isPlayingBingo = false;
+
+        bingoIndex = -1;
+    }
+
+    private void animateBingoIfNeeded() {
+        if(bingoIndex < 0) {
+            return;
+        }
+        isPlayingBingo = true;
+
+        int width;
+        int height;
+        int leftMargin;
+        int topMargin;
+        if(isBingoRow) {
+            for (int j = 0; j < dim; j++) {
+                cardState[bingoIndex * dim + j] = false;
+            }
+
+
+            width = gridWidth;
+            height = gridHeight / dim;
+            leftMargin = 0;
+            topMargin = (gridHeight / dim) * bingoIndex;
+        } else {
+            for(int j = 0; j < dim; j++) {
+                cardState[j*dim + bingoIndex] = false;
+            }
+
+            width = gridWidth / dim;
+            height = gridHeight;
+            leftMargin = (gridWidth / dim) * bingoIndex;
+            topMargin = 0;
+        }
+
+        gridAdapter.notifyDataSetChanged();
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) bingoMark.getLayoutParams();
         layoutParams.setMargins(leftMargin, topMargin, 0, 0);
         layoutParams.width = width;
         layoutParams.height = height;
 
-        bingoView.setAlpha(0);
+        bingoMark.setAlpha(0);
 
-        ObjectAnimator bingoMarkAnimator = ObjectAnimator.ofFloat(bingoView, "alpha", 0, 1);
+        ObjectAnimator bingoMarkAnimator = ObjectAnimator.ofFloat(bingoMark, "alpha", 0, 1);
         bingoMarkAnimator.setRepeatMode(ValueAnimator.REVERSE);
         bingoMarkAnimator.setRepeatCount(ValueAnimator.INFINITE);
         bingoMarkAnimator.setDuration(400);
 
 
-        final TextView bingoTitle = (TextView) findViewById(R.id.game_bingo_title);
         TypedValue titleFinalSize = new TypedValue();
         getResources().getValue(R.dimen.bingo_title_size, titleFinalSize, true);
 
@@ -269,13 +310,13 @@ public class BullshitBingoActivity extends Activity
             }
         });
 
-        AnimatorSet animations = new AnimatorSet();
-        animations.playTogether(bingoMarkAnimator, textAnimator);
+        bingoAnimatorSet = new AnimatorSet();
+        bingoAnimatorSet.playTogether(bingoMarkAnimator, textAnimator);
 
-        bingoView.setVisibility(View.VISIBLE);
+        bingoMark.setVisibility(View.VISIBLE);
         bingoTitle.setVisibility(View.VISIBLE);
 
-        animations.start();
+        bingoAnimatorSet.start();
         if(shouldVibrate()) {
             vibrator.vibrate(VibrationPatterns.PUTIN_PATTERN, -1);
         }
@@ -283,8 +324,12 @@ public class BullshitBingoActivity extends Activity
 
     @Override
     protected void onPause() {
-        vibrator.cancel();
+        cancelVibration();
         super.onPause();
+    }
+
+    private void cancelVibration() {
+        vibrator.cancel();
     }
 
     private boolean shouldVibrate() {
@@ -594,6 +639,9 @@ public class BullshitBingoActivity extends Activity
             isEditing = savedInstanceState.getBoolean(BUNDLE_IS_EDITING);
             currentCardName = savedInstanceState.getString(BUNDLE_CURRENT_CARD_NAME);
             cardState = savedInstanceState.getBooleanArray(BUNDLE_MARKS);
+            isPlayingBingo = savedInstanceState.getBoolean(BUNDLE_IS_PLAYING_BINGO);
+            isBingoRow = savedInstanceState.getBoolean(BUNDLE_IS_BINGO_ROW);
+            bingoIndex = savedInstanceState.getInt(BUNDLE_BINGO_INDEX);
             updateTitle();
             if(isEditing) {
                 prepareForEdit();
@@ -602,7 +650,6 @@ public class BullshitBingoActivity extends Activity
             if(wordsArrayList == null) {
                 return;
             }
-//            initCleanBoard();
             initBoardFromWords(getStringHolders(wordsArrayList));
         }
     }
@@ -624,6 +671,9 @@ public class BullshitBingoActivity extends Activity
         outState.putBoolean(BUNDLE_IS_EDITING, isEditing);
         outState.putString(BUNDLE_CURRENT_CARD_NAME, currentCardName);
         outState.putBooleanArray(BUNDLE_MARKS, cardState);
+        outState.putBoolean(BUNDLE_IS_PLAYING_BINGO, isPlayingBingo);
+        outState.putBoolean(BUNDLE_IS_BINGO_ROW, isBingoRow);
+        outState.putInt(BUNDLE_BINGO_INDEX, bingoIndex);
     }
 
     private ArrayList<String> getStringListFromCurrentWords() {
@@ -864,12 +914,13 @@ public class BullshitBingoActivity extends Activity
 
         gridAdapter.setColumnCount(dim);
 
-        gridAdapter.set(currentWords);
+//        gridAdapter.set(currentWords);
         invalidateOptionsMenu();
         //hack: need to repeat it, otherwise it doesn't work when rotating the screen
         gridView.post(new Runnable() {
             public void run() {
                 gridAdapter.set(currentWords);
+                animateBingoIfNeeded();
             }
         });
     }
@@ -951,6 +1002,8 @@ public class BullshitBingoActivity extends Activity
     public void onBackPressed() {
         if (isEditing) {
             accept();
+        } else if(isPlayingBingo) {
+            cancelBingoAnimation();
         } else {
             super.onBackPressed();
         }
