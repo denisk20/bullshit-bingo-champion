@@ -36,4 +36,6 @@
     <string name="pref_title">Настройки</string>
     <string name="error_cant_read_file">Нельзя открыть файл для чтения: </string>
     <string name="game_bingo">Бинго!</string>
+    <string name="action_increase_font">Увеличить размер шрифта</string>
+    <string name="action_decrease_font">Уменьшить размер шрифта</string>
 </resources>
