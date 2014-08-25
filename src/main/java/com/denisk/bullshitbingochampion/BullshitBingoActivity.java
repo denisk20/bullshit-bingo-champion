@@ -23,6 +23,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.*;
 import android.widget.*;
+import com.tjeannin.apprate.AppRate;
 import org.askerov.dynamicgrid.BaseDynamicGridAdapter;
 import org.askerov.dynamicgrid.DynamicGridView;
 
@@ -151,6 +152,12 @@ public class BullshitBingoActivity extends Activity
         } else {
             restoreFromBundle(savedInstanceState);
         }
+
+        new AppRate(this)
+                .setMinDaysUntilPrompt(10)
+                .setMinLaunchesUntilPrompt(15)
+                .setShowIfAppHasCrashed(false)
+                .init();
     }
 
      class CardDynamicGridAdapter extends BaseDynamicGridAdapter implements View.OnTouchListener {
