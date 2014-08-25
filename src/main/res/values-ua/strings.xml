@@ -38,4 +38,10 @@
     <string name="game_bingo">Бинго!</string>
     <string name="action_increase_font">Увеличить размер шрифта</string>
     <string name="action_decrease_font">Уменьшить размер шрифта</string>
+    <string name="rate">Оцените\u0020</string>
+    <string name="rate_if_you_enjoy">Если вам нравится\u0020</string>
+    <string name="rate_please_rate_thanks">, пожалуйста, потратьте минутку на то, чтобы оценить её. Спасибо за вашу поддержку!</string>
+    <string name="rate_do_it">Оценить !</string>
+    <string name="rate_later">Напомнить позже</string>
+    <string name="rate_no">Нет, спасибо</string>
 </resources>

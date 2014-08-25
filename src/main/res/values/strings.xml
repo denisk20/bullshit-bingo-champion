@@ -37,4 +37,10 @@
     <string name="game_bingo">Bingo!</string>
     <string name="action_increase_font">Increase font</string>
     <string name="action_decrease_font">Decrease font</string>
+    <string name="rate">Rate\u0020</string>
+    <string name="rate_if_you_enjoy">If you enjoy using\u0020</string>
+    <string name="rate_please_rate_thanks">, please take a moment to rate it. Thanks for your support!</string>
+    <string name="rate_do_it">Rate it !</string>
+    <string name="rate_later">Remind me later</string>
+    <string name="rate_no">No thanks</string>
 </resources>

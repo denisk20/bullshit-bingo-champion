@@ -153,9 +153,10 @@ public class BullshitBingoActivity extends Activity
             restoreFromBundle(savedInstanceState);
         }
 
+        AppRate.reset(this);
         new AppRate(this)
-                .setMinDaysUntilPrompt(10)
-                .setMinLaunchesUntilPrompt(15)
+                .setMinDaysUntilPrompt(0)
+                .setMinLaunchesUntilPrompt(0)
                 .setShowIfAppHasCrashed(false)
                 .init();
     }

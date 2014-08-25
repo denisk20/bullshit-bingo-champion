@@ -19,6 +19,7 @@ import android.net.Uri;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.widget.Toast;
+import com.denisk.bullshitbingochampion.R;
 
 public class AppRate implements android.content.DialogInterface.OnClickListener, OnCancelListener {
 
@@ -164,11 +165,11 @@ public class AppRate implements android.content.DialogInterface.OnClickListener,
 
 		Log.d(TAG, "Create default dialog.");
 
-		String title = "Rate " + getApplicationName(hostActivity.getApplicationContext());
-		String message = "If you enjoy using " + getApplicationName(hostActivity.getApplicationContext()) + ", please take a moment to rate it. Thanks for your support!";
-		String rate = "Rate it !";
-		String remindLater = "Remind me later";
-		String dismiss = "No thanks";
+		String title = hostActivity.getString(R.string.rate) + getApplicationName(hostActivity.getApplicationContext());
+		String message = hostActivity.getString(R.string.rate_if_you_enjoy) + getApplicationName(hostActivity.getApplicationContext()) + hostActivity.getString(R.string.rate_please_rate_thanks);
+		String rate = hostActivity.getString(R.string.rate_do_it);
+		String remindLater = hostActivity.getString(R.string.rate_later);
+		String dismiss = hostActivity.getString(R.string.rate_no);
 
 		new AlertDialog.Builder(hostActivity)
 				.setTitle(title)
