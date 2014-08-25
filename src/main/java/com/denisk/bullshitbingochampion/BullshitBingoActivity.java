@@ -51,6 +51,8 @@ public class BullshitBingoActivity extends Activity
     public static final float IDEAL_FONT_SIZE_PX_FOR_1280_800 = 120f;
     public static final double LANDSCAPE_WIDTH_HEIGHT_COEFF = 1280./800;
 
+    public static final int FONT_STEP = 2;
+
     private SharedPreferences sharedPreferences;
 
     private DynamicGridView gridView;
@@ -72,6 +74,8 @@ public class BullshitBingoActivity extends Activity
     private MenuItem shareMenuItem;
     private MenuItem deleteMenuItem;
     private MenuItem settingsMenuItem;
+    private MenuItem increaseFontMenuItem;
+    private MenuItem decreaseFontMenuItem;
 
     private MenuItem shuffleMenuItem;
     //the width and the height (not counting action bar) of the grid
@@ -100,6 +104,7 @@ public class BullshitBingoActivity extends Activity
     private ActionBar actionBar;
     private File bullshitDir;
     private ArrayAdapter<String> cardListAdapter;
+
     private float finalFontSize;
 
     private boolean[] cardState;
@@ -733,9 +738,32 @@ public class BullshitBingoActivity extends Activity
             case R.id.action_settings:
                 Intent intent = new Intent(this, PreferencesActivity.class);
                 startActivity(intent);
+                return true;
+            case R.id.action_increase_font:
+                finalFontSize += FONT_STEP;
+                persistFont();
+
+                return true;
+            case R.id.action_decrease_font:
+                if (finalFontSize > 3) {
+                    finalFontSize -= FONT_STEP;
+                    persistFont();
+                }
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void persistFont() {
+        boolean land = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+        String prefix = getFontPrefix(land);
+
+        String key = getFontKey(dim, prefix);
+
+        sharedPreferences.edit().putFloat(key, finalFontSize).commit();
+
+        gridAdapter.notifyDataSetChanged();
     }
 
     private void accept() {
@@ -846,6 +874,8 @@ public class BullshitBingoActivity extends Activity
         shuffleMenuItem = menu.findItem(R.id.action_shuffle);
         deleteMenuItem = menu.findItem(R.id.action_delete);
         settingsMenuItem = menu.findItem(R.id.action_settings);
+        increaseFontMenuItem = menu.findItem(R.id.action_increase_font);
+        decreaseFontMenuItem = menu.findItem(R.id.action_decrease_font);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -861,6 +891,8 @@ public class BullshitBingoActivity extends Activity
             shuffleMenuItem.setVisible(true);
             deleteMenuItem.setVisible(false);
             settingsMenuItem.setVisible(true);
+            increaseFontMenuItem.setVisible(true);
+            decreaseFontMenuItem.setVisible(true);
         } else {
             newMenuItem.setVisible(true);
             editMenuItem.setVisible(isGridFilled());
@@ -870,7 +902,10 @@ public class BullshitBingoActivity extends Activity
             shuffleMenuItem.setVisible(false);
             deleteMenuItem.setVisible(isGridFilled() && isPersisted());
             settingsMenuItem.setVisible(true);
+            increaseFontMenuItem.setVisible(isGridFilled());
+            decreaseFontMenuItem.setVisible(isGridFilled());
         }
+
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -892,10 +927,30 @@ public class BullshitBingoActivity extends Activity
     }
 
     private void initCardFontSize(int dim) {
-        finalFontSize = IDEAL_FONT_SIZE_PX_FOR_1280_800 /dim;
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            finalFontSize *= LANDSCAPE_WIDTH_HEIGHT_COEFF;
+        boolean land = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+        String prefix = getFontPrefix(land);
+
+        String key = getFontKey(dim, prefix);
+        float fontSize = sharedPreferences.getFloat(key, -1);
+
+        if (fontSize < 0) {
+            finalFontSize = IDEAL_FONT_SIZE_PX_FOR_1280_800 /dim;
+            if(land) {
+                finalFontSize *= LANDSCAPE_WIDTH_HEIGHT_COEFF;
+            }
+
+            sharedPreferences.edit().putFloat(key, finalFontSize).commit();
+        } else {
+            finalFontSize = fontSize;
         }
+    }
+
+    private String getFontKey(int dim, String prefix) {
+        return prefix + dim;
+    }
+
+    private String getFontPrefix(boolean land) {
+        return land ? "land" : "portrait";
     }
 
     private void initCleanBoard() {

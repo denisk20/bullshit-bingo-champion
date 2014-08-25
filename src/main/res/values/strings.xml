@@ -35,4 +35,6 @@
     <string name="pref_title">Settings</string>
     <string name="error_cant_read_file">File can\'t be opened for read:</string>
     <string name="game_bingo">Bingo!</string>
+    <string name="action_increase_font">Increase font</string>
+    <string name="action_decrease_font">Decrease font</string>
 </resources>
