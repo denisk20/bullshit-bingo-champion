@@ -777,7 +777,7 @@ public class BullshitBingoActivity extends Activity
                         cardFile.delete();
                         drawerLayout.closeDrawers();
                         reloadCardList();
-                        if (currentCardName.equals(cardName)) {
+                        if (currentCardName != null && currentCardName.equals(cardName)) {
                             dim = 0;
                             initCleanBoard();
                             currentCardName = "";
@@ -786,7 +786,7 @@ public class BullshitBingoActivity extends Activity
                         break;
 
                     case DialogInterface.BUTTON_NEGATIVE:
-                        //No button clicked
+                        //do nothing
                         break;
                 }
 
