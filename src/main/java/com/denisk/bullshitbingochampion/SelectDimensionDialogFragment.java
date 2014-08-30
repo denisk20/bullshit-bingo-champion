@@ -25,6 +25,7 @@ public class SelectDimensionDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
         final NumberPicker numberPicker = new NumberPicker(activity);
+        numberPicker.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         Resources res = getResources();
         numberPicker.setMinValue(res.getInteger(R.integer.min_cells));
         numberPicker.setMaxValue(res.getInteger(R.integer.max_cells));
