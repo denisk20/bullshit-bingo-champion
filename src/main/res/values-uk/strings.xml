@@ -15,7 +15,7 @@
     <string name="drawer_open">Оберіть мапу</string>
     <string name="new_card_name">нова мапа</string>
     <string name="save_card_title">Зберегти мапу</string>
-    <string name="file_comment">Це файл аплікація Bullshit Bingo Champion. Він містить опис квадратної мапи слів і може використовуватись як популярна гра в слова http://url.here. Повинен бути в кодуванні UTF-8.
+    <string name="file_comment">Це файл аплікація Bullshit Bingo Champion. Він містить опис квадратної мапи слів і може використовуватись як популярна гра в слова https://play.google.com/store/apps/details?id=com.denisk.bullshitbingochampion Повинен бути в кодуванні UTF-8.
         Порожні рядки теж вважаються словами!
     </string>
     <string name="error_cant_start_comment">Не може починатися з </string>

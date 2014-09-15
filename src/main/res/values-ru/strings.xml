@@ -16,7 +16,7 @@
     <string name="new_card_name">новая карта</string>
     <string name="save_card_title">Сохранить карту</string>
     <string name="file_comment">Это файл приложения Bullshit Bingo Champion. Он содержит описание квадратной карты слов и
-        может быть использован чтобы играть в популярную игру в слова http://url.here. Должен быть в кодировке UTF-8.
+        может быть использован чтобы играть в популярную игру в слова https://play.google.com/store/apps/details?id=com.denisk.bullshitbingochampion Должен быть в кодировке UTF-8.
         Пустые строки тоже считаются словами!
     </string>
     <string name="error_cant_start_comment">Не может начинаться с </string>
