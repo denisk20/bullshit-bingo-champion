@@ -1,5 +1,8 @@
 Android emulator for [popular Bingo game](http://en.wikipedia.org/wiki/Buzzword_bingo)
 
+See it live on the play store!
+https://play.google.com/store/apps/details?id=com.denisk.bullshitbingochampion
+
 The most advanced and fun bullshit bingo simulator. Turns any boring meeting into an exciting adventure! When the app is used the speaker is usually pleasantly surprised how careful he is being listened, and people even take notes :)
 Features:
 * Create and modify word cards easily. Drag and drop to arrange words. Shuffle cards.
