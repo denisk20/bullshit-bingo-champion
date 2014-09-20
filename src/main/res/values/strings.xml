@@ -48,4 +48,7 @@
     <string name="pref_summary_reload">Reload default cards recreating them if not exist and overriding any changes in
         them
     </string>
+    <string name="pref_dialog_reload">Reload default cards? Any changes in them will be lost, save with unique names to
+        avoid losing the changes
+    </string>
 </resources>
