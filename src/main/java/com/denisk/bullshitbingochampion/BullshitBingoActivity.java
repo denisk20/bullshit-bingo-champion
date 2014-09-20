@@ -12,7 +12,6 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
@@ -54,13 +53,15 @@ public class BullshitBingoActivity extends Activity
 
     public static final int FONT_STEP = 2;
     public static final String UTF_8 = "UTF-8";
+
     public static final int[] DEFAULT_CARDS = new int[]{
-            R.raw.manager_talk_5x5,
-            R.raw.standup_4x4,
-            R.raw.top_manager_4x4,
-            R.raw.ultimate_10x10,
-            R.raw.everyday_status_3x3
+            R.raw._manager_talk_5x5,
+            R.raw._standup_4x4,
+            R.raw._top_manager_4x4,
+            R.raw._ultimate_10x10,
+            R.raw._everyday_status_3x3
     };
+    public static final int SETTINGS_REQUEST_CODE = 1;
 
     private SharedPreferences sharedPreferences;
 
@@ -166,7 +167,7 @@ public class BullshitBingoActivity extends Activity
         if(Boolean.TRUE.equals(sharedPreferences.getBoolean(FIRST_RUN_KEY, Boolean.TRUE)) && checkDir()) {
             sharedPreferences.edit().putBoolean(FIRST_RUN_KEY, Boolean.FALSE).apply();
 
-            copyDefaultCard(DEFAULT_CARDS);
+            copyDefaultCards(DEFAULT_CARDS);
 
             reloadCardList();
         }
@@ -178,7 +179,7 @@ public class BullshitBingoActivity extends Activity
                 .init();
     }
 
-    private void copyDefaultCard(int[] resources) {
+    private void copyDefaultCards(int[] resources) {
         for (int resId: resources) {
             InputStream inputStream = getResources().openRawResource(resId);
 
@@ -805,7 +806,7 @@ public class BullshitBingoActivity extends Activity
                 return true;
             case R.id.action_settings:
                 Intent intent = new Intent(this, PreferencesActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent, SETTINGS_REQUEST_CODE);
                 return true;
             case R.id.action_increase_font:
                 finalFontSize += FONT_STEP;
@@ -820,6 +821,25 @@ public class BullshitBingoActivity extends Activity
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == SETTINGS_REQUEST_CODE) {
+            if(resultCode == RESULT_OK) {
+                if(data != null && data.hasExtra(PreferencesActivity.RELOAD_DEFAULT_CARDS)) {
+                    copyDefaultCards(DEFAULT_CARDS);
+                    reloadCardList();
+
+                    for(int id: DEFAULT_CARDS) {
+                        String name = getResources().getResourceEntryName(id);
+                        if (clearCardIfCurrentCardNameEquals(name)) {
+                            break;
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -875,14 +895,10 @@ public class BullshitBingoActivity extends Activity
                         }
                         File cardFile = new File(bullshitDir, cardName + FILE_SUFFIX);
                         cardFile.delete();
-                        drawerLayout.closeDrawers();
+
                         reloadCardList();
-                        if (currentCardName != null && currentCardName.equals(cardName)) {
-                            dim = 0;
-                            initCleanBoard();
-                            currentCardName = "";
-                            updateTitle();
-                        }
+
+                        clearCardIfCurrentCardNameEquals(cardName);
                         break;
 
                     case DialogInterface.BUTTON_NEGATIVE:
@@ -897,6 +913,18 @@ public class BullshitBingoActivity extends Activity
                 .setPositiveButton(R.string.ok, deleteCardListener)
                 .setNegativeButton(R.string.cancel, deleteCardListener)
                 .show();
+    }
+
+    private boolean clearCardIfCurrentCardNameEquals(CharSequence cardName) {
+        if (currentCardName != null && currentCardName.equals(cardName)) {
+            dim = 0;
+            initCleanBoard();
+            currentCardName = "";
+            updateTitle();
+
+            return true;
+        }
+        return false;
     }
 
     private boolean isPersisted() {

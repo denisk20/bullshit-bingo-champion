@@ -51,11 +51,7 @@
                 <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.bullshit"/>
             </intent-filter>
         </activity>
-        <activity android:name=".PreferencesActivity">
-            <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.denisk.bullshitbingochampion.BullshitBingoActivity" />
-        </activity>
+        <activity android:name=".PreferencesActivity"/>
     </application>
 
 

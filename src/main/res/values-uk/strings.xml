@@ -6,7 +6,7 @@
     <string name="create">Створити</string>
     <string name="ok">OK</string>
     <string name="cancel">Скасувати</string>
-    <string name="action_save">Зберегти як...</string>
+    <string name="action_save">Зберегти як…</string>
     <string name="long_press_to_drag">Доторкніться, щоб редагувати. Тривалий дотик для впорядкування</string>
     <string name="edit_cell_title">Редагувати слово</string>
     <string name="action_accept">Прийняти</string>
@@ -14,7 +14,7 @@
     <string name="action_shuffle">Перемішати</string>
     <string name="drawer_open">Оберіть мапу</string>
     <string name="new_card_name">нова мапа</string>
-    <string name="save_card_title">Зберегти мапу</string>
+    <string name="save_card_title">Зберегти мапу як…</string>
     <string name="file_comment">Це файл аплікація Bullshit Bingo Champion. Він містить опис квадратної мапи слів і може використовуватись як популярна гра в слова https://play.google.com/store/apps/details?id=com.denisk.bullshitbingochampion Повинен бути в кодуванні UTF-8.
         Порожні рядки теж вважаються словами!
     </string>
@@ -30,8 +30,6 @@
     <string name="share_title">Мапа: </string>
     <string name="long_press_to_delete">Тривале натискання для видалення</string>
     <string name="error_wrong_card_format">Невірний формат мапи</string>
-    <string name="pref_vibrate">Вібрація</string>
-    <string name="pref_vibrate_summ">Вібрувати або ні коли обрано слово або коли партія виграна</string>
     <string name="action_settings">Налаштування</string>
     <string name="pref_title">Налаштування</string>
     <string name="error_cant_read_file">Неможливо відкрити файл для читання:\u0020</string>
@@ -44,4 +42,10 @@
     <string name="rate_do_it">Оцінити !</string>
     <string name="rate_later">Нагадати пізніше</string>
     <string name="rate_no">Ні, дякую</string>
+    <string name="pref_title_vibrate">Вібрація</string>
+    <string name="pref_summary_vibrate">Вібрувати або ні коли обрано слово або коли партія виграна</string>
+    <string name="pref_title_reload">Перегрузити дефолтні мапи</string>
+    <string name="pref_summary_reload">Перегружає дефолтні мапи створюючи їх заново якщо вони не існують та перетираючи будь-які
+        модификації що були зроблені в них
+    </string>
 </resources>

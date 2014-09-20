@@ -3,6 +3,7 @@ package com.denisk.bullshitbingochampion;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
@@ -12,12 +13,16 @@ import android.view.MenuItem;
  * @since 12.08.14.
  */
 public class PreferencesActivity extends PreferenceActivity {
+
+    public static final String RELOAD_DEFAULT_CARDS = "reloadDefaultCards";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        PreferencesFragment fragment = new PreferencesFragment();
         getFragmentManager().beginTransaction()
-                .replace(android.R.id.content, new PreferencesFragment())
+                .replace(android.R.id.content, fragment)
                 .commit();
 
         ActionBar actionBar = getActionBar();
@@ -32,9 +37,9 @@ public class PreferencesActivity extends PreferenceActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case android.R.id.home:
-                Intent intent = NavUtils.getParentActivityIntent(this);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP| Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                NavUtils.navigateUpTo(this, intent);
+                Intent returnIntent = new Intent();
+                setResult(RESULT_CANCELED, returnIntent);
+                finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);

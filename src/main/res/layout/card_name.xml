@@ -7,8 +7,8 @@
         android:textSize="20sp"
         android:textColor="@android:color/white"
         android:gravity="center"
-        android:paddingBottom="3dp"
-        android:paddingTop="3dp"
+        android:paddingBottom="4dp"
+        android:paddingTop="4dp"
         >
 <!--todo adjust text size-->
 </TextView>
