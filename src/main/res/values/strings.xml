@@ -51,4 +51,7 @@
     <string name="pref_dialog_reload">Reload default cards? Any changes in them will be lost, save with unique names to
         avoid losing the changes
     </string>
+    <string name="drawer_first_open">This is a list of default cards. Feel free to modify them - you\'ll be able to
+        reload them from \'Settings\' menu
+    </string>
 </resources>

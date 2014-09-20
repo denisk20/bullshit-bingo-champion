@@ -65,7 +65,8 @@ public class BullshitBingoActivity extends Activity
 
     private SharedPreferences sharedPreferences;
 
-    private final static String FIRST_RUN_KEY = "firstRun";
+    private final static String FIRST_ONCREATE_KEY = "firstOnCreate";
+    private final static String FIRST_DRAWER_OPEN_KEY = "firstDrawerOpen";
 
     private DynamicGridView gridView;
 
@@ -164,8 +165,8 @@ public class BullshitBingoActivity extends Activity
             restoreFromBundle(savedInstanceState);
         }
 
-        if(Boolean.TRUE.equals(sharedPreferences.getBoolean(FIRST_RUN_KEY, Boolean.TRUE)) && checkDir()) {
-            sharedPreferences.edit().putBoolean(FIRST_RUN_KEY, Boolean.FALSE).apply();
+        if((! sharedPreferences.contains(FIRST_ONCREATE_KEY)) && checkDir()) {
+            sharedPreferences.edit().putBoolean(FIRST_ONCREATE_KEY, false).apply();
 
             copyDefaultCards(DEFAULT_CARDS);
 
@@ -671,6 +672,10 @@ public class BullshitBingoActivity extends Activity
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.app_name){
             @Override
             public void onDrawerOpened(View drawerView) {
+                if(! sharedPreferences.contains(FIRST_DRAWER_OPEN_KEY)) {
+                    sharedPreferences.edit().putBoolean(FIRST_DRAWER_OPEN_KEY, false).apply();
+                    Toast.makeText(BullshitBingoActivity.this, getString(R.string.drawer_first_open), Toast.LENGTH_LONG).show();
+                }
                 super.onDrawerOpened(drawerView);
             }
 
