@@ -53,8 +53,18 @@ public class BullshitBingoActivity extends Activity
     public static final double LANDSCAPE_WIDTH_HEIGHT_COEFF = 1280./800;
 
     public static final int FONT_STEP = 2;
+    public static final String UTF_8 = "UTF-8";
+    public static final int[] DEFAULT_CARDS = new int[]{
+            R.raw.manager_talk_5x5,
+            R.raw.standup_4x4,
+            R.raw.top_manager_4x4,
+            R.raw.ultimate_10x10,
+            R.raw.everyday_status_3x3
+    };
 
     private SharedPreferences sharedPreferences;
+
+    private final static String FIRST_RUN_KEY = "firstRun";
 
     private DynamicGridView gridView;
 
@@ -153,6 +163,14 @@ public class BullshitBingoActivity extends Activity
             restoreFromBundle(savedInstanceState);
         }
 
+        if(Boolean.TRUE.equals(sharedPreferences.getBoolean(FIRST_RUN_KEY, Boolean.TRUE)) && checkDir()) {
+            sharedPreferences.edit().putBoolean(FIRST_RUN_KEY, Boolean.FALSE).apply();
+
+            copyDefaultCard(DEFAULT_CARDS);
+
+            reloadCardList();
+        }
+
         new AppRate(this)
                 .setMinDaysUntilPrompt(10)
                 .setMinLaunchesUntilPrompt(15)
@@ -160,7 +178,46 @@ public class BullshitBingoActivity extends Activity
                 .init();
     }
 
-     class CardDynamicGridAdapter extends BaseDynamicGridAdapter implements View.OnTouchListener {
+    private void copyDefaultCard(int[] resources) {
+        for (int resId: resources) {
+            InputStream inputStream = getResources().openRawResource(resId);
+
+            BufferedReader reader = null;
+            BufferedWriter writer = null;
+            try {
+                reader = new BufferedReader(new InputStreamReader(inputStream, UTF_8));
+
+                File dest = new File(bullshitDir, getResources().getResourceEntryName(resId) + FILE_SUFFIX);
+                if(dest.exists()) {
+                    dest.delete();
+                }
+                writer = new BufferedWriter(new FileWriter(dest));
+
+                String line;
+                while((line = reader.readLine()) != null) {
+                    writer.write(line + "\n");
+                }
+            } catch (IOException e) {
+                Log.e(BullshitBingoActivity.class.getName(), "Can't create default cards", e);
+                Toast.makeText(this, "Can't create default cards", Toast.LENGTH_LONG).show();
+            } finally {
+                closeQuietly(reader);
+                closeQuietly(writer);
+            }
+        }
+    }
+
+    private void closeQuietly(Closeable closeable) {
+        if(closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    class CardDynamicGridAdapter extends BaseDynamicGridAdapter implements View.OnTouchListener {
          protected CardDynamicGridAdapter(Context context, int columnCount) {
              super(context, columnCount);
          }
@@ -541,7 +598,9 @@ public class BullshitBingoActivity extends Activity
     }
 
     private List<String> getWordsForCard(String pureCard) {
-        checkDir();
+        if (! checkDir()) {
+            return new ArrayList<>();
+        }
         File file = new File(bullshitDir, pureCard + FILE_SUFFIX);
         FileInputStream is;
         try {
@@ -556,7 +615,7 @@ public class BullshitBingoActivity extends Activity
     private List<String> readCardFromInputStream(InputStream is) {
         BufferedReader br;
         try {
-            br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            br = new BufferedReader(new InputStreamReader(is, UTF_8));
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -569,7 +628,7 @@ public class BullshitBingoActivity extends Activity
                 }
             }
         } catch (IOException e) {
-            Log.e(BullshitBingoActivity.class.getName(), "Can't open card", e);
+            Log.e(BullshitBingoActivity.class.getName(), "Can't open card from input stream", e);
             Toast.makeText(this, R.string.error_wrong_card_format, Toast.LENGTH_SHORT).show();
             return null;
         } finally {
@@ -583,7 +642,9 @@ public class BullshitBingoActivity extends Activity
     }
 
     private List<String> getCardNames() {
-        checkDir();
+        if (! checkDir()) {
+            return new ArrayList<>();
+        }
         String[] cards = bullshitDir.list(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String filename) {
@@ -784,7 +845,9 @@ public class BullshitBingoActivity extends Activity
     }
 
     private void shareCurrentCard() {
-        checkDir();
+        if (! checkDir()) {
+            return;
+        }
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
         String cardName = currentCardName + FILE_SUFFIX;
@@ -807,7 +870,9 @@ public class BullshitBingoActivity extends Activity
             public void onClick(DialogInterface dialog, int which) {
                 switch (which){
                     case DialogInterface.BUTTON_POSITIVE:
-                        checkDir();
+                        if (! checkDir()) {
+                            return;
+                        }
                         File cardFile = new File(bullshitDir, cardName + FILE_SUFFIX);
                         cardFile.delete();
                         drawerLayout.closeDrawers();
@@ -1009,7 +1074,9 @@ public class BullshitBingoActivity extends Activity
     }
 
     private void persistWords(CharSequence fileName) {
-        checkDir();
+        if (! checkDir()) {
+            return;
+        }
 
         File file = new File(bullshitDir, fileName.toString() + FILE_SUFFIX);
         if(file.exists()) {
@@ -1017,7 +1084,7 @@ public class BullshitBingoActivity extends Activity
         }
         BufferedWriter writer;
         try {
-            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
+            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), UTF_8));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -1040,10 +1107,12 @@ public class BullshitBingoActivity extends Activity
         }
     }
 
-    private void checkDir() {
+    private boolean checkDir() {
         if(bullshitDir == null || ! bullshitDir.exists()) {
-            throw new IllegalStateException("Directory for saving files does not exist: " + bullshitDir);
+            Toast.makeText(this, getString(R.string.error_directory_does_not_exist) + bullshitDir, Toast.LENGTH_LONG).show();
+            return false;
         }
+        return true;
     }
 
     /**

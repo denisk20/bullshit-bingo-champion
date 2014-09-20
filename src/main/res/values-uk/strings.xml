@@ -20,8 +20,9 @@
     </string>
     <string name="error_cant_start_comment">Не може починатися з </string>
     <string name="error_wrong_filename">Невірне ім’я файлу</string>
-    <string name="error_wrong_word_count">Кількість слів невірна, повинна бути квадратна матриця. Мапа: </string>
-    <string name="error_empty_cart">Мапа порожня: </string>
+    <string name="error_wrong_word_count">Кількість слів невірна, повинна бути квадратна матриця. Мапа:\u0020</string>
+    <string name="error_empty_cart">Мапа порожня:\u0020</string>
+    <string name="error_directory_does_not_exist">Папка не існує:\u0020</string>
     <string name="action_delete">Видалити</string>
     <string name="delete_prompt">Видалити мапу: </string>
     <string name="error_empty_card_name">Давай, введи що-небудь</string>
@@ -33,13 +34,13 @@
     <string name="pref_vibrate_summ">Вібрувати або ні коли обрано слово або коли партія виграна</string>
     <string name="action_settings">Налаштування</string>
     <string name="pref_title">Налаштування</string>
-    <string name="error_cant_read_file">Неможливо відкрити файл для читання: </string>
+    <string name="error_cant_read_file">Неможливо відкрити файл для читання:\u0020</string>
     <string name="game_bingo">Бінго!</string>
     <string name="action_increase_font">Збільшити шрифт</string>
     <string name="action_decrease_font">Зменшити шрифт</string>
     <string name="rate">Оцініть\u0020</string>
     <string name="rate_if_you_enjoy">Якщо вам подобається\u0020</string>
-    <string name="rate_please_rate_thanks">, будь ласка, затримайтесь на хвилинку, щоб оцінити програму. Дякую за ваш відгук!</string>
+    <string name="rate_please_rate_thanks">, будь ласка, затримайтесь на хвилинку, щоб оцінити програму. Дякуємо за підтримку!</string>
     <string name="rate_do_it">Оцінити !</string>
     <string name="rate_later">Нагадати пізніше</string>
     <string name="rate_no">Ні, дякую</string>
