@@ -17,13 +17,14 @@
     <string name="save_card_title">Сохранить карту как…</string>
     <string name="file_comment">Это файл приложения Bullshit Bingo Champion. Он содержит описание квадратной карты слов и
         может быть использован чтобы играть в популярную игру в слова https://play.google.com/store/apps/details?id=com.denisk.bullshitbingochampion Должен быть в кодировке UTF-8.
+        Каждая строка может быть в формате \'слово | 3\', где 3 - количество попаданий в это слово (пока поддерживаем только 0 или 1, но мы добавим множественный попадания позже).
         Пустые строки тоже считаются словами!
     </string>
     <string name="error_cant_start_comment">Не может начинаться с </string>
     <string name="error_wrong_filename">Неверное имя файла</string>
-    <string name="error_wrong_word_count">Количество слов неверное, должна быть квадратная матрица. Карта:\u0020</string>
-    <string name="error_empty_cart">Карта пуста:\u0020</string>
-    <string name="error_directory_does_not_exist">Папка не существует:\u0020</string>
+    <string name="error_wrong_word_count">Количество слов неверное, должна быть квадратная матрица. Карта: %s</string>
+    <string name="error_empty_card">Карта пуста: %s</string>
+    <string name="error_directory_does_not_exist">Папка не существует: %s</string>
     <string name="action_delete">Удалить</string>
     <string name="delete_prompt">Удалить карту: </string>
     <string name="error_empty_card_name">Ну же, введи что-нибудь</string>
@@ -33,13 +34,12 @@
     <string name="error_wrong_card_format">Неверный формат карты</string>
     <string name="action_settings">Настройки</string>
     <string name="pref_title">Настройки</string>
-    <string name="error_cant_read_file">Нельзя открыть файл для чтения:\u0020</string>
+    <string name="error_cant_read_file">Нельзя открыть файл для чтения: %s</string>
     <string name="game_bingo">Бинго!</string>
     <string name="action_increase_font">Увеличить шрифт</string>
     <string name="action_decrease_font">Уменьшить шрифт</string>
-    <string name="rate">Оцените\u0020</string>
-    <string name="rate_if_you_enjoy">Если вам нравится\u0020</string>
-    <string name="rate_please_rate_thanks">, пожалуйста, потратьте минутку на то, чтобы оценить её. Спасибо за вашу поддержку!</string>
+    <string name="rate">Оцените %s</string>
+    <string name="rate_if_you_enjoy">Если вам нравится %s, пожалуйста, потратьте минутку на то, чтобы оценить её. Спасибо за вашу поддержку!</string>
     <string name="rate_do_it">Оценить !</string>
     <string name="rate_later">Напомнить позже</string>
     <string name="rate_no">Нет, спасибо</string>

@@ -602,13 +602,13 @@ public class BullshitBingoActivity extends Activity
 
     private boolean setDimAndRenderWords(String card, List<WordAndHits> words) {
         if(words.size() == 0) {
-            Toast.makeText(this, getResources().getString(R.string.error_empty_cart) + card, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getResources().getString(R.string.error_empty_card, card), Toast.LENGTH_LONG).show();
             return false;
         }
         double sqrt = Math.sqrt(words.size());
         double floor = Math.floor(sqrt + 0.5);
         if(Math.abs(floor - sqrt) > 0.1) {
-            Toast.makeText(this, getResources().getString(R.string.error_wrong_word_count) + card, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getResources().getString(R.string.error_wrong_word_count, card), Toast.LENGTH_LONG).show();
             return false;
         }
 
@@ -651,7 +651,7 @@ public class BullshitBingoActivity extends Activity
         try {
             is = new FileInputStream(file);
         } catch (FileNotFoundException e) {
-            Toast.makeText(this, getResources().getString(R.string.error_cant_read_file) + file, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getResources().getString(R.string.error_cant_read_file, file.toString()), Toast.LENGTH_SHORT).show();
             throw new RuntimeException(e);
         }
         return readCardFromInputStream(is);
@@ -1238,7 +1238,7 @@ public class BullshitBingoActivity extends Activity
 
     private boolean checkDir() {
         if(bullshitDir == null || ! bullshitDir.exists()) {
-            Toast.makeText(this, getString(R.string.error_directory_does_not_exist) + bullshitDir, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.error_directory_does_not_exist, bullshitDir), Toast.LENGTH_LONG).show();
             return false;
         }
         return true;

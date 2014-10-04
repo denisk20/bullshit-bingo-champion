@@ -16,13 +16,14 @@
     <string name="new_card_name">нова мапа</string>
     <string name="save_card_title">Зберегти мапу як…</string>
     <string name="file_comment">Це файл аплікація Bullshit Bingo Champion. Він містить опис квадратної мапи слів і може використовуватись як популярна гра в слова https://play.google.com/store/apps/details?id=com.denisk.bullshitbingochampion Повинен бути в кодуванні UTF-8.
+        Рядки можуть бути у форматі \'слово | 3\', де 3 - це кількість згадування слова (зараз це може бути лише 1 і 2, та ми це полагодим згодом).
         Порожні рядки теж вважаються словами!
     </string>
     <string name="error_cant_start_comment">Не може починатися з </string>
     <string name="error_wrong_filename">Невірне ім’я файлу</string>
-    <string name="error_wrong_word_count">Кількість слів невірна, повинна бути квадратна матриця. Мапа:\u0020</string>
-    <string name="error_empty_cart">Мапа порожня:\u0020</string>
-    <string name="error_directory_does_not_exist">Папка не існує:\u0020</string>
+    <string name="error_wrong_word_count">Кількість слів невірна, повинна бути квадратна матриця. Мапа %s</string>
+    <string name="error_empty_card">Мапа порожня: %s</string>
+    <string name="error_directory_does_not_exist">Папка не існує: %s</string>
     <string name="action_delete">Видалити</string>
     <string name="delete_prompt">Видалити мапу: </string>
     <string name="error_empty_card_name">Давай, введи що-небудь</string>
@@ -32,13 +33,12 @@
     <string name="error_wrong_card_format">Невірний формат мапи</string>
     <string name="action_settings">Налаштування</string>
     <string name="pref_title">Налаштування</string>
-    <string name="error_cant_read_file">Неможливо відкрити файл для читання:\u0020</string>
+    <string name="error_cant_read_file">Неможливо відкрити файл для читання: %s</string>
     <string name="game_bingo">Бінго!</string>
     <string name="action_increase_font">Збільшити шрифт</string>
     <string name="action_decrease_font">Зменшити шрифт</string>
-    <string name="rate">Оцініть\u0020</string>
-    <string name="rate_if_you_enjoy">Якщо вам подобається\u0020</string>
-    <string name="rate_please_rate_thanks">, будь ласка, затримайтесь на хвилинку, щоб оцінити програму. Дякуємо за підтримку!</string>
+    <string name="rate">Оцініть %s</string>
+    <string name="rate_if_you_enjoy">Якщо вам подобається %s, будь ласка, затримайтесь на хвилинку, щоб оцінити програму. Дякуємо за підтримку!</string>
     <string name="rate_do_it">Оцінити !</string>
     <string name="rate_later">Нагадати пізніше</string>
     <string name="rate_no">Ні, дякую</string>

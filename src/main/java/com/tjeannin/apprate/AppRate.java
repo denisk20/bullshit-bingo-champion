@@ -165,8 +165,8 @@ public class AppRate implements android.content.DialogInterface.OnClickListener,
 
 		Log.d(TAG, "Create default dialog.");
 
-		String title = hostActivity.getString(R.string.rate) + getApplicationName(hostActivity.getApplicationContext());
-		String message = hostActivity.getString(R.string.rate_if_you_enjoy) + getApplicationName(hostActivity.getApplicationContext()) + hostActivity.getString(R.string.rate_please_rate_thanks);
+		String title = hostActivity.getString(R.string.rate, getApplicationName(hostActivity.getApplicationContext()));
+		String message = hostActivity.getString(R.string.rate_if_you_enjoy, getApplicationName(hostActivity.getApplicationContext()));
 		String rate = hostActivity.getString(R.string.rate_do_it);
 		String remindLater = hostActivity.getString(R.string.rate_later);
 		String dismiss = hostActivity.getString(R.string.rate_no);
