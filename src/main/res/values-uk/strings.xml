@@ -54,6 +54,6 @@
     <string name="drawer_first_open">Це лист дефолтних карт. Можете редагувати їх - ви завжди сможете перезавантажити їх
         через меню \'Налаштування\'
     </string>
-    <string name="error_cant_parse_occurrences">Неможливо прочитати кількість для слова %%s: %%s</string>
-    <string name="toast_saving_card">Зберігаємо мапу %%s…</string>
+    <string name="error_cant_parse_occurrences">Неможливо прочитати кількість для слова %1$s: %2$s</string>
+    <string name="toast_saving_card">Зберігаємо мапу %s…</string>
 </resources>

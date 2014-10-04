@@ -684,7 +684,7 @@ public class BullshitBingoActivity extends Activity
                     try {
                         hits = Integer.parseInt(parts[1].trim());
                     } catch (NumberFormatException e) {
-                        String message = getString(R.string.error_cant_parse_occurrences) + word + ": " + parts[1].trim();
+                        String message = getString(R.string.error_cant_parse_occurrences, word, parts[1].trim());
                         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
                         Log.e(BullshitBingoActivity.class.getName(), message);
                     }

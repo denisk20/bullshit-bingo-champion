@@ -55,6 +55,6 @@
     <string name="drawer_first_open">This is a list of default cards. Feel free to modify them - you\'ll be able to
         reload them from \'Settings\' menu
     </string>
-    <string name="error_cant_parse_occurrences">Can\'t parse the number of occurrences for word %%s: %%s</string>
-    <string name="toast_saving_card">Saving card %s…</string>
+    <string name="error_cant_parse_occurrences">Can\'t parse the number of occurrences for word %1$s  %2$s</string>
+    <string name="toast_saving_card">Saving card %1$s…</string>
 </resources>
