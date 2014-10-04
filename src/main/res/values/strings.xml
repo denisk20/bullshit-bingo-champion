@@ -1,4 +1,5 @@
 <resources>
+    <!--todo replace all \u0020 with formats-->
     <string name="app_name">Bullshit Bingo Champion</string>
     <string name="action_new">New Card</string>
     <string name="action_edit">Edit</string>
@@ -54,4 +55,6 @@
     <string name="drawer_first_open">This is a list of default cards. Feel free to modify them - you\'ll be able to
         reload them from \'Settings\' menu
     </string>
+    <string name="error_cant_parse_occurrences">Can\'t parse the number of occurrences for word %%s: %%s</string>
+    <string name="toast_saving_card">Saving card %s…</string>
 </resources>

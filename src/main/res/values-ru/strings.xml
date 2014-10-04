@@ -55,4 +55,6 @@
     <string name="drawer_first_open">Это список дефолтных карт. Можете изменять их - вы всегда сможете перегрузить их
         из меню \'Настройки\'
     </string>
+    <string name="error_cant_parse_occurrences">Невозможно прочитать количество вхождений для слова %%s: %%s</string>
+    <string name="toast_saving_card">Сохраняем карту %%s…</string>
 </resources>

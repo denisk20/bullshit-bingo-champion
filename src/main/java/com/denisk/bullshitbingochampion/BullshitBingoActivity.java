@@ -39,12 +39,13 @@ public class BullshitBingoActivity extends Activity
     public static final String BUNDLE_WORDS = "words";
     public static final String BUNDLE_IS_EDITING = "isEditing";
     public static final String BUNDLE_CURRENT_CARD_NAME = "currentCard";
-    public static final String BUNDLE_MARKS = "marks";
+    public static final String BUNDLE_CARD_STATES = "cardStates";
     public static final String BUNDLE_IS_PLAYING_BINGO = "isBingoPlaying";
     public static final String BUNDLE_IS_BINGO_ROW = "isBingoRow";
     public static final String BUNDLE_BINGO_INDEX = "bingoIndex";
 
     public static final String COMMENT_MARK = "#";
+    public static final String DELIMITER_MARK = ">";
     public static final String NEW_CARD_PREFIX = "<";
     public static final String NEW_CARD_SUFFIX = ">";
     public static final String FILE_SUFFIX = ".bullshit";
@@ -102,6 +103,11 @@ public class BullshitBingoActivity extends Activity
 
     private String currentCardName;
 
+    /**
+     * Whether current card was modified
+     */
+    private boolean isDirty = false;
+
     private boolean gridViewInitFinished; //have obtained gridWidth and gridHeight?
     private AdapterView.OnItemLongClickListener itemLongClickListener = new AdapterView.OnItemLongClickListener() {
         @Override
@@ -120,10 +126,9 @@ public class BullshitBingoActivity extends Activity
 
     private float finalFontSize;
 
-    private boolean[] cardState;
     private Vibrator vibrator;
 
-    private boolean isPlayingBingo = false;
+    private boolean isBingoAnimationPlaying = false;
     private int bingoIndex = -1;
     private boolean isBingoRow; //if false then it is column
     private AnimatorSet bingoAnimatorSet;
@@ -180,6 +185,16 @@ public class BullshitBingoActivity extends Activity
                 .init();
     }
 
+    private int[] getHitsCount() {
+        int res[] = new int [gridAdapter.getCount()];
+        for(int i = 0; i < gridAdapter.getCount(); i++) {
+            WordAndHits w = (WordAndHits) gridAdapter.getItem(i);
+            res[i] = w.hits;
+        }
+
+        return res;
+    }
+
     private void copyDefaultCards(int[] resources) {
         for (int resId: resources) {
             InputStream inputStream = getResources().openRawResource(resId);
@@ -209,6 +224,10 @@ public class BullshitBingoActivity extends Activity
         }
     }
 
+    private WordAndHits getWordDataAtPosition(int pos) {
+        return (WordAndHits) gridAdapter.getItem(pos);
+    }
+
     private void closeQuietly(Closeable closeable) {
         if(closeable != null) {
             try {
@@ -230,7 +249,7 @@ public class BullshitBingoActivity extends Activity
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            StringHolder text = (StringHolder) getItem(position);
+            WordAndHits wordAndHits = (WordAndHits) getItem(position);
             TextView textView;
             if (!(convertView instanceof TextView)) {
                 textView = (TextView) getLayoutInflater().inflate(R.layout.word, null);
@@ -240,7 +259,7 @@ public class BullshitBingoActivity extends Activity
             textView.setWidth((int) (gridWidth / dim - shift));
             textView.setHeight((int) (gridHeight / dim - shift));
 
-            textView.setText(text.s);
+            textView.setText(wordAndHits.word);
             textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, finalFontSize);
             textView.setTranslationX(0);
             textView.setTranslationY(0);
@@ -262,12 +281,18 @@ public class BullshitBingoActivity extends Activity
              if (event.getAction() == MotionEvent.ACTION_DOWN) {
                  int position = (int) view.getTag();
                  if (!isEditing) {
-                     if(isPlayingBingo) {
+                     if(isBingoAnimationPlaying) {
                          cancelBingoAnimation();
 
                          return false;
                      }
-                     cardState[position] = !cardState[position];
+                     isDirty = true;
+
+                     int hitsCount[] = getHitsCount();
+
+                     //todo modify this to increase the number of hits
+                     getWordDataAtPosition(position).hits = (hitsCount[position] == 0 ? 1 : 0);
+
                      setCardColor(position, view);
                      if (shouldVibrate()) {
                          vibrator.vibrate(30);
@@ -277,7 +302,7 @@ public class BullshitBingoActivity extends Activity
                          boolean bingo = true;
                          //check i-th row for bingo
                          for(int j = 0; j < dim; j++) {
-                            bingo &= cardState[i*dim + j];
+                            bingo &= (hitsCount[i*dim + j] > 0);
                          }
                          if(bingo) {
                              isBingoRow = true;
@@ -290,7 +315,7 @@ public class BullshitBingoActivity extends Activity
                          //check i-th column for bingo
                          bingo = true;
                          for(int j = 0; j < dim; j++) {
-                             bingo &= cardState[j*dim + i];
+                             bingo &= (hitsCount[j*dim + i] > 0);
                          }
                          if(bingo) {
                              isBingoRow = false;
@@ -319,7 +344,7 @@ public class BullshitBingoActivity extends Activity
 
         cancelVibration();
 
-        isPlayingBingo = false;
+        isBingoAnimationPlaying = false;
 
         bingoIndex = -1;
     }
@@ -328,7 +353,7 @@ public class BullshitBingoActivity extends Activity
         if(bingoIndex < 0) {
             return;
         }
-        isPlayingBingo = true;
+        isBingoAnimationPlaying = true;
 
         int width;
         int height;
@@ -336,7 +361,7 @@ public class BullshitBingoActivity extends Activity
         int topMargin;
         if(isBingoRow) {
             for (int j = 0; j < dim; j++) {
-                cardState[bingoIndex * dim + j] = false;
+                getWordDataAtPosition(bingoIndex * dim + j).hits = 0;
             }
 
 
@@ -346,7 +371,7 @@ public class BullshitBingoActivity extends Activity
             topMargin = (gridHeight / dim) * bingoIndex;
         } else {
             for(int j = 0; j < dim; j++) {
-                cardState[j*dim + bingoIndex] = false;
+                getWordDataAtPosition(j*dim + bingoIndex).hits = 0;
             }
 
             width = gridWidth / dim;
@@ -396,7 +421,14 @@ public class BullshitBingoActivity extends Activity
     @Override
     protected void onPause() {
         cancelVibration();
+        persistIfNeeded();
         super.onPause();
+    }
+
+    private void persistIfNeeded() {
+        if (isDirty && isPersisted()) {
+            persistWords(currentCardName);
+        }
     }
 
     private void cancelVibration() {
@@ -431,11 +463,13 @@ public class BullshitBingoActivity extends Activity
                 if(! isEditing) {
                     return;
                 }
-                StringHolder itemAtPosition = (StringHolder) gridView.getItemAtPosition(position);
+                WordAndHits itemAtPosition = (WordAndHits) gridView.getItemAtPosition(position);
                 if (itemAtPosition == null) {
                     return;
                 }
-                CharSequence currentCellValue = itemAtPosition.s;
+                itemAtPosition.hits++;
+
+                CharSequence currentCellValue = itemAtPosition.word;
 
                 if (editCellDialog == null) {
                     editCellDialog = new EditCellDialogFragment();
@@ -469,7 +503,7 @@ public class BullshitBingoActivity extends Activity
 
     private void setCardColor(int position, View view) {
         int background;
-        if(cardState[position]) {
+        if(getWordDataAtPosition(position).hits > 0) {
             background = R.drawable.back_selected;
         } else {
             background = R.drawable.back;
@@ -487,7 +521,15 @@ public class BullshitBingoActivity extends Activity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 cancelBingoAnimation();
                 String card = (String) parent.getItemAtPosition(position);
-                List<String> words = getWordsForCard(card);
+
+                if(card.equals(currentCardName)) {
+                    drawerLayout.closeDrawers();
+                    return;
+                }
+
+                persistIfNeeded();
+
+                List<WordAndHits> words = getWordsForCard(card);
                 if(words == null) {
                     return;
                 }
@@ -528,9 +570,7 @@ public class BullshitBingoActivity extends Activity
                     }
                 }
             }
-            if (cursor != null) {
-                cursor.close();
-            }
+            closeQuietly(cursor);
         }
         if(cardName == null) {
             cardName = "imported_" + System.currentTimeMillis();
@@ -546,21 +586,21 @@ public class BullshitBingoActivity extends Activity
             if (cardName.contains(FILE_SUFFIX)) {
                 cardName = cardName.substring(0, cardName.indexOf(FILE_SUFFIX));
             }
-            List<String> words = readCardFromInputStream(inputStream);
+            List<WordAndHits> words = readCardFromInputStream(inputStream);
             if(words == null) {
                 return;
             }
             if(!setDimAndRenderWords(cardName, words)) {
                 return;
             }
-            initBoardFromWords(getStringHolders(words));
+            initBoardFromWords(words);
 
             persistWords(cardName);
             reloadCardList();
         }
     }
 
-    private boolean setDimAndRenderWords(String card, List<String> words) {
+    private boolean setDimAndRenderWords(String card, List<WordAndHits> words) {
         if(words.size() == 0) {
             Toast.makeText(this, getResources().getString(R.string.error_empty_cart) + card, Toast.LENGTH_LONG).show();
             return false;
@@ -578,7 +618,7 @@ public class BullshitBingoActivity extends Activity
 
         currentCardName = card;
         updateTitle();
-        initBoardFromWords(getStringHolders(words));
+        initBoardFromWords(words);
 
         drawerLayout.closeDrawers();
 
@@ -590,7 +630,10 @@ public class BullshitBingoActivity extends Activity
     }
 
     private void initCardState() {
-        cardState = new boolean[dim*dim];
+        for(Object o: gridAdapter.getItems()) {
+            WordAndHits wordAndHits = (WordAndHits) o;
+            wordAndHits.hits = 0;
+        }
     }
 
     private void reloadCardList() {
@@ -599,7 +642,7 @@ public class BullshitBingoActivity extends Activity
         cardListAdapter.notifyDataSetChanged();
     }
 
-    private List<String> getWordsForCard(String pureCard) {
+    private List<WordAndHits> getWordsForCard(String pureCard) {
         if (! checkDir()) {
             return new ArrayList<>();
         }
@@ -614,20 +657,40 @@ public class BullshitBingoActivity extends Activity
         return readCardFromInputStream(is);
     }
 
-    private List<String> readCardFromInputStream(InputStream is) {
+    private List<WordAndHits> readCardFromInputStream(InputStream is) {
         BufferedReader br;
         try {
             br = new BufferedReader(new InputStreamReader(is, UTF_8));
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
-        ArrayList<String> result = new ArrayList<>();
-        String word;
+        ArrayList<WordAndHits> result = new ArrayList<>();
+        String line;
         try {
-            while((word = br.readLine()) != null) {
-                if(! word.startsWith(COMMENT_MARK)) {
-                    result.add(word);
+            while((line = br.readLine()) != null) {
+                if(line.startsWith(COMMENT_MARK)) {
+                    continue;
                 }
+                /*
+                   we expect the lines to be in format
+                   'word | 3'
+                   where 3 is the number of occurrences of the word
+                 */
+                String[] parts = line.split(DELIMITER_MARK);
+                String word = parts[0].trim();
+                //how many times
+                int hits = 0;
+                if(parts.length > 1) {
+                    try {
+                        hits = Integer.parseInt(parts[1].trim());
+                    } catch (NumberFormatException e) {
+                        String message = getString(R.string.error_cant_parse_occurrences) + word + ": " + parts[1].trim();
+                        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                        Log.e(BullshitBingoActivity.class.getName(), message);
+                    }
+                }
+                WordAndHits wordAndHits = new WordAndHits(word, hits);
+                result.add(wordAndHits);
             }
         } catch (IOException e) {
             Log.e(BullshitBingoActivity.class.getName(), "Can't open card from input stream", e);
@@ -641,6 +704,30 @@ public class BullshitBingoActivity extends Activity
             }
         }
         return result;
+    }
+
+    /**
+     * How many times was the word selected
+     */
+    static class WordAndHits {
+        String word = "";
+        int hits;
+
+        WordAndHits() {
+        }
+
+        WordAndHits(String word, int hits) {
+            this.word = word;
+            this.hits = hits;
+        }
+
+        @Override
+        public String toString() {
+            return "{" +
+                    "word='" + word + '\'' +
+                    ", hits=" + hits +
+                    '}';
+        }
     }
 
     private List<String> getCardNames() {
@@ -718,8 +805,8 @@ public class BullshitBingoActivity extends Activity
             dim = savedInstanceState.getInt(BUNDLE_DIM);
             isEditing = savedInstanceState.getBoolean(BUNDLE_IS_EDITING);
             currentCardName = savedInstanceState.getString(BUNDLE_CURRENT_CARD_NAME);
-            cardState = savedInstanceState.getBooleanArray(BUNDLE_MARKS);
-            isPlayingBingo = savedInstanceState.getBoolean(BUNDLE_IS_PLAYING_BINGO);
+            int[] hitsCount = savedInstanceState.getIntArray(BUNDLE_CARD_STATES);
+            isBingoAnimationPlaying = savedInstanceState.getBoolean(BUNDLE_IS_PLAYING_BINGO);
             isBingoRow = savedInstanceState.getBoolean(BUNDLE_IS_BINGO_ROW);
             bingoIndex = savedInstanceState.getInt(BUNDLE_BINGO_INDEX);
             updateTitle();
@@ -730,16 +817,13 @@ public class BullshitBingoActivity extends Activity
             if(wordsArrayList == null) {
                 return;
             }
-            initBoardFromWords(getStringHolders(wordsArrayList));
-        }
-    }
+            ArrayList<WordAndHits> wordAndHits = new ArrayList<>(hitsCount.length);
+            for(int i = 0; i < hitsCount.length; i++) {
+                wordAndHits.add(i, new WordAndHits(wordsArrayList.get(i), hitsCount[i]));
+            }
 
-    private ArrayList<StringHolder> getStringHolders(List<String> wordsArrayList) {
-        ArrayList<StringHolder> currentWords = new ArrayList<>(wordsArrayList.size());
-        for(String s: wordsArrayList) {
-            currentWords.add(new StringHolder(s));
+            initBoardFromWords(wordAndHits);
         }
-        return currentWords;
     }
 
     @Override
@@ -750,8 +834,8 @@ public class BullshitBingoActivity extends Activity
         outState.putInt(BUNDLE_DIM, dim);
         outState.putBoolean(BUNDLE_IS_EDITING, isEditing);
         outState.putString(BUNDLE_CURRENT_CARD_NAME, currentCardName);
-        outState.putBooleanArray(BUNDLE_MARKS, cardState);
-        outState.putBoolean(BUNDLE_IS_PLAYING_BINGO, isPlayingBingo);
+        outState.putIntArray(BUNDLE_CARD_STATES, getHitsCount());
+        outState.putBoolean(BUNDLE_IS_PLAYING_BINGO, isBingoAnimationPlaying);
         outState.putBoolean(BUNDLE_IS_BINGO_ROW, isBingoRow);
         outState.putInt(BUNDLE_BINGO_INDEX, bingoIndex);
     }
@@ -759,8 +843,8 @@ public class BullshitBingoActivity extends Activity
     private ArrayList<String> getStringListFromCurrentWords() {
         ArrayList<String> words = new ArrayList<>();
         for (Object o : gridAdapter.getItems()) {
-            StringHolder h = (StringHolder) o;
-            words.add(h.s.toString());
+            WordAndHits h = (WordAndHits) o;
+            words.add(h.word);
         }
 
         return words;
@@ -797,7 +881,7 @@ public class BullshitBingoActivity extends Activity
                 saveCardDialog.show(getFragmentManager(), "saveCard");
                 return true;
             case R.id.action_accept:
-                accept();
+                saveWords();
                 return true;
             case R.id.action_share:
                 shareCurrentCard();
@@ -859,7 +943,7 @@ public class BullshitBingoActivity extends Activity
         gridAdapter.notifyDataSetChanged();
     }
 
-    private void accept() {
+    private void saveWords() {
         exitEditMode();
         if(isPersisted()) {
             persistWords(currentCardName);
@@ -933,7 +1017,7 @@ public class BullshitBingoActivity extends Activity
     }
 
     private boolean isPersisted() {
-        return !currentCardName.startsWith(NEW_CARD_PREFIX);
+        return currentCardName != null && !currentCardName.startsWith(NEW_CARD_PREFIX);
     }
 
     private void updateTitle() {
@@ -1059,10 +1143,10 @@ public class BullshitBingoActivity extends Activity
     }
 
     private void initCleanBoard() {
-        ArrayList<StringHolder> currentWords = new ArrayList<>(dim*dim);
+        ArrayList<WordAndHits> currentWords = new ArrayList<>(dim*dim);
         for (int i = 0; i < dim; i++) {
             for(int j = 0; j < dim; j++) {
-                currentWords.add(new StringHolder(""));
+                currentWords.add(new WordAndHits());
             }
         }
 
@@ -1070,7 +1154,7 @@ public class BullshitBingoActivity extends Activity
         invalidateOptionsMenu();
     }
 
-    private void initBoardFromWords(final List<StringHolder> currentWords) {
+    private void initBoardFromWords(final List<WordAndHits> currentWords) {
         initCardFontSize(dim);
 
         gridView.setNumColumns(dim);
@@ -1092,7 +1176,7 @@ public class BullshitBingoActivity extends Activity
 
     @Override
     public void onCellEditFinished(CharSequence newValue, int position) {
-        gridAdapter.setItemAtPosition(new StringHolder(newValue), position);
+        gridAdapter.setItemAtPosition(new WordAndHits(newValue.toString(), 0), position);
         invalidateOptionsMenu();
     }
 
@@ -1111,6 +1195,8 @@ public class BullshitBingoActivity extends Activity
             return;
         }
 
+        Toast.makeText(this, getString(R.string.toast_saving_card, fileName), Toast.LENGTH_SHORT).show();
+
         File file = new File(bullshitDir, fileName.toString() + FILE_SUFFIX);
         if(file.exists()) {
             file.delete();
@@ -1123,12 +1209,23 @@ public class BullshitBingoActivity extends Activity
         }
 
         try {
-            writer.append(COMMENT_MARK + getResources().getString(R.string.file_comment) + "\n");
+            writer
+                    .append(COMMENT_MARK)
+                    .append(getResources().getString(R.string.file_comment))
+                    .append("\n");
             for(Object o: gridAdapter.getItems()) {
-                String word = ((StringHolder) o).s.toString();
-                writer.append(word + "\n");
+                WordAndHits word = (WordAndHits) o;
+                writer
+                        .append(word.word)
+                        .append(DELIMITER_MARK)
+                        .append(Integer.toString(word.hits))
+                        .append("\n");
             }
+
+            isDirty = false;
+
         } catch (IOException e) {
+            //todo replace all throw exceptions with warnings
             throw new IllegalStateException("Can't write to bullshitbingo file " + file);
         } finally {
             try {
@@ -1136,7 +1233,6 @@ public class BullshitBingoActivity extends Activity
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Log.d(BullshitBingoActivity.class.getName(), "===Persisted card to " + file);
         }
     }
 
@@ -1148,30 +1244,11 @@ public class BullshitBingoActivity extends Activity
         return true;
     }
 
-    /**
-     * DynamicGridView can't hold equal objects, so we wrap
-     * Strings so that even equal strings look like unequal
-     * objects for it
-     */
-    private static class StringHolder {
-        CharSequence s;
-
-        StringHolder(CharSequence s) {
-            this.s = s;
-        }
-
-        @Override
-        public String toString() {
-            final StringBuilder sb = new StringBuilder();
-            sb.append("s=").append(s);
-            return sb.toString();
-        }
-    }
     @Override
     public void onBackPressed() {
         if (isEditing) {
-            accept();
-        } else if(isPlayingBingo) {
+            saveWords();
+        } else if(isBingoAnimationPlaying) {
             cancelBingoAnimation();
         } else {
             super.onBackPressed();
