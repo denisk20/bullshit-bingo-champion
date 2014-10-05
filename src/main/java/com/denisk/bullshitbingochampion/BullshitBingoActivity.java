@@ -288,10 +288,12 @@ public class BullshitBingoActivity extends Activity
                      }
                      isDirty = true;
 
-                     int hitsCount[] = getHitsCount();
 
+                     WordAndHits wordDataAtPosition = getWordDataAtPosition(position);
                      //todo modify this to increase the number of hits
-                     getWordDataAtPosition(position).hits = (hitsCount[position] == 0 ? 1 : 0);
+                     wordDataAtPosition.hits = (wordDataAtPosition.hits == 0 ? 1 : 0);
+
+                     int hitsCount[] = getHitsCount();
 
                      setCardColor(position, view);
                      if (shouldVibrate()) {
