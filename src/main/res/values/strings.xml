@@ -10,7 +10,7 @@
     <string name="long_press_to_drag">Tap to edit. Long press to drag</string>
     <string name="edit_cell_title">Edit cell</string>
     <string name="action_accept">Accept</string>
-    <string name="action_share">Share</string>
+    <string name="action_share_file">Share bullshit file</string>
     <string name="action_shuffle">Shuffle</string>
     <string name="drawer_open">Select card</string>
     <string name="new_card_name">new card</string>
@@ -56,4 +56,5 @@
     </string>
     <string name="error_cant_parse_occurrences">Can\'t parse the number of occurrences for word %1$s  %2$s</string>
     <string name="toast_saving_card">Saving card %s…</string>
+    <string name="action_share_image">Share image</string>
 </resources>

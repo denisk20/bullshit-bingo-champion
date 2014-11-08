@@ -10,7 +10,7 @@
     <string name="long_press_to_drag">Доторкніться, щоб редагувати. Тривалий дотик для впорядкування</string>
     <string name="edit_cell_title">Редагувати слово</string>
     <string name="action_accept">Прийняти</string>
-    <string name="action_share">Поділитись</string>
+    <string name="action_share_file">Поділитись bullshit файлом</string>
     <string name="action_shuffle">Перемішати</string>
     <string name="drawer_open">Оберіть мапу</string>
     <string name="new_card_name">нова мапа</string>
@@ -56,4 +56,5 @@
     </string>
     <string name="error_cant_parse_occurrences">Неможливо прочитати кількість для слова %1$s: %2$s</string>
     <string name="toast_saving_card">Зберігаємо мапу %s…</string>
+    <string name="action_share_image">Отправити картинку</string>
 </resources>

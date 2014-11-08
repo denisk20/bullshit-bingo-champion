@@ -6,17 +6,22 @@ import android.animation.ValueAnimator;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
@@ -53,6 +58,9 @@ public class BullshitBingoActivity extends Activity
     public static final float IDEAL_FONT_SIZE_PX_FOR_1280_800 = 120f;
     public static final double LANDSCAPE_WIDTH_HEIGHT_COEFF = 1280. / 800;
 
+    private static final int DESIRED_IMAGE_HEIGHT = 480;
+    private static final int DESIRED_IMAGE_WIDTH = 640;
+
     public static final int FONT_STEP = 2;
     public static final String UTF_8 = "UTF-8";
 
@@ -64,6 +72,7 @@ public class BullshitBingoActivity extends Activity
             R.raw._everyday_status_3x3
     };
     public static final int SETTINGS_REQUEST_CODE = 1;
+    public static final String IMAGE_PNG = "image/png";
 
     private SharedPreferences sharedPreferences;
 
@@ -86,7 +95,8 @@ public class BullshitBingoActivity extends Activity
     private MenuItem editMenuItem;
     private MenuItem saveAsMenuItem;
     private MenuItem acceptItemMenuItem;
-    private MenuItem shareMenuItem;
+    private MenuItem shareBullshitMenuItem;
+    private MenuItem shareImageMenuItem;
     private MenuItem deleteMenuItem;
     private MenuItem settingsMenuItem;
     private MenuItem increaseFontMenuItem;
@@ -888,8 +898,11 @@ public class BullshitBingoActivity extends Activity
             case R.id.action_accept:
                 saveWords();
                 return true;
-            case R.id.action_share:
+            case R.id.action_share_bullshit:
                 shareCurrentCard();
+                return true;
+            case R.id.action_share_image:
+                shareImage();
                 return true;
             case R.id.action_delete:
                 showDeleteCardDialog(currentCardName);
@@ -918,6 +931,48 @@ public class BullshitBingoActivity extends Activity
         }
     }
 
+    private void shareImage() {
+        int gridWidth = gridView.getWidth();
+        int gridHeight = gridView.getHeight();
+        Bitmap bitmap = Bitmap.createBitmap(gridWidth, gridHeight, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(bitmap);
+        gridView.draw(c);
+
+        int width;
+        int height;
+        boolean isLandscape = isLandscape();
+        float coeff;
+        if(isLandscape) {
+            coeff = gridWidth / DESIRED_IMAGE_WIDTH;
+            width = DESIRED_IMAGE_WIDTH;
+            height = (int) (gridHeight / coeff);
+        } else {
+            coeff = gridHeight / DESIRED_IMAGE_HEIGHT;
+            height = DESIRED_IMAGE_HEIGHT;
+            width = (int) (gridWidth / coeff);
+        }
+
+        bitmap = Bitmap.createScaledBitmap(bitmap, width, height, false);
+
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.MIME_TYPE, IMAGE_PNG);
+//todo use tmp file instead
+        Uri uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        OutputStream os;
+        try {
+            os = getContentResolver().openOutputStream(uri);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 0, os);
+            closeQuietly(os);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Intent share = new Intent(Intent.ACTION_SEND);
+        share.setType(IMAGE_PNG);
+        share.putExtra(Intent.EXTRA_STREAM, uri);
+        startActivity(Intent.createChooser(share, getString(R.string.action_share_image)));
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == SETTINGS_REQUEST_CODE) {
@@ -938,7 +993,7 @@ public class BullshitBingoActivity extends Activity
     }
 
     private void persistFont() {
-        boolean land = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+        boolean land = isLandscape();
         String prefix = getFontPrefix(land);
 
         String key = getFontKey(dim, prefix);
@@ -946,6 +1001,10 @@ public class BullshitBingoActivity extends Activity
         sharedPreferences.edit().putFloat(key, finalFontSize).commit();
 
         gridAdapter.notifyDataSetChanged();
+    }
+
+    private boolean isLandscape() {
+        return getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
     }
 
     private void saveWords() {
@@ -1065,7 +1124,8 @@ public class BullshitBingoActivity extends Activity
         editMenuItem = menu.findItem(R.id.action_edit);
         saveAsMenuItem = menu.findItem(R.id.action_save_as);
         acceptItemMenuItem = menu.findItem(R.id.action_accept);
-        shareMenuItem = menu.findItem(R.id.action_share);
+        shareBullshitMenuItem = menu.findItem(R.id.action_share_bullshit);
+        shareImageMenuItem = menu.findItem(R.id.action_share_image);
         shuffleMenuItem = menu.findItem(R.id.action_shuffle);
         deleteMenuItem = menu.findItem(R.id.action_delete);
         settingsMenuItem = menu.findItem(R.id.action_settings);
@@ -1082,7 +1142,8 @@ public class BullshitBingoActivity extends Activity
             editMenuItem.setVisible(false);
             saveAsMenuItem.setVisible(true);
             acceptItemMenuItem.setVisible(true);
-            shareMenuItem.setVisible(false);
+            shareBullshitMenuItem.setVisible(false);
+            shareImageMenuItem.setVisible(false);
             shuffleMenuItem.setVisible(true);
             deleteMenuItem.setVisible(false);
             settingsMenuItem.setVisible(true);
@@ -1093,7 +1154,8 @@ public class BullshitBingoActivity extends Activity
             editMenuItem.setVisible(isGridFilled());
             saveAsMenuItem.setVisible(isGridFilled());
             acceptItemMenuItem.setVisible(false);
-            shareMenuItem.setVisible(isGridFilled() && isPersisted());
+            shareBullshitMenuItem.setVisible(isGridFilled() && isPersisted());
+            shareImageMenuItem.setVisible(isGridFilled());
             shuffleMenuItem.setVisible(false);
             deleteMenuItem.setVisible(isGridFilled() && isPersisted());
             settingsMenuItem.setVisible(true);
@@ -1122,7 +1184,7 @@ public class BullshitBingoActivity extends Activity
     }
 
     private void initCardFontSize(int dim) {
-        boolean land = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+        boolean land = isLandscape();
         String prefix = getFontPrefix(land);
 
         String key = getFontKey(dim, prefix);

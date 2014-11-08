@@ -24,9 +24,15 @@
           android:showAsAction="ifRoom"
           android:visible="false"
             />
-    <item android:id="@+id/action_share"
+    <item android:id="@+id/action_share_bullshit"
           android:icon="@drawable/ic_action_share"
-          android:title="@string/action_share"
+          android:title="@string/action_share_file"
+          android:showAsAction="ifRoom"
+          android:visible="false"
+            />
+    <item android:id="@+id/action_share_image"
+          android:icon="@drawable/ic_action_send_now"
+          android:title="@string/action_share_image"
           android:showAsAction="ifRoom"
           android:visible="false"
             />

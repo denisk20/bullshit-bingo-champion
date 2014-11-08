@@ -10,7 +10,7 @@
     <string name="long_press_to_drag">Коснитесь для редактирования. Длинное прикосновение для упорядочения</string>
     <string name="edit_cell_title">Редактировать слово</string>
     <string name="action_accept">Принять</string>
-    <string name="action_share">Поделиться</string>
+    <string name="action_share_file">Отправить bullshit файл</string>
     <string name="action_shuffle">Перемешать</string>
     <string name="drawer_open">Выберите карту</string>
     <string name="new_card_name">новая карта</string>
@@ -57,4 +57,5 @@
     </string>
     <string name="error_cant_parse_occurrences">Невозможно прочитать количество вхождений для слова %1$s: %2$s</string>
     <string name="toast_saving_card">Сохраняем карту %s…</string>
+    <string name="action_share_image">Отправить картинку</string>
 </resources>
