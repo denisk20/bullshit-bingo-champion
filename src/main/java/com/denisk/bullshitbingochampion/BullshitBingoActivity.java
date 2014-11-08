@@ -1,4 +1,5 @@
 package com.denisk.bullshitbingochampion;
+
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -50,7 +51,7 @@ public class BullshitBingoActivity extends Activity
     public static final String NEW_CARD_SUFFIX = ">";
     public static final String FILE_SUFFIX = ".bullshit";
     public static final float IDEAL_FONT_SIZE_PX_FOR_1280_800 = 120f;
-    public static final double LANDSCAPE_WIDTH_HEIGHT_COEFF = 1280./800;
+    public static final double LANDSCAPE_WIDTH_HEIGHT_COEFF = 1280. / 800;
 
     public static final int FONT_STEP = 2;
     public static final String UTF_8 = "UTF-8";
@@ -164,13 +165,13 @@ public class BullshitBingoActivity extends Activity
 
         initGridView();
 
-        if(getIntent() != null && getIntent().getData() != null) {
+        if (getIntent() != null && getIntent().getData() != null) {
             openFromIntent();
         } else {
             restoreFromBundle(savedInstanceState);
         }
 
-        if((! sharedPreferences.contains(FIRST_ONCREATE_KEY)) && checkDir()) {
+        if ((!sharedPreferences.contains(FIRST_ONCREATE_KEY)) && checkDir()) {
             sharedPreferences.edit().putBoolean(FIRST_ONCREATE_KEY, false).apply();
 
             copyDefaultCards(DEFAULT_CARDS);
@@ -186,8 +187,8 @@ public class BullshitBingoActivity extends Activity
     }
 
     private int[] getHitsCount() {
-        int res[] = new int [gridAdapter.getCount()];
-        for(int i = 0; i < gridAdapter.getCount(); i++) {
+        int res[] = new int[gridAdapter.getCount()];
+        for (int i = 0; i < gridAdapter.getCount(); i++) {
             WordAndHits w = (WordAndHits) gridAdapter.getItem(i);
             res[i] = w.hits;
         }
@@ -196,7 +197,7 @@ public class BullshitBingoActivity extends Activity
     }
 
     private void copyDefaultCards(int[] resources) {
-        for (int resId: resources) {
+        for (int resId : resources) {
             InputStream inputStream = getResources().openRawResource(resId);
 
             BufferedReader reader = null;
@@ -205,13 +206,13 @@ public class BullshitBingoActivity extends Activity
                 reader = new BufferedReader(new InputStreamReader(inputStream, UTF_8));
 
                 File dest = new File(bullshitDir, getResources().getResourceEntryName(resId) + FILE_SUFFIX);
-                if(dest.exists()) {
+                if (dest.exists()) {
                     dest.delete();
                 }
                 writer = new BufferedWriter(new FileWriter(dest));
 
                 String line;
-                while((line = reader.readLine()) != null) {
+                while ((line = reader.readLine()) != null) {
                     writer.write(line + "\n");
                 }
             } catch (IOException e) {
@@ -229,7 +230,7 @@ public class BullshitBingoActivity extends Activity
     }
 
     private void closeQuietly(Closeable closeable) {
-        if(closeable != null) {
+        if (closeable != null) {
             try {
                 closeable.close();
             } catch (IOException e) {
@@ -239,13 +240,13 @@ public class BullshitBingoActivity extends Activity
     }
 
     class CardDynamicGridAdapter extends BaseDynamicGridAdapter implements View.OnTouchListener {
-         protected CardDynamicGridAdapter(Context context, int columnCount) {
-             super(context, columnCount);
-         }
+        protected CardDynamicGridAdapter(Context context, int columnCount) {
+            super(context, columnCount);
+        }
 
-         public CardDynamicGridAdapter(Context context, List<?> items, int columnCount) {
-             super(context, items, columnCount);
-         }
+        public CardDynamicGridAdapter(Context context, List<?> items, int columnCount) {
+            super(context, items, columnCount);
+        }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
@@ -276,69 +277,69 @@ public class BullshitBingoActivity extends Activity
         }
 
 
-         @Override
-         public boolean onTouch(View view, MotionEvent event) {
-             if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                 int position = (int) view.getTag();
-                 if (!isEditing) {
-                     if(isBingoAnimationPlaying) {
-                         cancelBingoAnimation();
+        @Override
+        public boolean onTouch(View view, MotionEvent event) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                int position = (int) view.getTag();
+                if (!isEditing) {
+                    if (isBingoAnimationPlaying) {
+                        cancelBingoAnimation();
 
-                         return false;
-                     }
-                     isDirty = true;
+                        return false;
+                    }
+                    isDirty = true;
 
 
-                     WordAndHits wordDataAtPosition = getWordDataAtPosition(position);
-                     //todo modify this to increase the number of hits
-                     wordDataAtPosition.hits = (wordDataAtPosition.hits == 0 ? 1 : 0);
+                    WordAndHits wordDataAtPosition = getWordDataAtPosition(position);
+                    //todo modify this to increase the number of hits
+                    wordDataAtPosition.hits = (wordDataAtPosition.hits == 0 ? 1 : 0);
 
-                     int hitsCount[] = getHitsCount();
+                    int hitsCount[] = getHitsCount();
 
-                     setCardColor(position, view);
-                     if (shouldVibrate()) {
-                         vibrator.vibrate(30);
-                     }
-                     //look for bingo among columns and lines
-                     for(int i = 0; i < dim; i++) {
-                         boolean bingo = true;
-                         //check i-th row for bingo
-                         for(int j = 0; j < dim; j++) {
-                            bingo &= (hitsCount[i*dim + j] > 0);
-                         }
-                         if(bingo) {
-                             isBingoRow = true;
-                             bingoIndex = i;
+                    setCardColor(position, view);
+                    if (shouldVibrate()) {
+                        vibrator.vibrate(30);
+                    }
+                    //look for bingo among columns and lines
+                    for (int i = 0; i < dim; i++) {
+                        boolean bingo = true;
+                        //check i-th row for bingo
+                        for (int j = 0; j < dim; j++) {
+                            bingo &= (hitsCount[i * dim + j] > 0);
+                        }
+                        if (bingo) {
+                            isBingoRow = true;
+                            bingoIndex = i;
 
-                             animateBingoIfNeeded();
+                            animateBingoIfNeeded();
 
-                             return true;
-                         }
-                         //check i-th column for bingo
-                         bingo = true;
-                         for(int j = 0; j < dim; j++) {
-                             bingo &= (hitsCount[j*dim + i] > 0);
-                         }
-                         if(bingo) {
-                             isBingoRow = false;
-                             bingoIndex = i;
+                            return true;
+                        }
+                        //check i-th column for bingo
+                        bingo = true;
+                        for (int j = 0; j < dim; j++) {
+                            bingo &= (hitsCount[j * dim + i] > 0);
+                        }
+                        if (bingo) {
+                            isBingoRow = false;
+                            bingoIndex = i;
 
-                             animateBingoIfNeeded();
+                            animateBingoIfNeeded();
 
-                             return true;
-                         }
-                     }
-                     return true;
-                 }
+                            return true;
+                        }
+                    }
+                    return true;
+                }
 
-                 return false;
-             }
-             return false;
-         }
-     }
+                return false;
+            }
+            return false;
+        }
+    }
 
     private void cancelBingoAnimation() {
-        if(bingoAnimatorSet != null) {
+        if (bingoAnimatorSet != null) {
             bingoAnimatorSet.cancel();
         }
         bingoMark.setVisibility(View.INVISIBLE);
@@ -352,7 +353,7 @@ public class BullshitBingoActivity extends Activity
     }
 
     private void animateBingoIfNeeded() {
-        if(bingoIndex < 0) {
+        if (bingoIndex < 0) {
             return;
         }
         isBingoAnimationPlaying = true;
@@ -361,7 +362,7 @@ public class BullshitBingoActivity extends Activity
         int height;
         int leftMargin;
         int topMargin;
-        if(isBingoRow) {
+        if (isBingoRow) {
             for (int j = 0; j < dim; j++) {
                 getWordDataAtPosition(bingoIndex * dim + j).hits = 0;
             }
@@ -372,8 +373,8 @@ public class BullshitBingoActivity extends Activity
             leftMargin = 0;
             topMargin = (gridHeight / dim) * bingoIndex;
         } else {
-            for(int j = 0; j < dim; j++) {
-                getWordDataAtPosition(j*dim + bingoIndex).hits = 0;
+            for (int j = 0; j < dim; j++) {
+                getWordDataAtPosition(j * dim + bingoIndex).hits = 0;
             }
 
             width = gridWidth / dim;
@@ -415,7 +416,7 @@ public class BullshitBingoActivity extends Activity
         bingoTitle.setVisibility(View.VISIBLE);
 
         bingoAnimatorSet.start();
-        if(shouldVibrate()) {
+        if (shouldVibrate()) {
             vibrator.vibrate(VibrationPatterns.PUTIN_PATTERN, -1);
         }
     }
@@ -462,7 +463,7 @@ public class BullshitBingoActivity extends Activity
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(final AdapterView<?> parent, final View view, final int position, long id) {
-                if(! isEditing) {
+                if (!isEditing) {
                     return;
                 }
                 WordAndHits itemAtPosition = (WordAndHits) gridView.getItemAtPosition(position);
@@ -505,7 +506,7 @@ public class BullshitBingoActivity extends Activity
 
     private void setCardColor(int position, View view) {
         int background;
-        if(getWordDataAtPosition(position).hits > 0) {
+        if (getWordDataAtPosition(position).hits > 0) {
             background = R.drawable.back_selected;
         } else {
             background = R.drawable.back;
@@ -524,7 +525,7 @@ public class BullshitBingoActivity extends Activity
                 cancelBingoAnimation();
                 String card = (String) parent.getItemAtPosition(position);
 
-                if(card.equals(currentCardName)) {
+                if (card.equals(currentCardName)) {
                     drawerLayout.closeDrawers();
                     return;
                 }
@@ -532,7 +533,7 @@ public class BullshitBingoActivity extends Activity
                 persistIfNeeded();
 
                 List<WordAndHits> words = getWordsForCard(card);
-                if(words == null) {
+                if (words == null) {
                     return;
                 }
                 isEditing = false;
@@ -564,9 +565,9 @@ public class BullshitBingoActivity extends Activity
             Cursor cursor = getContentResolver().query(data, null, null, null, null);
             if (cursor != null && cursor.getCount() != 0) {
                 cursor.moveToFirst();
-                for(String p: knownColNames) {
+                for (String p : knownColNames) {
                     int columnIndex = cursor.getColumnIndex(p);
-                    if(columnIndex > -1) {
+                    if (columnIndex > -1) {
                         cardName = cursor.getString(columnIndex);
                         break;
                     }
@@ -574,7 +575,7 @@ public class BullshitBingoActivity extends Activity
             }
             closeQuietly(cursor);
         }
-        if(cardName == null) {
+        if (cardName == null) {
             cardName = "imported_" + System.currentTimeMillis();
         }
         InputStream inputStream = null;
@@ -584,15 +585,15 @@ public class BullshitBingoActivity extends Activity
             Toast.makeText(this, "Can't open input stream to data", Toast.LENGTH_SHORT).show();
         }
 
-        if(inputStream != null) {
+        if (inputStream != null) {
             if (cardName.contains(FILE_SUFFIX)) {
                 cardName = cardName.substring(0, cardName.indexOf(FILE_SUFFIX));
             }
             List<WordAndHits> words = readCardFromInputStream(inputStream);
-            if(words == null) {
+            if (words == null) {
                 return;
             }
-            if(!setDimAndRenderWords(cardName, words)) {
+            if (!setDimAndRenderWords(cardName, words)) {
                 return;
             }
             initBoardFromWords(words);
@@ -603,13 +604,13 @@ public class BullshitBingoActivity extends Activity
     }
 
     private boolean setDimAndRenderWords(String card, List<WordAndHits> words) {
-        if(words.size() == 0) {
+        if (words.size() == 0) {
             Toast.makeText(this, getResources().getString(R.string.error_empty_card, card), Toast.LENGTH_LONG).show();
             return false;
         }
         double sqrt = Math.sqrt(words.size());
         double floor = Math.floor(sqrt + 0.5);
-        if(Math.abs(floor - sqrt) > 0.1) {
+        if (Math.abs(floor - sqrt) > 0.1) {
             Toast.makeText(this, getResources().getString(R.string.error_wrong_word_count, card), Toast.LENGTH_LONG).show();
             return false;
         }
@@ -632,7 +633,7 @@ public class BullshitBingoActivity extends Activity
     }
 
     private void initCardState() {
-        for(Object o: gridAdapter.getItems()) {
+        for (Object o : gridAdapter.getItems()) {
             WordAndHits wordAndHits = (WordAndHits) o;
             wordAndHits.hits = 0;
         }
@@ -645,7 +646,7 @@ public class BullshitBingoActivity extends Activity
     }
 
     private List<WordAndHits> getWordsForCard(String pureCard) {
-        if (! checkDir()) {
+        if (!checkDir()) {
             return new ArrayList<>();
         }
         File file = new File(bullshitDir, pureCard + FILE_SUFFIX);
@@ -669,8 +670,8 @@ public class BullshitBingoActivity extends Activity
         ArrayList<WordAndHits> result = new ArrayList<>();
         String line;
         try {
-            while((line = br.readLine()) != null) {
-                if(line.startsWith(COMMENT_MARK)) {
+            while ((line = br.readLine()) != null) {
+                if (line.startsWith(COMMENT_MARK)) {
                     continue;
                 }
                 /*
@@ -682,7 +683,7 @@ public class BullshitBingoActivity extends Activity
                 String word = parts[0].trim();
                 //how many times
                 int hits = 0;
-                if(parts.length > 1) {
+                if (parts.length > 1) {
                     try {
                         hits = Integer.parseInt(parts[1].trim());
                     } catch (NumberFormatException e) {
@@ -733,7 +734,7 @@ public class BullshitBingoActivity extends Activity
     }
 
     private List<String> getCardNames() {
-        if (! checkDir()) {
+        if (!checkDir()) {
             return new ArrayList<>();
         }
         String[] cards = bullshitDir.list(new FilenameFilter() {
@@ -743,7 +744,7 @@ public class BullshitBingoActivity extends Activity
             }
         });
         ArrayList<String> result = new ArrayList<>(cards.length);
-        for (String card: cards) {
+        for (String card : cards) {
             if (card.endsWith(FILE_SUFFIX)) {
                 card = card.substring(0, card.indexOf(FILE_SUFFIX));
                 result.add(card);
@@ -758,10 +759,10 @@ public class BullshitBingoActivity extends Activity
 
     private void initActionBar() {
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.app_name){
+        drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.app_name) {
             @Override
             public void onDrawerOpened(View drawerView) {
-                if(! sharedPreferences.contains(FIRST_DRAWER_OPEN_KEY)) {
+                if (!sharedPreferences.contains(FIRST_DRAWER_OPEN_KEY)) {
                     sharedPreferences.edit().putBoolean(FIRST_DRAWER_OPEN_KEY, false).apply();
                     Toast.makeText(BullshitBingoActivity.this, getString(R.string.drawer_first_open), Toast.LENGTH_LONG).show();
                 }
@@ -812,15 +813,15 @@ public class BullshitBingoActivity extends Activity
             isBingoRow = savedInstanceState.getBoolean(BUNDLE_IS_BINGO_ROW);
             bingoIndex = savedInstanceState.getInt(BUNDLE_BINGO_INDEX);
             updateTitle();
-            if(isEditing) {
+            if (isEditing) {
                 prepareForEdit();
             }
             ArrayList<String> wordsArrayList = savedInstanceState.getStringArrayList(BUNDLE_WORDS);
-            if(wordsArrayList == null) {
+            if (wordsArrayList == null) {
                 return;
             }
             ArrayList<WordAndHits> wordAndHits = new ArrayList<>(hitsCount.length);
-            for(int i = 0; i < hitsCount.length; i++) {
+            for (int i = 0; i < hitsCount.length; i++) {
                 wordAndHits.add(i, new WordAndHits(wordsArrayList.get(i), hitsCount[i]));
             }
 
@@ -858,11 +859,11 @@ public class BullshitBingoActivity extends Activity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(! gridViewInitFinished) {
+        if (!gridViewInitFinished) {
             return false;
         }
 
-        if(drawerToggle.onOptionsItemSelected(item)) {
+        if (drawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
         drawerLayout.closeDrawers();
@@ -917,13 +918,13 @@ public class BullshitBingoActivity extends Activity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == SETTINGS_REQUEST_CODE) {
-            if(resultCode == RESULT_OK) {
-                if(data != null && data.hasExtra(PreferencesActivity.RELOAD_DEFAULT_CARDS)) {
+        if (requestCode == SETTINGS_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                if (data != null && data.hasExtra(PreferencesActivity.RELOAD_DEFAULT_CARDS)) {
                     copyDefaultCards(DEFAULT_CARDS);
                     reloadCardList();
 
-                    for(int id: DEFAULT_CARDS) {
+                    for (int id : DEFAULT_CARDS) {
                         String name = getResources().getResourceEntryName(id);
                         if (clearCardIfCurrentCardNameEquals(name)) {
                             break;
@@ -947,16 +948,16 @@ public class BullshitBingoActivity extends Activity
 
     private void saveWords() {
         exitEditMode();
-        if(isPersisted()) {
+        if (isPersisted()) {
             persistWords(currentCardName);
-        } else if(! currentCardName.endsWith("*")) {
+        } else if (!currentCardName.endsWith("*")) {
             currentCardName += "*";
             updateTitle();
         }
     }
 
     private void shareCurrentCard() {
-        if (! checkDir()) {
+        if (!checkDir()) {
             return;
         }
         Intent sendIntent = new Intent();
@@ -966,7 +967,7 @@ public class BullshitBingoActivity extends Activity
         sendIntent.putExtra(Intent.EXTRA_TITLE, title);
         sendIntent.putExtra(Intent.EXTRA_SUBJECT, title);
         File file = new File(bullshitDir, cardName);
-        if(! file.exists()) {
+        if (!file.exists()) {
             throw new IllegalStateException("No bullshit file: " + file);
         }
         //todo this seems to be useless, gmail strips it
@@ -979,9 +980,9 @@ public class BullshitBingoActivity extends Activity
         DialogInterface.OnClickListener deleteCardListener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                switch (which){
+                switch (which) {
                     case DialogInterface.BUTTON_POSITIVE:
-                        if (! checkDir()) {
+                        if (!checkDir()) {
                             return;
                         }
                         File cardFile = new File(bullshitDir, cardName + FILE_SUFFIX);
@@ -1045,7 +1046,7 @@ public class BullshitBingoActivity extends Activity
     }
 
     private void showSelectNewCardDimensionDialog() {
-        if(dimensionDialog == null) {
+        if (dimensionDialog == null) {
             dimensionDialog = new SelectDimensionDialogFragment();
         }
         dimensionDialog.show(getFragmentManager(), "dimension");
@@ -1125,8 +1126,8 @@ public class BullshitBingoActivity extends Activity
         float fontSize = sharedPreferences.getFloat(key, -1);
 
         if (fontSize < 0) {
-            finalFontSize = IDEAL_FONT_SIZE_PX_FOR_1280_800 /dim;
-            if(land) {
+            finalFontSize = IDEAL_FONT_SIZE_PX_FOR_1280_800 / dim;
+            if (land) {
                 finalFontSize *= LANDSCAPE_WIDTH_HEIGHT_COEFF;
             }
 
@@ -1145,9 +1146,9 @@ public class BullshitBingoActivity extends Activity
     }
 
     private void initCleanBoard() {
-        ArrayList<WordAndHits> currentWords = new ArrayList<>(dim*dim);
+        ArrayList<WordAndHits> currentWords = new ArrayList<>(dim * dim);
         for (int i = 0; i < dim; i++) {
-            for(int j = 0; j < dim; j++) {
+            for (int j = 0; j < dim; j++) {
                 currentWords.add(new WordAndHits());
             }
         }
@@ -1193,14 +1194,14 @@ public class BullshitBingoActivity extends Activity
     }
 
     private void persistWords(CharSequence fileName) {
-        if (! checkDir()) {
+        if (!checkDir()) {
             return;
         }
 
         Toast.makeText(this, getString(R.string.toast_saving_card, fileName), Toast.LENGTH_SHORT).show();
 
         File file = new File(bullshitDir, fileName.toString() + FILE_SUFFIX);
-        if(file.exists()) {
+        if (file.exists()) {
             file.delete();
         }
         BufferedWriter writer;
@@ -1215,7 +1216,7 @@ public class BullshitBingoActivity extends Activity
                     .append(COMMENT_MARK)
                     .append(getResources().getString(R.string.file_comment))
                     .append("\n");
-            for(Object o: gridAdapter.getItems()) {
+            for (Object o : gridAdapter.getItems()) {
                 WordAndHits word = (WordAndHits) o;
                 writer
                         .append(word.word)
@@ -1239,7 +1240,7 @@ public class BullshitBingoActivity extends Activity
     }
 
     private boolean checkDir() {
-        if(bullshitDir == null || ! bullshitDir.exists()) {
+        if (bullshitDir == null || !bullshitDir.exists()) {
             Toast.makeText(this, getString(R.string.error_directory_does_not_exist, bullshitDir), Toast.LENGTH_LONG).show();
             return false;
         }
@@ -1250,7 +1251,7 @@ public class BullshitBingoActivity extends Activity
     public void onBackPressed() {
         if (isEditing) {
             saveWords();
-        } else if(isBingoAnimationPlaying) {
+        } else if (isBingoAnimationPlaying) {
             cancelBingoAnimation();
         } else {
             super.onBackPressed();
@@ -1258,7 +1259,7 @@ public class BullshitBingoActivity extends Activity
     }
 
     private void createDirIfNeeded() {
-        if(isExternalStorageWritable()) {
+        if (isExternalStorageWritable()) {
             bullshitDir = Environment.getExternalStoragePublicDirectory(DIR_NAME);
         } else {
             //use internal storage
@@ -1273,7 +1274,7 @@ public class BullshitBingoActivity extends Activity
             throw new IllegalStateException("Can't create .nomedia file", e);
         }
 
-        if(! bullshitDir.exists()) {
+        if (!bullshitDir.exists()) {
             throw new IllegalStateException("Can't create directory to store *.bullshit files at " + bullshitDir);
         } else {
             Log.d(BullshitBingoActivity.class.getName(), "===Bullshit dir: " + bullshitDir);
