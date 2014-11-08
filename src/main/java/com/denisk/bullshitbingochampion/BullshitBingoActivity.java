@@ -657,7 +657,7 @@ public class BullshitBingoActivity extends Activity
             is = new FileInputStream(file);
         } catch (FileNotFoundException e) {
             Toast.makeText(this, getResources().getString(R.string.error_cant_read_file, file.toString()), Toast.LENGTH_SHORT).show();
-            throw new RuntimeException(e);
+            return new ArrayList<>();
         }
         return readCardFromInputStream(is);
     }
@@ -970,7 +970,8 @@ public class BullshitBingoActivity extends Activity
         sendIntent.putExtra(Intent.EXTRA_SUBJECT, title);
         File file = new File(bullshitDir, cardName);
         if (!file.exists()) {
-            throw new IllegalStateException("No bullshit file: " + file);
+            Toast.makeText(this, "No bullshit file: " + file, Toast.LENGTH_SHORT).show();
+            return;
         }
         //todo this seems to be useless, gmail strips it
         sendIntent.setType("text/bullshit");
@@ -1210,7 +1211,8 @@ public class BullshitBingoActivity extends Activity
         try {
             writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), UTF_8));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            Toast.makeText(this, "Can't persist words", Toast.LENGTH_SHORT).show();
+            return;
         }
 
         try {
@@ -1230,8 +1232,7 @@ public class BullshitBingoActivity extends Activity
             isDirty = false;
 
         } catch (IOException e) {
-            //todo replace all throw exceptions with warnings
-            throw new IllegalStateException("Can't write to bullshitbingo file " + file);
+            Toast.makeText(this, "Can't write to bullshitbingo file " + file + ": " + e.getMessage(), Toast.LENGTH_SHORT).show();
         } finally {
             try {
                 writer.close();
@@ -1273,11 +1274,11 @@ public class BullshitBingoActivity extends Activity
         try {
             new File(bullshitDir, ".nomedia").createNewFile();
         } catch (IOException e) {
-            throw new IllegalStateException("Can't create .nomedia file", e);
+            Toast.makeText(this, "Can't create .nomedia file: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
 
         if (!bullshitDir.exists()) {
-            throw new IllegalStateException("Can't create directory to store *.bullshit files at " + bullshitDir);
+            Toast.makeText(this, "Can't create directory to store *.bullshit files at " + bullshitDir, Toast.LENGTH_SHORT).show();
         } else {
             Log.d(BullshitBingoActivity.class.getName(), "===Bullshit dir: " + bullshitDir);
         }
