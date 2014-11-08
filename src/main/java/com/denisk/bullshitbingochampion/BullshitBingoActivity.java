@@ -265,7 +265,9 @@ public class BullshitBingoActivity extends Activity
             textView.setTranslationX(0);
             textView.setTranslationY(0);
 
-            setCardColor(position, textView);
+            if (! isEditing) {
+                setCardColor(position, textView);
+            }
 
             setViewVisibilityOnPosition(position, textView);
 
@@ -279,60 +281,60 @@ public class BullshitBingoActivity extends Activity
 
         @Override
         public boolean onTouch(View view, MotionEvent event) {
+            if(isEditing) {
+                return false;
+            }
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 int position = (int) view.getTag();
-                if (!isEditing) {
-                    if (isBingoAnimationPlaying) {
-                        cancelBingoAnimation();
+                if (isBingoAnimationPlaying) {
+                    cancelBingoAnimation();
 
-                        return false;
-                    }
-                    isDirty = true;
-
-
-                    WordAndHits wordDataAtPosition = getWordDataAtPosition(position);
-                    //todo modify this to increase the number of hits
-                    wordDataAtPosition.hits = (wordDataAtPosition.hits == 0 ? 1 : 0);
-
-                    int hitsCount[] = getHitsCount();
-
-                    setCardColor(position, view);
-                    if (shouldVibrate()) {
-                        vibrator.vibrate(30);
-                    }
-                    //look for bingo among columns and lines
-                    for (int i = 0; i < dim; i++) {
-                        boolean bingo = true;
-                        //check i-th row for bingo
-                        for (int j = 0; j < dim; j++) {
-                            bingo &= (hitsCount[i * dim + j] > 0);
-                        }
-                        if (bingo) {
-                            isBingoRow = true;
-                            bingoIndex = i;
-
-                            animateBingoIfNeeded();
-
-                            return true;
-                        }
-                        //check i-th column for bingo
-                        bingo = true;
-                        for (int j = 0; j < dim; j++) {
-                            bingo &= (hitsCount[j * dim + i] > 0);
-                        }
-                        if (bingo) {
-                            isBingoRow = false;
-                            bingoIndex = i;
-
-                            animateBingoIfNeeded();
-
-                            return true;
-                        }
-                    }
-                    return true;
+                    return false;
                 }
+                isDirty = true;
 
-                return false;
+
+                WordAndHits wordDataAtPosition = getWordDataAtPosition(position);
+                //todo modify this to increase the number of hits
+                wordDataAtPosition.hits = (wordDataAtPosition.hits == 0 ? 1 : 0);
+
+                int hitsCount[] = getHitsCount();
+
+                setCardColor(position, view);
+                if (shouldVibrate()) {
+                    vibrator.vibrate(30);
+                }
+                //look for bingo among columns and lines
+                for (int i = 0; i < dim; i++) {
+                    boolean bingo = true;
+                    //check i-th row for bingo
+                    for (int j = 0; j < dim; j++) {
+                        bingo &= (hitsCount[i * dim + j] > 0);
+                    }
+                    if (bingo) {
+                        isBingoRow = true;
+                        bingoIndex = i;
+
+                        animateBingoIfNeeded();
+
+                        return true;
+                    }
+                    //check i-th column for bingo
+                    bingo = true;
+                    for (int j = 0; j < dim; j++) {
+                        bingo &= (hitsCount[j * dim + i] > 0);
+                    }
+                    if (bingo) {
+                        isBingoRow = false;
+                        bingoIndex = i;
+
+                        animateBingoIfNeeded();
+
+                        return true;
+                    }
+                }
+                return true;
+
             }
             return false;
         }
