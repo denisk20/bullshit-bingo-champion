@@ -26,7 +26,7 @@
     <string name="error_empty_card">Карта пуста: %s</string>
     <string name="error_directory_does_not_exist">Папка не существует: %s</string>
     <string name="action_delete">Удалить</string>
-    <string name="delete_prompt">Удалить карту: </string>
+    <string name="delete_prompt">Удалить карту: %s</string>
     <string name="error_empty_card_name">Ну же, введи что-нибудь</string>
     <string name="share_with">Поделиться словами…</string>
     <string name="share_title">Карта: </string>

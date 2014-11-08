@@ -25,7 +25,7 @@
     <string name="error_empty_card">Мапа порожня: %s</string>
     <string name="error_directory_does_not_exist">Папка не існує: %s</string>
     <string name="action_delete">Видалити</string>
-    <string name="delete_prompt">Видалити мапу: </string>
+    <string name="delete_prompt">Видалити мапу: %s</string>
     <string name="error_empty_card_name">Давай, введи що-небудь</string>
     <string name="share_with">Поділитися словами…</string>
     <string name="share_title">Мапа: </string>

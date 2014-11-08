@@ -25,7 +25,7 @@
     <string name="error_empty_card">Card is empty: %s</string>
     <string name="error_directory_does_not_exist">Directory does not exist: %s</string>
     <string name="action_delete">Delete</string>
-    <string name="delete_prompt">Delete card:</string>
+    <string name="delete_prompt">Delete card: %s</string>
     <string name="error_empty_card_name">C\'mon, type something</string>
     <string name="share_with">Share the words…</string>
     <string name="share_title">Bullshit Bingo card:</string>

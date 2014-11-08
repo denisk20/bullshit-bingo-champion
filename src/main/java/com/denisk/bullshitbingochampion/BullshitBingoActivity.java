@@ -1000,7 +1000,7 @@ public class BullshitBingoActivity extends Activity
             }
         };
         new AlertDialog.Builder(this)
-                .setMessage(getResources().getString(R.string.delete_prompt)+ " " + cardName)
+                .setMessage(getResources().getString(R.string.delete_prompt, cardName))
                 .setPositiveButton(R.string.ok, deleteCardListener)
                 .setNegativeButton(R.string.cancel, deleteCardListener)
                 .show();
