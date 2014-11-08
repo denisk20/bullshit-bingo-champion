@@ -675,7 +675,7 @@ public class BullshitBingoActivity extends Activity
                 }
                 /*
                    we expect the lines to be in format
-                   'word | 3'
+                   'word > 3'
                    where 3 is the number of occurrences of the word
                  */
                 String[] parts = line.split(DELIMITER_MARK);
