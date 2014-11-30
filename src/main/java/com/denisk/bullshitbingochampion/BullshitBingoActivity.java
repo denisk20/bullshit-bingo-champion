@@ -15,7 +15,11 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -33,7 +37,9 @@ import org.askerov.dynamicgrid.BaseDynamicGridAdapter;
 import org.askerov.dynamicgrid.DynamicGridView;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class BullshitBingoActivity extends Activity
@@ -58,8 +64,8 @@ public class BullshitBingoActivity extends Activity
     public static final float IDEAL_FONT_SIZE_PX_FOR_1280_800 = 120f;
     public static final double LANDSCAPE_WIDTH_HEIGHT_COEFF = 1280. / 800;
 
-    private static final int DESIRED_IMAGE_HEIGHT = 480;
-    private static final int DESIRED_IMAGE_WIDTH = 640;
+    private static final float DESIRED_IMAGE_HEIGHT = 480;
+    private static final float DESIRED_IMAGE_WIDTH = 640;
 
     public static final int FONT_STEP = 2;
     public static final String UTF_8 = "UTF-8";
@@ -934,12 +940,14 @@ public class BullshitBingoActivity extends Activity
     private void shareImage() {
         int gridWidth = gridView.getWidth();
         int gridHeight = gridView.getHeight();
+
         Bitmap bitmap = Bitmap.createBitmap(gridWidth, gridHeight, Bitmap.Config.ARGB_8888);
         Canvas c = new Canvas(bitmap);
+        c.setDensity(Bitmap.DENSITY_NONE);
         gridView.draw(c);
 
-        int width;
-        int height;
+        float width;
+        float height;
         boolean isLandscape = isLandscape();
         float coeff;
         if(isLandscape) {
@@ -952,16 +960,40 @@ public class BullshitBingoActivity extends Activity
             width = (int) (gridWidth / coeff);
         }
 
-        bitmap = Bitmap.createScaledBitmap(bitmap, width, height, false);
+
+        bitmap = Bitmap.createScaledBitmap(bitmap, (int)width, (int)height, false);
+
+        int extraHeight = 50;
+
+        Bitmap largeBitmap = Bitmap.createBitmap((int)width, (int)height + extraHeight, Bitmap.Config.ARGB_8888);
+        Canvas largeCanvas = new Canvas(largeBitmap);
+        largeCanvas.drawBitmap(bitmap, 0, extraHeight, null);
+
+        Paint paint = new Paint();
+        paint.setTextSize(18);
+        paint.setTypeface(Typeface.DEFAULT_BOLD);
+        paint.setAntiAlias(true);
+        paint.setColor(Color.WHITE);
+
+        SimpleDateFormat format = new SimpleDateFormat("d MMM yyyy, HH:mm:ss Z");
+        String dateText = format.format(new Date());
+
+        Rect bounds = new Rect();
+        paint.getTextBounds(dateText, 0, dateText.length(), bounds);
+
+        largeCanvas.drawText(dateText, 10, extraHeight - 5, paint);
+
+        paint.setTextSize(14);
+        largeCanvas.drawText("Hello", 10, extraHeight - 5 - bounds.height(), paint);
 
         ContentValues values = new ContentValues();
         values.put(MediaStore.Images.Media.MIME_TYPE, IMAGE_PNG);
-//todo use tmp file instead
+
         Uri uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
         OutputStream os;
         try {
             os = getContentResolver().openOutputStream(uri);
-            bitmap.compress(Bitmap.CompressFormat.PNG, 0, os);
+            largeBitmap.compress(Bitmap.CompressFormat.PNG, 0, os);
             closeQuietly(os);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
