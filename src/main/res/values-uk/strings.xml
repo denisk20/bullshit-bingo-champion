@@ -28,7 +28,7 @@
     <string name="delete_prompt">Видалити мапу: %s</string>
     <string name="error_empty_card_name">Давай, введи що-небудь</string>
     <string name="share_with">Поділитися словами…</string>
-    <string name="share_title">Мапа: </string>
+    <string name="share_title">Мапа: %s</string>
     <string name="long_press_to_delete">Тривале натискання для видалення</string>
     <string name="error_wrong_card_format">Невірний формат мапи</string>
     <string name="action_settings">Налаштування</string>
@@ -57,4 +57,6 @@
     <string name="error_cant_parse_occurrences">Неможливо прочитати кількість для слова %1$s: %2$s</string>
     <string name="toast_saving_card">Зберігаємо мапу %s…</string>
     <string name="action_share_image">Отправити картинку</string>
+    <string name="share_picture_bbc_title">Bullshit Bingo Champion для Android</string>
+    <string name="share_picture_card">Мапа: %s</string>
 </resources>

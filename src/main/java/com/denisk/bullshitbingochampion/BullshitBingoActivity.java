@@ -11,6 +11,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -20,6 +22,8 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -943,7 +947,6 @@ public class BullshitBingoActivity extends Activity
 
         Bitmap bitmap = Bitmap.createBitmap(gridWidth, gridHeight, Bitmap.Config.ARGB_8888);
         Canvas c = new Canvas(bitmap);
-        c.setDensity(Bitmap.DENSITY_NONE);
         gridView.draw(c);
 
         float width;
@@ -961,33 +964,65 @@ public class BullshitBingoActivity extends Activity
         }
 
 
-        bitmap = Bitmap.createScaledBitmap(bitmap, (int)width, (int)height, false);
+        bitmap = Bitmap.createScaledBitmap(bitmap, (int)width, (int)height, true);
 
-        int extraHeight = 50;
+        float extraHeight = 70;
 
-        Bitmap largeBitmap = Bitmap.createBitmap((int)width, (int)height + extraHeight, Bitmap.Config.ARGB_8888);
+        Bitmap largeBitmap = Bitmap.createBitmap((int)width, (int)(height + extraHeight), Bitmap.Config.ARGB_8888);
         Canvas largeCanvas = new Canvas(largeBitmap);
-        largeCanvas.drawBitmap(bitmap, 0, extraHeight, null);
+        largeCanvas.drawBitmap(bitmap, 0, extraHeight/2, null);
 
         Paint paint = new Paint();
-        paint.setTextSize(18);
-        paint.setTypeface(Typeface.DEFAULT_BOLD);
         paint.setAntiAlias(true);
+
         paint.setColor(Color.WHITE);
+        largeCanvas.drawRect(0f, 0f, width, extraHeight/2, paint);
+        largeCanvas.drawRect(0f, height + extraHeight/2, width, height + extraHeight, paint);
+
+        paint.setTypeface(Typeface.DEFAULT_BOLD);
+        paint.setColor(Color.BLACK);
+
+        paint.setTextSize(14);
+
+
+        String cardName = getString(R.string.share_picture_card, currentCardName);
+
+        largeCanvas.drawText(cardName, 10, extraHeight/2 - 5, paint);
+
+        String title = getString(R.string.share_picture_bbc_title);
+        paint.setTextSize(18);
+
+        Rect cardNameBounds = new Rect();
+        paint.getTextBounds(cardName, 0, cardName.length(), cardNameBounds);
+
+        largeCanvas.drawText(title, 10, extraHeight/2 - 5 - cardNameBounds.height(), paint);
+
 
         SimpleDateFormat format = new SimpleDateFormat("d MMM yyyy, HH:mm:ss Z");
         String dateText = format.format(new Date());
 
-        Rect bounds = new Rect();
-        paint.getTextBounds(dateText, 0, dateText.length(), bounds);
-
-        largeCanvas.drawText(dateText, 10, extraHeight - 5, paint);
-
         paint.setTextSize(14);
-        largeCanvas.drawText("Hello", 10, extraHeight - 5 - bounds.height(), paint);
+        paint.setTextAlign(Paint.Align.LEFT);
+
+        largeCanvas.drawText(dateText, 10, height + extraHeight, paint);
+
+        ApplicationInfo applicationInfo;
+        try {
+            applicationInfo = getPackageManager().getApplicationInfo(getPackageName(), 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            Toast.makeText(this, "Can't load current application info", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        Drawable iconDrawable = getResources().getDrawable(applicationInfo.icon);
+
+        Bitmap iconBitmap = drawableToBitmap(iconDrawable);
+
+        largeCanvas.drawBitmap(iconBitmap, width - iconBitmap.getWidth(), height + extraHeight - iconBitmap.getHeight(), paint);
 
         ContentValues values = new ContentValues();
         values.put(MediaStore.Images.Media.MIME_TYPE, IMAGE_PNG);
+        values.put(MediaStore.Images.Media.DATE_TAKEN, new Date().getTime());
 
         Uri uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
         OutputStream os;
@@ -1003,6 +1038,18 @@ public class BullshitBingoActivity extends Activity
         share.setType(IMAGE_PNG);
         share.putExtra(Intent.EXTRA_STREAM, uri);
         startActivity(Intent.createChooser(share, getString(R.string.action_share_image)));
+    }
+    public static Bitmap drawableToBitmap (Drawable drawable) {
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable)drawable).getBitmap();
+        }
+
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        return bitmap;
     }
 
     @Override
@@ -1056,7 +1103,7 @@ public class BullshitBingoActivity extends Activity
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
         String cardName = currentCardName + FILE_SUFFIX;
-        String title = getResources().getString(R.string.share_title) + " " + cardName;
+        String title = getResources().getString(R.string.share_title, cardName);
         sendIntent.putExtra(Intent.EXTRA_TITLE, title);
         sendIntent.putExtra(Intent.EXTRA_SUBJECT, title);
         File file = new File(bullshitDir, cardName);

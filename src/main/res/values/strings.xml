@@ -28,7 +28,7 @@
     <string name="delete_prompt">Delete card: %s</string>
     <string name="error_empty_card_name">C\'mon, type something</string>
     <string name="share_with">Share the words…</string>
-    <string name="share_title">Bullshit Bingo card:</string>
+    <string name="share_title">Bullshit Bingo card: %s</string>
     <string name="long_press_to_delete">Long press to delete</string>
     <string name="error_wrong_card_format">Wrong card format</string>
     <string name="action_settings">Settings</string>
@@ -57,4 +57,6 @@
     <string name="error_cant_parse_occurrences">Can\'t parse the number of occurrences for word %1$s  %2$s</string>
     <string name="toast_saving_card">Saving card %s…</string>
     <string name="action_share_image">Share image</string>
+    <string name="share_picture_bbc_title">Bullshit Bingo Champion for Android</string>
+    <string name="share_picture_card">Card: %s</string>
 </resources>
