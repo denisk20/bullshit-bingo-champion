@@ -18,7 +18,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
@@ -729,30 +728,6 @@ public class BullshitBingoActivity extends Activity
             }
         }
         return result;
-    }
-
-    /**
-     * How many times was the word selected
-     */
-    static class WordAndHits {
-        String word = "";
-        int hits;
-
-        WordAndHits() {
-        }
-
-        WordAndHits(String word, int hits) {
-            this.word = word;
-            this.hits = hits;
-        }
-
-        @Override
-        public String toString() {
-            return "{" +
-                    "word='" + word + '\'' +
-                    ", hits=" + hits +
-                    '}';
-        }
     }
 
     private List<String> getCardNames() {
