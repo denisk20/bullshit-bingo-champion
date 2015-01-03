@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -20,8 +21,12 @@ import java.util.List;
  */
 public class DrawTestActivity extends Activity {
 
-    public static final int GRID_WIDTH_DP = 6;
+    public static final int GRID_WIDTH_DP = 2;
     public static final int TEXT_SIZE_DP = 34;
+    public static final int LINE_INTERVAL_DP = 3;
+    public static final int LEFT_MARGIN_DP = 2;
+
+
     private SurfaceView surfaceView;
     ArrayList<WordAndHits> words = new ArrayList<>();
     private SurfaceHolder holder;
@@ -66,23 +71,31 @@ public class DrawTestActivity extends Activity {
                     canvas.drawLine(0, y, width, y, paint);
                 }
 
-                paint.setTextAlign(Paint.Align.CENTER);
+                paint.setTextAlign(Paint.Align.LEFT);
                 paint.setAntiAlias(true);
 
-                paint.setTextSize(Util.dpToPix(getApplicationContext(), TEXT_SIZE_DP));
+                float textSizePx = Util.dpToPix(getApplicationContext(), TEXT_SIZE_DP);
+                float lineIntervalPx = Util.dpToPix(getApplicationContext(), LINE_INTERVAL_DP);
+                float leftMarginPx = Util.dpToPix(getApplicationContext(), LEFT_MARGIN_DP);
+
+                paint.setTextSize(textSizePx);
                 for(int i = 0; i < dim*dim; i++) {
                     WordAndHits word = words.get(i);
                     float xCell = i % dim;
                     float yCell = (float) Math.floor(i / dim);
 
                     String text = (word.word == null ? "" : word.word.trim());
-                    float textWidth = paint.measureText(text);
-                    if(textWidth > cellWidth) {
-                        Log.wtf("===", "'" + text + "' is bigger then a cell");
-                        List<String> split = splitIntoStringsThatFit(text.split("\\s+"), cellWidth, paint);
-                        int k = 0;
-                    } else {
-                        canvas.drawText(text, xCell * cellWidth + cellWidth / 2, yCell * cellHeight + cellHeight / 2, paint);
+
+                    Rect bounds = new Rect();
+                    paint.getTextBounds(text, 0, text.length(), bounds);
+
+                    List<String> lines = splitIntoStringsThatFit(text.split("\\s+"), cellWidth, paint);
+
+                    float textBlockHeight = lines.size() * textSizePx + (lines.size() - 1) * lineIntervalPx;
+                    float y = yCell * cellHeight + cellHeight / 2 - textBlockHeight / 2 + textSizePx;
+                    for(String line : lines) {
+                        canvas.drawText(line, xCell * cellWidth + leftMarginPx, y, paint);
+                        y += textSizePx + lineIntervalPx;
                     }
                 }
                 holder.unlockCanvasAndPost(canvas);
@@ -152,7 +165,7 @@ public class DrawTestActivity extends Activity {
 
     private void initWords() {
         words.add(new WordAndHits("Hello", 0));
-        words.add(new WordAndHits("Hello hello", 0));
+        words.add(new WordAndHits("Hello hello you how are you", 0));
         words.add(new WordAndHits("Another hello world letmeoutofhereplease!!! you all lie to me I kno it :) I o u k l m n j j c", 2));
         words.add(new WordAndHits("o Longlongwordswithoutspaceswhichwontfit", 1));
     }
