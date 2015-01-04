@@ -58,5 +58,5 @@
     <string name="toast_saving_card">Saving card %s…</string>
     <string name="action_share_image">Share image</string>
     <string name="share_picture_bbc_title">Bullshit Bingo Champion for Android</string>
-    <string name="share_picture_card">Card: %s</string>
+    <string name="share_picture_card">Card:</string>
 </resources>

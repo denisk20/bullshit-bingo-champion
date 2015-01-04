@@ -64,8 +64,6 @@ public class BullshitBingoActivity extends Activity
     public static final String NEW_CARD_PREFIX = "<";
     public static final String NEW_CARD_SUFFIX = ">";
     public static final String FILE_SUFFIX = ".bullshit";
-    public static final float IDEAL_FONT_SIZE_PX_FOR_1280_800 = 120f;
-    public static final double LANDSCAPE_WIDTH_HEIGHT_COEFF = 1280. / 800;
 
     private static final float DESIRED_IMAGE_HEIGHT = 480;
     private static final float DESIRED_IMAGE_WIDTH = 640;
@@ -928,7 +926,7 @@ public class BullshitBingoActivity extends Activity
 
         float width;
         float height;
-        boolean isLandscape = isLandscape();
+        boolean isLandscape = Util.isLandscape(this);
         float coeff;
         if(isLandscape) {
             coeff = gridWidth / DESIRED_IMAGE_WIDTH;
@@ -962,7 +960,7 @@ public class BullshitBingoActivity extends Activity
         paint.setTextSize(14);
 
 
-        String cardName = getString(R.string.share_picture_card, currentCardName);
+        String cardName = getString(R.string.share_picture_card);
 
         largeCanvas.drawText(cardName, 10, extraHeight/2 - 5, paint);
 
@@ -1049,18 +1047,14 @@ public class BullshitBingoActivity extends Activity
     }
 
     private void persistFont() {
-        boolean land = isLandscape();
-        String prefix = getFontPrefix(land);
+        boolean land = Util.isLandscape(this);
+        String prefix = Util.getFontPrefix(land);
 
-        String key = getFontKey(dim, prefix);
+        String key = Util.getFontKey(dim, prefix);
 
         sharedPreferences.edit().putFloat(key, finalFontSize).commit();
 
         gridAdapter.notifyDataSetChanged();
-    }
-
-    private boolean isLandscape() {
-        return getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
     }
 
     private void saveWords() {
@@ -1239,33 +1233,6 @@ public class BullshitBingoActivity extends Activity
         initCleanBoard();
     }
 
-    private void initCardFontSize(int dim) {
-        boolean land = isLandscape();
-        String prefix = getFontPrefix(land);
-
-        String key = getFontKey(dim, prefix);
-        float fontSize = sharedPreferences.getFloat(key, -1);
-
-        if (fontSize < 0) {
-            finalFontSize = IDEAL_FONT_SIZE_PX_FOR_1280_800 / dim;
-            if (land) {
-                finalFontSize *= LANDSCAPE_WIDTH_HEIGHT_COEFF;
-            }
-
-            sharedPreferences.edit().putFloat(key, finalFontSize).commit();
-        } else {
-            finalFontSize = fontSize;
-        }
-    }
-
-    private String getFontKey(int dim, String prefix) {
-        return prefix + dim;
-    }
-
-    private String getFontPrefix(boolean land) {
-        return land ? "land" : "portrait";
-    }
-
     private void initCleanBoard() {
         ArrayList<WordAndHits> currentWords = new ArrayList<>(dim * dim);
         for (int i = 0; i < dim; i++) {
@@ -1279,7 +1246,7 @@ public class BullshitBingoActivity extends Activity
     }
 
     private void initBoardFromWords(final List<WordAndHits> currentWords) {
-        initCardFontSize(dim);
+        finalFontSize = Util.getCardFontSize(this, dim, Util.isLandscape(this));
 
         gridView.setNumColumns(dim);
 
