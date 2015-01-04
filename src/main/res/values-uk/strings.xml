@@ -64,4 +64,6 @@
     <string name="changelog_ok_button">OK</string>
     <string name="changelog_show_full">Докладніше...</string>
     <string name="changelog_title">Що нового</string>
+    <string name="pref_title_changelog">Зміни</string>
+    <string name="pref_summary_changelog">Показани зміни</string>
 </resources>

@@ -10,4 +10,8 @@
             android:key="reload_default_cards"
             android:title="@string/pref_title_reload"
             android:summary="@string/pref_summary_reload"/>
+    <Preference
+            android:key="show_changelog"
+            android:title="@string/pref_title_changelog"
+            android:summary="@string/pref_summary_changelog"/>
 </PreferenceScreen>

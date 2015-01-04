@@ -65,4 +65,6 @@
     <string name="changelog_ok_button">OK</string>
     <string name="changelog_show_full">Подробнее</string>
     <string name="changelog_title">Что нового</string>
+    <string name="pref_title_changelog">Изменения</string>
+    <string name="pref_summary_changelog">Показать изменения</string>
 </resources>

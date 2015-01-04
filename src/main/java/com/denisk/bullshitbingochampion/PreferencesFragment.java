@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import de.cketti.library.changelog.ChangeLog;
 
 /**
  * @author denisk
@@ -16,6 +17,7 @@ public class PreferencesFragment extends PreferenceFragment {
 
     private Activity parent;
     private Preference resetButton;
+    private Preference changelogButton;
 
     private Preference.OnPreferenceClickListener onPreferenceClickListener= new Preference.OnPreferenceClickListener() {
         @Override
@@ -47,6 +49,15 @@ public class PreferencesFragment extends PreferenceFragment {
             }
         }
     };
+    private Preference.OnPreferenceClickListener onShowChangelogListener = new Preference.OnPreferenceClickListener() {
+        @Override
+        public boolean onPreferenceClick(Preference preference) {
+            ChangeLog cl = new ChangeLog(parent);
+            cl.getFullLogDialog().show();
+
+            return true;
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,8 +68,11 @@ public class PreferencesFragment extends PreferenceFragment {
         parent = getActivity();
 
         resetButton = findPreference("reload_default_cards");
-
         resetButton.setOnPreferenceClickListener(onPreferenceClickListener);
+
+        changelogButton = findPreference("show_changelog");
+
+        changelogButton.setOnPreferenceClickListener(onShowChangelogListener);
 
     }
 }
