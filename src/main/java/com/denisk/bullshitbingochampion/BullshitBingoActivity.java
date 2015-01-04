@@ -11,16 +11,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -40,7 +34,6 @@ import org.askerov.dynamicgrid.BaseDynamicGridAdapter;
 import org.askerov.dynamicgrid.DynamicGridView;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -65,8 +58,8 @@ public class BullshitBingoActivity extends Activity
     public static final String NEW_CARD_SUFFIX = ">";
     public static final String FILE_SUFFIX = ".bullshit";
 
-    private static final float DESIRED_IMAGE_HEIGHT = 480;
-    private static final float DESIRED_IMAGE_WIDTH = 640;
+    private static final int IMAGE_LONG_EDGE = 1280;
+    private static final int IMAGE_SHORT_EDGE = 800;
 
     public static final int FONT_STEP = 2;
     public static final String UTF_8 = "UTF-8";
@@ -916,84 +909,30 @@ public class BullshitBingoActivity extends Activity
         }
     }
 
+    private List<WordAndHits> getWordsAndHits() {
+        List<Object> items = gridAdapter.getItems();
+        ArrayList<WordAndHits> result = new ArrayList<>(items.size());
+        for(Object o : items) {
+            result.add((WordAndHits) o);
+        }
+
+        return result;
+    }
+
     private void shareImage() {
-        int gridWidth = gridView.getWidth();
-        int gridHeight = gridView.getHeight();
+        boolean isLand = Util.isLandscape(this);
+        int width = isLand ? IMAGE_LONG_EDGE : IMAGE_SHORT_EDGE;
+        int height = isLand ? IMAGE_SHORT_EDGE : IMAGE_LONG_EDGE;
 
-        Bitmap bitmap = Bitmap.createBitmap(gridWidth, gridHeight, Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(bitmap);
-        gridView.draw(c);
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        CardExporter cardExporter = new CardExporter(getWordsAndHits(), canvas, this)
+                .withWidth(width)
+                .withHeight(height)
+                .withCardName(currentCardName)
+                ;
 
-        float width;
-        float height;
-        boolean isLandscape = Util.isLandscape(this);
-        float coeff;
-        if(isLandscape) {
-            coeff = gridWidth / DESIRED_IMAGE_WIDTH;
-            width = DESIRED_IMAGE_WIDTH;
-            height = (int) (gridHeight / coeff);
-        } else {
-            coeff = gridHeight / DESIRED_IMAGE_HEIGHT;
-            height = DESIRED_IMAGE_HEIGHT;
-            width = (int) (gridWidth / coeff);
-        }
-
-
-        bitmap = Bitmap.createScaledBitmap(bitmap, (int)width, (int)height, true);
-
-        float extraHeight = 70;
-
-        Bitmap largeBitmap = Bitmap.createBitmap((int)width, (int)(height + extraHeight), Bitmap.Config.ARGB_8888);
-        Canvas largeCanvas = new Canvas(largeBitmap);
-        largeCanvas.drawBitmap(bitmap, 0, extraHeight/2, null);
-
-        Paint paint = new Paint();
-        paint.setAntiAlias(true);
-
-        paint.setColor(Color.WHITE);
-        largeCanvas.drawRect(0f, 0f, width, extraHeight/2, paint);
-        largeCanvas.drawRect(0f, height + extraHeight/2, width, height + extraHeight, paint);
-
-        paint.setTypeface(Typeface.DEFAULT_BOLD);
-        paint.setColor(Color.BLACK);
-
-        paint.setTextSize(14);
-
-
-        String cardName = getString(R.string.share_picture_card);
-
-        largeCanvas.drawText(cardName, 10, extraHeight/2 - 5, paint);
-
-        String title = getString(R.string.share_picture_bbc_title);
-        paint.setTextSize(18);
-
-        Rect cardNameBounds = new Rect();
-        paint.getTextBounds(cardName, 0, cardName.length(), cardNameBounds);
-
-        largeCanvas.drawText(title, 10, extraHeight/2 - 5 - cardNameBounds.height(), paint);
-
-
-        SimpleDateFormat format = new SimpleDateFormat("d MMM yyyy, HH:mm:ss Z");
-        String dateText = format.format(new Date());
-
-        paint.setTextSize(14);
-        paint.setTextAlign(Paint.Align.LEFT);
-
-        largeCanvas.drawText(dateText, 10, height + extraHeight, paint);
-
-        ApplicationInfo applicationInfo;
-        try {
-            applicationInfo = getPackageManager().getApplicationInfo(getPackageName(), 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            Toast.makeText(this, "Can't load current application info", Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        Drawable iconDrawable = getResources().getDrawable(applicationInfo.icon);
-
-        Bitmap iconBitmap = drawableToBitmap(iconDrawable);
-
-        largeCanvas.drawBitmap(iconBitmap, width - iconBitmap.getWidth(), height + extraHeight - iconBitmap.getHeight(), paint);
+        cardExporter.drawCard();
 
         ContentValues values = new ContentValues();
         values.put(MediaStore.Images.Media.MIME_TYPE, IMAGE_PNG);
@@ -1003,7 +942,7 @@ public class BullshitBingoActivity extends Activity
         OutputStream os;
         try {
             os = getContentResolver().openOutputStream(uri);
-            largeBitmap.compress(Bitmap.CompressFormat.PNG, 0, os);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 0, os);
             closeQuietly(os);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -1014,6 +953,7 @@ public class BullshitBingoActivity extends Activity
         share.putExtra(Intent.EXTRA_STREAM, uri);
         startActivity(Intent.createChooser(share, getString(R.string.action_share_image)));
     }
+
     public static Bitmap drawableToBitmap (Drawable drawable) {
         if (drawable instanceof BitmapDrawable) {
             return ((BitmapDrawable)drawable).getBitmap();

@@ -71,7 +71,7 @@ public class DrawTestActivity extends Activity {
         words.add(new WordAndHits("Hello", 2));
         words.add(new WordAndHits("Hello", 2));
         words.add(new WordAndHits("Hello", 0));
-        words.add(new WordAndHits("Hello hello hello!", 2));
+        words.add(new WordAndHits("Hello hello hello hello!", 2));
         words.add(new WordAndHits("Hello", 2));
         words.add(new WordAndHits("Hello", 2));
         words.add(new WordAndHits("Hello", 0));

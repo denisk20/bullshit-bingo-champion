@@ -24,17 +24,17 @@ import java.util.List;
  * @since 04.01.15.
  */
 public class CardExporter {
-    public static final int LEFT_MARGIN = 3;
     public static final int TOP_MARGIN = 100;
-    public static final int BOTTOM_MARGIN = 200;
+    public static final int BOTTOM_MARGIN = 100;
     public static final int HEADER_FOOTER_LEFT_MARGIN = 20;
     public static final int HEADER_FOOTER_COLOR = 0xffe5e5e5;
-    public static final int HEADER_TEXT_SIZE = 70;
+    public static final int HEADER_TEXT_SIZE = 50;
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("d MMMM yyyy, HH:mm:ss Z");
-    public static final int DATE_TEXT_SIZE = 50;
-    public static final int DATE_TOP_MARGIN = 10;
-    public static final int BBC_TEXT_SIZE = 40;
-    public static final int BBC_BOTTOM_MARGIN = 20;
+    public static final int DATE_TEXT_SIZE = 35;
+    public static final int DATE_TOP_MARGIN = 5;
+    public static final int BBC_TEXT_SIZE = 35;
+    public static final int BBC_BOTTOM_MARGIN = 10;
+    public static final int BBC_LOGO_PADDING = 5;
     private static final float BINGO_STROKE_WIDTH = 15;
 
     private String cardName = "<unknown>";
@@ -116,12 +116,35 @@ public class CardExporter {
         float cellWidth = width/dim;
         float cellHeight = contentHeight/dim;
 
-        paint.setTextAlign(Paint.Align.LEFT);
+        drawWords(paint, dim, cellWidth, cellHeight);
 
-        float textSize = Util.getCardFontSize(context, (int) dim, true);
+        drawGrid(paint, dim, contentHeight);
 
+        drawBingo(paint, cellWidth, cellHeight);
+    }
+
+    private void drawBingo(Paint paint, float cellWidth, float cellHeight) {
+        BingoData bingoData = BingoData.fromWords(words);
+        paint.setColor(bingoStrokeColor);
+        paint.setStrokeWidth(BINGO_STROKE_WIDTH);
+        paint.setStyle(Paint.Style.STROKE);
+
+        for(Integer row : bingoData.bingoRows) {
+            canvas.drawRect(0, row * cellHeight + TOP_MARGIN, width, (row + 1) * cellHeight + TOP_MARGIN, paint);
+        }
+        for(Integer col : bingoData.bingoColumns) {
+            canvas.drawRect(col * cellWidth, TOP_MARGIN, (col + 1) * cellWidth, height - BOTTOM_MARGIN, paint);
+        }
+    }
+
+    private void drawWords(Paint paint, float dim, float cellWidth, float cellHeight) {
+
+        float textSize = Util.getCardFontSize(context, (int) dim, width > height);
+
+        paint.setTextAlign(Paint.Align.CENTER);
         paint.setTextSize(textSize);
         paint.setTypeface(Typeface.DEFAULT);
+
         for(int i = 0; i < dim*dim; i++) {
             WordAndHits word = words.get(i);
             float xCell = i % dim;
@@ -140,23 +163,9 @@ public class CardExporter {
             float textBlockHeight = lines.size() * textSize + (lines.size() - 1) * lineInterval;
             float currentLineYCoord = yCell * cellHeight + cellHeight / 2 - textBlockHeight / 2 + textSize + TOP_MARGIN;
             for(String line : lines) {
-                canvas.drawText(line, xCell * cellWidth + LEFT_MARGIN, currentLineYCoord, paint);
+                canvas.drawText(line, xCell * cellWidth + cellWidth / 2, currentLineYCoord, paint);
                 currentLineYCoord += textSize + lineInterval;
             }
-        }
-
-        drawGrid(paint, dim, contentHeight);
-
-        BingoData bingoData = BingoData.fromWords(words);
-        paint.setColor(bingoStrokeColor);
-        paint.setStrokeWidth(BINGO_STROKE_WIDTH);
-        paint.setStyle(Paint.Style.STROKE);
-
-        for(Integer row : bingoData.bingoRows) {
-            canvas.drawRect(0, row * cellHeight + TOP_MARGIN, width, (row + 1) * cellHeight + TOP_MARGIN, paint);
-        }
-        for(Integer col : bingoData.bingoColumns) {
-            canvas.drawRect(col * cellWidth, TOP_MARGIN, (col + 1) * cellWidth, height - BOTTOM_MARGIN, paint);
         }
     }
 
@@ -186,14 +195,14 @@ public class CardExporter {
         Drawable iconDrawable = context.getResources().getDrawable(applicationInfo.icon);
         Bitmap iconBitmap = Util.drawableToBitmap(iconDrawable);
 
-        iconBitmap = Bitmap.createScaledBitmap(iconBitmap, BOTTOM_MARGIN, BOTTOM_MARGIN, true);
-        canvas.drawBitmap(iconBitmap, width - BOTTOM_MARGIN, height - BOTTOM_MARGIN, paint);
+        iconBitmap = Bitmap.createScaledBitmap(iconBitmap, BOTTOM_MARGIN - BBC_LOGO_PADDING, BOTTOM_MARGIN - BBC_LOGO_PADDING, true);
+        canvas.drawBitmap(iconBitmap, width - BOTTOM_MARGIN, height - BOTTOM_MARGIN + BBC_LOGO_PADDING, paint);
     }
 
     private void drawHeader(Paint paint) {
         paint.setColor(Color.BLACK);
         paint.setTextSize(HEADER_TEXT_SIZE);
-        String cardText = context.getString(R.string.share_picture_card);
+        String cardText = context.getString(R.string.share_picture_card) + " ";
         Rect bounds = new Rect();
         paint.getTextBounds(cardText, 0, cardText.length(), bounds);
         int titleYCoord = TOP_MARGIN / 2 + bounds.height() / 2;
