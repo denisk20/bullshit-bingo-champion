@@ -1,17 +1,26 @@
 package com.denisk.bullshitbingochampion;
 
 import android.app.Activity;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -20,12 +29,12 @@ import java.util.List;
  */
 public class DrawTestActivity extends Activity {
 
-    public static final int GRID_WIDTH = 1;
+    public static final int GRID_WIDTH = 10;
     public static final int TEXT_SIZE = 100;
     public static final int LINE_INTERVAL = 15;
-    public static final int LEFT_MARGIN = 0;
-    public static final int TOP_MARGIN = 300;
-    public static final int BOTTOM_MARGIN = 300;
+    public static final int LEFT_MARGIN = 3;
+    public static final int TOP_MARGIN = 100;
+    public static final int BOTTOM_MARGIN = 200;
 
 
     private SurfaceView surfaceView;
@@ -52,9 +61,59 @@ public class DrawTestActivity extends Activity {
                 Canvas canvas = holder.lockCanvas();
 
                 Paint paint = new Paint();
+                paint.setAntiAlias(true);
+
                 paint.setColor(Color.WHITE);
 
                 canvas.drawRect(0, 0, width, height, paint);
+
+                paint.setColor(0xffe5e5e5);
+                canvas.drawRect(0, 0, width, TOP_MARGIN, paint);
+                float bottomMarginYCoord = height - BOTTOM_MARGIN;
+                canvas.drawRect(0, bottomMarginYCoord, width, height, paint);
+
+                paint.setColor(Color.BLACK);
+                paint.setTextSize(70);
+                String cardText = "Card: ";
+                int titleTextLeftMargin = 20;
+                Rect bounds = new Rect();
+                paint.getTextBounds(cardText, 0, cardText.length(), bounds);
+                int titleYCoord = TOP_MARGIN / 2 + bounds.height() / 2;
+                canvas.drawText(cardText, titleTextLeftMargin, titleYCoord, paint);
+
+                float cardTextWidth = paint.measureText(cardText);
+                paint.setTypeface(Typeface.DEFAULT_BOLD);
+                canvas.drawText("My Card", titleTextLeftMargin + cardTextWidth, titleYCoord, paint);
+
+                SimpleDateFormat format = new SimpleDateFormat("d MMMM yyyy, HH:mm:ss Z");
+                String dateText = format.format(new Date());
+
+                paint.setTextSize(50);
+                paint.getTextBounds(dateText, 0, dateText.length(), bounds);
+                canvas.drawText(dateText, titleTextLeftMargin, bottomMarginYCoord + bounds.height() , paint);
+
+
+                ApplicationInfo applicationInfo;
+                try {
+                    applicationInfo = getPackageManager().getApplicationInfo(getPackageName(), 0);
+                } catch (PackageManager.NameNotFoundException e) {
+                    Toast.makeText(DrawTestActivity.this, "Can't load current application info", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                paint.setTextSize(40);
+                String applicationName = Util.getApplicationName(DrawTestActivity.this);
+                paint.getTextBounds(applicationName, 0, applicationName.length(), bounds);
+
+                canvas.drawText(applicationName, titleTextLeftMargin, height - 20, paint);
+
+                Drawable iconDrawable = getResources().getDrawable(applicationInfo.icon);
+                Bitmap iconBitmap = drawableToBitmap(iconDrawable);
+
+                iconBitmap = Bitmap.createScaledBitmap(iconBitmap, BOTTOM_MARGIN, BOTTOM_MARGIN, true);
+                canvas.drawBitmap(iconBitmap, width - BOTTOM_MARGIN, bottomMarginYCoord, paint);
+
+                height -= TOP_MARGIN + BOTTOM_MARGIN;
 
                 float dim = (float) Math.sqrt(words.size());
                 float cellWidth = width/dim;
@@ -66,14 +125,14 @@ public class DrawTestActivity extends Activity {
                     float x = width / dim * i;
                     float y = height / dim * i;
 
-                    canvas.drawLine(x, 0, x, height, paint);
-                    canvas.drawLine(0, y, width, y, paint);
+                    canvas.drawLine(x, TOP_MARGIN , x, height + TOP_MARGIN, paint);
+                    canvas.drawLine(0, y + TOP_MARGIN, width, y + TOP_MARGIN, paint);
                 }
 
                 paint.setTextAlign(Paint.Align.LEFT);
-                paint.setAntiAlias(true);
 
                 paint.setTextSize(TEXT_SIZE);
+                paint.setTypeface(Typeface.DEFAULT);
                 for(int i = 0; i < dim*dim; i++) {
                     WordAndHits word = words.get(i);
                     float xCell = i % dim;
@@ -81,16 +140,13 @@ public class DrawTestActivity extends Activity {
 
                     String text = (word.word == null ? "" : word.word.trim());
 
-                    Rect bounds = new Rect();
-                    paint.getTextBounds(text, 0, text.length(), bounds);
-
                     List<String> lines = splitIntoStringsThatFit(text.split("\\s+"), cellWidth, paint);
 
                     float textBlockHeight = lines.size() * TEXT_SIZE + (lines.size() - 1) * LINE_INTERVAL;
-                    float y = yCell * cellHeight + cellHeight / 2 - textBlockHeight / 2 + TEXT_SIZE;
+                    float currentLineYCoord = yCell * cellHeight + cellHeight / 2 - textBlockHeight / 2 + TEXT_SIZE + TOP_MARGIN;
                     for(String line : lines) {
-                        canvas.drawText(line, xCell * cellWidth + LEFT_MARGIN, y, paint);
-                        y += TEXT_SIZE + LINE_INTERVAL;
+                        canvas.drawText(line, xCell * cellWidth + LEFT_MARGIN, currentLineYCoord, paint);
+                        currentLineYCoord += TEXT_SIZE + LINE_INTERVAL;
                     }
                 }
                 holder.unlockCanvasAndPost(canvas);
@@ -161,7 +217,20 @@ public class DrawTestActivity extends Activity {
     private void initWords() {
         words.add(new WordAndHits("Hello", 0));
         words.add(new WordAndHits("Hello hello you how are you", 0));
-        words.add(new WordAndHits("Another hello world letmeoutofhereplease!!! you all lie to me I kno it :) I o u k l m n j j c", 2));
+        words.add(new WordAndHits("Another hello world letmeoutofhereplease!!!", 2));
+//        words.add(new WordAndHits("Another hello world letmeoutofhereplease!!! you all lie to me I kno it :) I o u k l m n j j c", 2));
         words.add(new WordAndHits("o Longlongwordswithoutspaceswhichwontfit", 1));
+    }
+    public static Bitmap drawableToBitmap (Drawable drawable) {
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable)drawable).getBitmap();
+        }
+
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        return bitmap;
     }
 }

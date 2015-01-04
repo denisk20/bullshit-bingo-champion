@@ -12,14 +12,12 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.widget.Toast;
 import com.denisk.bullshitbingochampion.R;
+import com.denisk.bullshitbingochampion.Util;
 
 public class AppRate implements android.content.DialogInterface.OnClickListener, OnCancelListener {
 
@@ -165,8 +163,8 @@ public class AppRate implements android.content.DialogInterface.OnClickListener,
 
 		Log.d(TAG, "Create default dialog.");
 
-		String title = hostActivity.getString(R.string.rate, getApplicationName(hostActivity.getApplicationContext()));
-		String message = hostActivity.getString(R.string.rate_if_you_enjoy, getApplicationName(hostActivity.getApplicationContext()));
+		String title = hostActivity.getString(R.string.rate, Util.getApplicationName(hostActivity.getApplicationContext()));
+		String message = hostActivity.getString(R.string.rate_if_you_enjoy, Util.getApplicationName(hostActivity.getApplicationContext()));
 		String rate = hostActivity.getString(R.string.rate_do_it);
 		String remindLater = hostActivity.getString(R.string.rate_later);
 		String dismiss = hostActivity.getString(R.string.rate_no);
@@ -258,18 +256,4 @@ public class AppRate implements android.content.DialogInterface.OnClickListener,
 		}
 	}
 
-	/**
-	 * @param context A context of the current application.
-	 * @return The application name of the current application.
-	 */
-	private static final String getApplicationName(Context context) {
-		final PackageManager packageManager = context.getPackageManager();
-		ApplicationInfo applicationInfo;
-		try {
-			applicationInfo = packageManager.getApplicationInfo(context.getPackageName(), 0);
-		} catch (final NameNotFoundException e) {
-			applicationInfo = null;
-		}
-		return (String) (applicationInfo != null ? packageManager.getApplicationLabel(applicationInfo) : "(unknown)");
-	}
 }
