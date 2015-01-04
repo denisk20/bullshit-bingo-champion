@@ -3,7 +3,7 @@ buildscript {
 		mavenCentral()
 	}
 	dependencies {
-		classpath 'com.android.tools.build:gradle:1.0.0-rc1'
+		classpath 'com.android.tools.build:gradle:1.0.0'
 	}
 }
 apply plugin: 'com.android.application'
@@ -14,7 +14,7 @@ repositories {
 
 android {
 	compileSdkVersion 21
-	buildToolsVersion "21.1.1"
+	buildToolsVersion "21.1.2"
 
 	defaultConfig {
 		minSdkVersion 15
@@ -48,5 +48,5 @@ android {
 
 dependencies {
 	compile project (':DynamicGrid:dynamicgrid')
-	compile 'com.android.support:support-v4:21.0.2'
+	compile 'com.android.support:support-v4:21.0.3'
 }

@@ -32,7 +32,7 @@ public class CardExporter {
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("d MMMM yyyy, HH:mm:ss Z");
     public static final int DATE_TEXT_SIZE = 35;
     public static final int DATE_TOP_MARGIN = 5;
-    public static final int BBC_TEXT_SIZE = 35;
+    public static final int BBC_TEXT_SIZE = 30;
     public static final int BBC_BOTTOM_MARGIN = 10;
     public static final int BBC_LOGO_PADDING = 5;
     private static final float BINGO_STROKE_WIDTH = 15;

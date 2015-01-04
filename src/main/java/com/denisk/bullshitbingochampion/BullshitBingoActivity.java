@@ -264,7 +264,7 @@ public class BullshitBingoActivity extends Activity
             WordAndHits wordAndHits = (WordAndHits) getItem(position);
             TextView textView;
             if (!(convertView instanceof TextView)) {
-                textView = (TextView) getLayoutInflater().inflate(R.layout.word, null);
+                textView = (TextView) getLayoutInflater().inflate(R.layout.word, parent, false);
             } else {
                 textView = (TextView) convertView;
             }
@@ -276,9 +276,7 @@ public class BullshitBingoActivity extends Activity
             textView.setTranslationX(0);
             textView.setTranslationY(0);
 
-            if (! isEditing) {
-                setCardColor(position, textView);
-            }
+            setCardColor(position, textView);
 
             setViewVisibilityOnPosition(position, textView);
 
@@ -484,7 +482,6 @@ public class BullshitBingoActivity extends Activity
                 if (itemAtPosition == null) {
                     return;
                 }
-                itemAtPosition.hits++;
 
                 CharSequence currentCellValue = itemAtPosition.word;
 
@@ -631,7 +628,7 @@ public class BullshitBingoActivity extends Activity
 
         dim = sqrt;
 
-        initCardState();
+        resetCardState();
 
         currentCardName = card;
         updateTitle();
@@ -646,7 +643,7 @@ public class BullshitBingoActivity extends Activity
         return true;
     }
 
-    private void initCardState() {
+    private void resetCardState() {
         for (Object o : gridAdapter.getItems()) {
             WordAndHits wordAndHits = (WordAndHits) o;
             wordAndHits.hits = 0;
@@ -886,7 +883,7 @@ public class BullshitBingoActivity extends Activity
                 showDeleteCardDialog(currentCardName);
                 return true;
             case R.id.action_shuffle:
-                initCardState();
+                resetCardState();
                 gridView.shuffle();
                 return true;
             case R.id.action_settings:
@@ -1084,7 +1081,7 @@ public class BullshitBingoActivity extends Activity
         Toast.makeText(this, R.string.long_press_to_drag, Toast.LENGTH_SHORT).show();
         invalidateOptionsMenu();
         gridView.setOnItemLongClickListener(itemLongClickListener);
-        initCardState();
+        resetCardState();
         gridAdapter.notifyDataSetChanged();
     }
 
@@ -1162,7 +1159,7 @@ public class BullshitBingoActivity extends Activity
 
         cancelBingoAnimation();
 
-        initCardState();
+        resetCardState();
         //go into edit mode immediately
         prepareForEdit();
 
