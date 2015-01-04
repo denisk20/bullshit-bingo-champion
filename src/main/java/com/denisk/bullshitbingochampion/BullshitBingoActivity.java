@@ -145,6 +145,7 @@ public class BullshitBingoActivity extends Activity
     private AnimatorSet bingoAnimatorSet;
     private TextView bingoMark;
     private TextView bingoTitle;
+    private Button shareButton;
 
     /**
      * Called when the activity is first created.
@@ -168,6 +169,8 @@ public class BullshitBingoActivity extends Activity
 
         bingoMark = (TextView) findViewById(R.id.game_bingo_mark);
         bingoTitle = (TextView) findViewById(R.id.game_bingo_title);
+        shareButton = (Button) findViewById(R.id.share_button);
+        shareButton.setVisibility(View.GONE);
 
         initActionBar();
 
@@ -354,6 +357,19 @@ public class BullshitBingoActivity extends Activity
         if (bingoAnimatorSet != null) {
             bingoAnimatorSet.cancel();
         }
+        if (isBingoAnimationPlaying) {
+            if (isBingoRow) {
+                for (int j = 0; j < dim; j++) {
+                    getWordDataAtPosition(bingoIndex * dim + j).hits = 0;
+                }
+            } else {
+                for (int j = 0; j < dim; j++) {
+                    getWordDataAtPosition(j * dim + bingoIndex).hits = 0;
+                }
+            }
+            gridAdapter.notifyDataSetChanged();
+        }
+
         bingoMark.setVisibility(View.INVISIBLE);
         bingoTitle.setVisibility(View.INVISIBLE);
 
@@ -362,6 +378,7 @@ public class BullshitBingoActivity extends Activity
         isBingoAnimationPlaying = false;
 
         bingoIndex = -1;
+        toggleShareButton();
     }
 
     private void animateBingoIfNeeded() {
@@ -375,20 +392,11 @@ public class BullshitBingoActivity extends Activity
         int leftMargin;
         int topMargin;
         if (isBingoRow) {
-            for (int j = 0; j < dim; j++) {
-                getWordDataAtPosition(bingoIndex * dim + j).hits = 0;
-            }
-
-
             width = gridWidth;
             height = gridHeight / dim;
             leftMargin = 0;
             topMargin = (gridHeight / dim) * bingoIndex;
         } else {
-            for (int j = 0; j < dim; j++) {
-                getWordDataAtPosition(j * dim + bingoIndex).hits = 0;
-            }
-
             width = gridWidth / dim;
             height = gridHeight;
             leftMargin = (gridWidth / dim) * bingoIndex;
@@ -431,6 +439,8 @@ public class BullshitBingoActivity extends Activity
         if (shouldVibrate()) {
             vibrator.vibrate(VibrationPatterns.PUTIN_PATTERN, -1);
         }
+
+        toggleShareButton();
     }
 
     @Override
@@ -441,7 +451,8 @@ public class BullshitBingoActivity extends Activity
     }
 
     private void persistIfNeeded() {
-        if (isDirty && isPersisted()) {
+        cancelBingoAnimation();
+        if (isDirty && isWrittenToDisk()) {
             persistWords(currentCardName);
         }
     }
@@ -533,7 +544,6 @@ public class BullshitBingoActivity extends Activity
         cardListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                cancelBingoAnimation();
                 String card = (String) parent.getItemAtPosition(position);
 
                 if (card.equals(currentCardName)) {
@@ -813,7 +823,13 @@ public class BullshitBingoActivity extends Activity
             }
 
             initBoardFromWords(wordAndHits);
+
+            toggleShareButton();
         }
+    }
+
+    private void toggleShareButton() {
+        shareButton.setVisibility(isBingoAnimationPlaying ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -854,7 +870,10 @@ public class BullshitBingoActivity extends Activity
             return true;
         }
         drawerLayout.closeDrawers();
-        cancelBingoAnimation();
+        if (item.getItemId() != R.id.action_share_image) {
+            //we don't cancel when we share
+            cancelBingoAnimation();
+        }
 
         // Handle presses on the action bar items
         switch (item.getItemId()) {
@@ -877,7 +896,7 @@ public class BullshitBingoActivity extends Activity
                 shareCurrentCard();
                 return true;
             case R.id.action_share_image:
-                shareImage();
+                shareImage(null);
                 return true;
             case R.id.action_delete:
                 showDeleteCardDialog(currentCardName);
@@ -916,7 +935,7 @@ public class BullshitBingoActivity extends Activity
         return result;
     }
 
-    private void shareImage() {
+    public void shareImage(View v) {
         boolean isLand = Util.isLandscape(this);
         int width = isLand ? IMAGE_LONG_EDGE : IMAGE_SHORT_EDGE;
         int height = isLand ? IMAGE_SHORT_EDGE : IMAGE_LONG_EDGE;
@@ -996,7 +1015,7 @@ public class BullshitBingoActivity extends Activity
 
     private void saveWords() {
         exitEditMode();
-        if (isPersisted()) {
+        if (isWrittenToDisk()) {
             persistWords(currentCardName);
         } else if (!currentCardName.endsWith("*")) {
             currentCardName += "*";
@@ -1068,7 +1087,7 @@ public class BullshitBingoActivity extends Activity
         return false;
     }
 
-    private boolean isPersisted() {
+    private boolean isWrittenToDisk() {
         return currentCardName != null && !currentCardName.startsWith(NEW_CARD_PREFIX);
     }
 
@@ -1141,10 +1160,10 @@ public class BullshitBingoActivity extends Activity
             editMenuItem.setVisible(isGridFilled());
             saveAsMenuItem.setVisible(isGridFilled());
             acceptItemMenuItem.setVisible(false);
-            shareBullshitMenuItem.setVisible(isGridFilled() && isPersisted());
+            shareBullshitMenuItem.setVisible(isGridFilled() && isWrittenToDisk());
             shareImageMenuItem.setVisible(isGridFilled());
             shuffleMenuItem.setVisible(false);
-            deleteMenuItem.setVisible(isGridFilled() && isPersisted());
+            deleteMenuItem.setVisible(isGridFilled() && isWrittenToDisk());
             settingsMenuItem.setVisible(true);
             increaseFontMenuItem.setVisible(isGridFilled());
             decreaseFontMenuItem.setVisible(isGridFilled());

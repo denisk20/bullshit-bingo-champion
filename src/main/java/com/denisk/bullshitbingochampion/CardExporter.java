@@ -41,7 +41,7 @@ public class CardExporter {
     private int lineInterval = 15;
     private int gridWidth = 10;
     private int gridColor = Color.BLACK;
-    private int highlightColor = 0xFFDBFFED;
+    private int highlightColor = 0xFF64FAAF;
     private int bingoStrokeColor = Color.RED;
 
     private int width = 1024;
