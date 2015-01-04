@@ -3,6 +3,7 @@ package com.denisk.bullshitbingochampion;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.widget.Toast;
 
 /**
  * @author denisk
@@ -27,5 +28,15 @@ public class Util {
             applicationInfo = null;
         }
         return (String) (applicationInfo != null ? packageManager.getApplicationLabel(applicationInfo) : "(unknown)");
+    }
+
+    public static int getDim(int size) {
+        double sqrt = Math.sqrt(size);
+        double floor = Math.floor(sqrt + 0.5);
+        if (Math.abs(floor - sqrt) > 0.1) {
+            return -1;
+        }
+
+        return (int) Math.round(sqrt);
     }
 }

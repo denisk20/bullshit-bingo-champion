@@ -205,6 +205,7 @@ public class BullshitBingoActivity extends Activity
                 .init();
     }
 
+    //todo remove this
     private int[] getHitsCount() {
         int res[] = new int[gridAdapter.getCount()];
         for (int i = 0; i < gridAdapter.getCount(); i++) {
@@ -323,7 +324,8 @@ public class BullshitBingoActivity extends Activity
                 if (shouldVibrate()) {
                     vibrator.vibrate(30);
                 }
-                //look for bingo among columns and lines
+                //todo use BingoData
+                //look for bingo among columns and rows
                 for (int i = 0; i < dim; i++) {
                     boolean bingo = true;
                     //check i-th row for bingo
@@ -625,18 +627,18 @@ public class BullshitBingoActivity extends Activity
     }
 
     private boolean setDimAndRenderWords(String card, List<WordAndHits> words) {
-        if (words.size() == 0) {
+        int size = words.size();
+        if (size == 0) {
             Toast.makeText(this, getResources().getString(R.string.error_empty_card, card), Toast.LENGTH_LONG).show();
             return false;
         }
-        double sqrt = Math.sqrt(words.size());
-        double floor = Math.floor(sqrt + 0.5);
-        if (Math.abs(floor - sqrt) > 0.1) {
-            Toast.makeText(this, getResources().getString(R.string.error_wrong_word_count, card), Toast.LENGTH_LONG).show();
+        int sqrt = Util.getDim(size);
+        if(sqrt < 0) {
+            Toast.makeText(this, getString(R.string.error_wrong_word_count, card), Toast.LENGTH_LONG).show();
             return false;
         }
 
-        dim = (int) Math.round(sqrt);
+        dim = sqrt;
 
         initCardState();
 

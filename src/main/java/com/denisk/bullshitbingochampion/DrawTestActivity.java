@@ -35,7 +35,7 @@ public class DrawTestActivity extends Activity {
     public static final int LEFT_MARGIN = 3;
     public static final int TOP_MARGIN = 100;
     public static final int BOTTOM_MARGIN = 200;
-
+    public static final int HEADER_FOOTER_LEFT_MARGIN = 20;
 
     private SurfaceView surfaceView;
     ArrayList<WordAndHits> words = new ArrayList<>();
@@ -75,22 +75,21 @@ public class DrawTestActivity extends Activity {
                 paint.setColor(Color.BLACK);
                 paint.setTextSize(70);
                 String cardText = "Card: ";
-                int titleTextLeftMargin = 20;
                 Rect bounds = new Rect();
                 paint.getTextBounds(cardText, 0, cardText.length(), bounds);
                 int titleYCoord = TOP_MARGIN / 2 + bounds.height() / 2;
-                canvas.drawText(cardText, titleTextLeftMargin, titleYCoord, paint);
+                canvas.drawText(cardText, HEADER_FOOTER_LEFT_MARGIN, titleYCoord, paint);
 
                 float cardTextWidth = paint.measureText(cardText);
                 paint.setTypeface(Typeface.DEFAULT_BOLD);
-                canvas.drawText("My Card", titleTextLeftMargin + cardTextWidth, titleYCoord, paint);
+                canvas.drawText("My Card", HEADER_FOOTER_LEFT_MARGIN + cardTextWidth, titleYCoord, paint);
 
                 SimpleDateFormat format = new SimpleDateFormat("d MMMM yyyy, HH:mm:ss Z");
                 String dateText = format.format(new Date());
 
                 paint.setTextSize(50);
                 paint.getTextBounds(dateText, 0, dateText.length(), bounds);
-                canvas.drawText(dateText, titleTextLeftMargin, bottomMarginYCoord + bounds.height() , paint);
+                canvas.drawText(dateText, HEADER_FOOTER_LEFT_MARGIN, bottomMarginYCoord + bounds.height() , paint);
 
 
                 ApplicationInfo applicationInfo;
@@ -105,7 +104,7 @@ public class DrawTestActivity extends Activity {
                 String applicationName = Util.getApplicationName(DrawTestActivity.this);
                 paint.getTextBounds(applicationName, 0, applicationName.length(), bounds);
 
-                canvas.drawText(applicationName, titleTextLeftMargin, height - 20, paint);
+                canvas.drawText(applicationName, HEADER_FOOTER_LEFT_MARGIN, height - 20, paint);
 
                 Drawable iconDrawable = getResources().getDrawable(applicationInfo.icon);
                 Bitmap iconBitmap = drawableToBitmap(iconDrawable);
@@ -113,21 +112,12 @@ public class DrawTestActivity extends Activity {
                 iconBitmap = Bitmap.createScaledBitmap(iconBitmap, BOTTOM_MARGIN, BOTTOM_MARGIN, true);
                 canvas.drawBitmap(iconBitmap, width - BOTTOM_MARGIN, bottomMarginYCoord, paint);
 
+                float origHeight = height;
                 height -= TOP_MARGIN + BOTTOM_MARGIN;
 
                 float dim = (float) Math.sqrt(words.size());
                 float cellWidth = width/dim;
                 float cellHeight = height/dim;
-
-                paint.setColor(Color.BLACK);
-                paint.setStrokeWidth(GRID_WIDTH);
-                for(int i = 1; i < dim; i++) {
-                    float x = width / dim * i;
-                    float y = height / dim * i;
-
-                    canvas.drawLine(x, TOP_MARGIN , x, height + TOP_MARGIN, paint);
-                    canvas.drawLine(0, y + TOP_MARGIN, width, y + TOP_MARGIN, paint);
-                }
 
                 paint.setTextAlign(Paint.Align.LEFT);
 
@@ -138,6 +128,12 @@ public class DrawTestActivity extends Activity {
                     float xCell = i % dim;
                     float yCell = (float) Math.floor(i / dim);
 
+                    if(word.hits > 0) {
+                        int color = paint.getColor();
+                        paint.setColor(0xFFDBFFED);
+                        canvas.drawRect(xCell * cellWidth, yCell * cellHeight + TOP_MARGIN, (xCell + 1) * cellWidth, (yCell + 1) * cellHeight + TOP_MARGIN, paint);
+                        paint.setColor(color);
+                    }
                     String text = (word.word == null ? "" : word.word.trim());
 
                     List<String> lines = splitIntoStringsThatFit(text.split("\\s+"), cellWidth, paint);
@@ -149,10 +145,36 @@ public class DrawTestActivity extends Activity {
                         currentLineYCoord += TEXT_SIZE + LINE_INTERVAL;
                     }
                 }
+
+                drawGrid(width, height, canvas, paint, dim);
+
+                BingoData bingoData = BingoData.fromWords(words);
+                paint.setColor(Color.RED);
+                paint.setStrokeWidth(GRID_WIDTH * 2);
+                paint.setStyle(Paint.Style.STROKE);
+
+                for(Integer row : bingoData.bingoRows) {
+                    canvas.drawRect(0, row * cellHeight + TOP_MARGIN, width, (row + 1) * cellHeight + TOP_MARGIN, paint);
+                }
+                for(Integer col : bingoData.bingoColumns) {
+                    canvas.drawRect(col * cellWidth, TOP_MARGIN, (col + 1) * cellWidth, origHeight - BOTTOM_MARGIN, paint);
+                }
                 holder.unlockCanvasAndPost(canvas);
             }
         });
 
+    }
+
+    private void drawGrid(float width, float height, Canvas canvas, Paint paint, float dim) {
+        paint.setColor(Color.BLACK);
+        paint.setStrokeWidth(GRID_WIDTH);
+        for(int i = 1; i < dim; i++) {
+            float x = width / dim * i;
+            float y = height / dim * i;
+
+            canvas.drawLine(x, TOP_MARGIN , x, height + TOP_MARGIN, paint);
+            canvas.drawLine(0, y + TOP_MARGIN, width, y + TOP_MARGIN, paint);
+        }
     }
 
     static List<String> splitIntoStringsThatFit(String source, float limitWidth, Paint paint) {
@@ -216,10 +238,14 @@ public class DrawTestActivity extends Activity {
 
     private void initWords() {
         words.add(new WordAndHits("Hello", 0));
-        words.add(new WordAndHits("Hello hello you how are you", 0));
-        words.add(new WordAndHits("Another hello world letmeoutofhereplease!!!", 2));
-//        words.add(new WordAndHits("Another hello world letmeoutofhereplease!!! you all lie to me I kno it :) I o u k l m n j j c", 2));
-        words.add(new WordAndHits("o Longlongwordswithoutspaceswhichwontfit", 1));
+        words.add(new WordAndHits("Hello", 1));
+        words.add(new WordAndHits("Hello", 2));
+        words.add(new WordAndHits("Hello", 2));
+        words.add(new WordAndHits("Hello", 2));
+        words.add(new WordAndHits("Hello", 2));
+        words.add(new WordAndHits("Hello", 2));
+        words.add(new WordAndHits("Hello", 2));
+        words.add(new WordAndHits("Hello", 0));
     }
     public static Bitmap drawableToBitmap (Drawable drawable) {
         if (drawable instanceof BitmapDrawable) {
