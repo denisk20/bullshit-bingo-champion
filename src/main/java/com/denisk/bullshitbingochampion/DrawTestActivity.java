@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -21,10 +20,12 @@ import java.util.List;
  */
 public class DrawTestActivity extends Activity {
 
-    public static final int GRID_WIDTH_DP = 2;
-    public static final int TEXT_SIZE_DP = 34;
-    public static final int LINE_INTERVAL_DP = 3;
-    public static final int LEFT_MARGIN_DP = 2;
+    public static final int GRID_WIDTH = 1;
+    public static final int TEXT_SIZE = 100;
+    public static final int LINE_INTERVAL = 15;
+    public static final int LEFT_MARGIN = 0;
+    public static final int TOP_MARGIN = 300;
+    public static final int BOTTOM_MARGIN = 300;
 
 
     private SurfaceView surfaceView;
@@ -59,10 +60,8 @@ public class DrawTestActivity extends Activity {
                 float cellWidth = width/dim;
                 float cellHeight = height/dim;
 
-                float strokeWidth = Util.dpToPix(getApplicationContext(), GRID_WIDTH_DP);
-
                 paint.setColor(Color.BLACK);
-                paint.setStrokeWidth(strokeWidth);
+                paint.setStrokeWidth(GRID_WIDTH);
                 for(int i = 1; i < dim; i++) {
                     float x = width / dim * i;
                     float y = height / dim * i;
@@ -74,11 +73,7 @@ public class DrawTestActivity extends Activity {
                 paint.setTextAlign(Paint.Align.LEFT);
                 paint.setAntiAlias(true);
 
-                float textSizePx = Util.dpToPix(getApplicationContext(), TEXT_SIZE_DP);
-                float lineIntervalPx = Util.dpToPix(getApplicationContext(), LINE_INTERVAL_DP);
-                float leftMarginPx = Util.dpToPix(getApplicationContext(), LEFT_MARGIN_DP);
-
-                paint.setTextSize(textSizePx);
+                paint.setTextSize(TEXT_SIZE);
                 for(int i = 0; i < dim*dim; i++) {
                     WordAndHits word = words.get(i);
                     float xCell = i % dim;
@@ -91,11 +86,11 @@ public class DrawTestActivity extends Activity {
 
                     List<String> lines = splitIntoStringsThatFit(text.split("\\s+"), cellWidth, paint);
 
-                    float textBlockHeight = lines.size() * textSizePx + (lines.size() - 1) * lineIntervalPx;
-                    float y = yCell * cellHeight + cellHeight / 2 - textBlockHeight / 2 + textSizePx;
+                    float textBlockHeight = lines.size() * TEXT_SIZE + (lines.size() - 1) * LINE_INTERVAL;
+                    float y = yCell * cellHeight + cellHeight / 2 - textBlockHeight / 2 + TEXT_SIZE;
                     for(String line : lines) {
-                        canvas.drawText(line, xCell * cellWidth + leftMarginPx, y, paint);
-                        y += textSizePx + lineIntervalPx;
+                        canvas.drawText(line, xCell * cellWidth + LEFT_MARGIN, y, paint);
+                        y += TEXT_SIZE + LINE_INTERVAL;
                     }
                 }
                 holder.unlockCanvasAndPost(canvas);
@@ -111,16 +106,16 @@ public class DrawTestActivity extends Activity {
 
         ArrayList<String> result = new ArrayList<>();
         int start = 0;
-        for(int i = 1; i < source.length(); i++) {
+        for(int i = 1; i <= source.length(); i++) {
             String substr = source.substring(start, i);
-            if(paint.measureText(substr) >= limitWidth && (i - start) > 1) {
+            if(paint.measureText(substr) >= limitWidth) {
+                //this one doesn't fit, take the previous one which fits
                 String fits = source.substring(start, i - 1);
                 result.add(fits);
                 start = i - 1;
             }
-
-            if(i == source.length() - 1) {
-                String fits = source.substring(start, i + 1);
+            if (i == source.length()) {
+                String fits = source.substring(start, i);
                 result.add(fits);
             }
         }
