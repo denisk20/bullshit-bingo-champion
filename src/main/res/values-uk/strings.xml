@@ -60,4 +60,8 @@
     <string name="share_picture_bbc_title">Bullshit Bingo Champion для Android</string>
     <string name="share_picture_card">Мапа:</string>
     <string name="share_button">Подiлитися результатом</string>
+    <string name="changelog_full_title">Зміни</string>
+    <string name="changelog_ok_button">OK</string>
+    <string name="changelog_show_full">Докладніше...</string>
+    <string name="changelog_title">Що нового</string>
 </resources>

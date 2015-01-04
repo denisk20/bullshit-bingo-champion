@@ -30,6 +30,7 @@ import android.util.TypedValue;
 import android.view.*;
 import android.widget.*;
 import com.tjeannin.apprate.AppRate;
+import de.cketti.library.changelog.ChangeLog;
 import org.askerov.dynamicgrid.BaseDynamicGridAdapter;
 import org.askerov.dynamicgrid.DynamicGridView;
 
@@ -197,6 +198,12 @@ public class BullshitBingoActivity extends Activity
                 .setMinLaunchesUntilPrompt(15)
                 .setShowIfAppHasCrashed(false)
                 .init();
+
+        ChangeLog cl = new ChangeLog(this);
+
+        if (cl.isFirstRun()) {
+            cl.getFullLogDialog().show();
+        }
     }
 
     //todo remove this

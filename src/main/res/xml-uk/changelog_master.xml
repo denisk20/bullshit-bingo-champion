@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<changelog>
+    <release version="1.2" versioncode="15" >
+        <change>Можливість ділитися результатами гри</change>
+        <change>Виправлений дефект з обиранням слів</change>
+    </release>
+</changelog>
