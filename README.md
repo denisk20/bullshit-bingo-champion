@@ -8,6 +8,7 @@ Features:
 * Create and modify word cards easily. Drag and drop to arrange words. Shuffle cards.
 * Save cards as *.bullshit text files, which can then be opened by the app!
 * Share cards with friends via email, evernote or whatever you want. Just send a *.bullshit file and a person will be able to open it using the app.
+* Share the results of your game sessions via social networks.
 * Keep a list of you favorite cards! There will be no meeting that you will not enjoy.
 * Animations!
 * Free and open source
