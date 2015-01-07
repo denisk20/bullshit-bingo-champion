@@ -77,6 +77,8 @@ public class BullshitBingoActivity extends Activity
     public static final int SETTINGS_REQUEST_CODE = 1;
     public static final String IMAGE_PNG = "image/png";
     public static final int CARD_VIBRATION_MILLIS = 30;
+    public static final int BINGO_MARK_ANIMATION_DURATION = 400;
+    public static final int BINGO_TEXT_ANIMATION_DURATION = 1000;
 
     private SharedPreferences sharedPreferences;
 
@@ -150,10 +152,13 @@ public class BullshitBingoActivity extends Activity
     private TextView bingoMark;
     private TextView bingoTitle;
     private Button shareButton;
+    //colors
     private CustomShapeDrawable selectedCardDrawable;
     private CustomShapeDrawable unselectedCardDrawable;
+    private CustomShapeDrawable bingoDrawable;
     private int unselectedCardTextColor;
     private int selectedCardTextColor;
+    private int bingoTextColor;
 
     /**
      * Called when the activity is first created.
@@ -422,18 +427,19 @@ public class BullshitBingoActivity extends Activity
         layoutParams.height = height;
 
         bingoMark.setAlpha(0);
+        bingoMark.setBackgroundDrawable(bingoDrawable);
 
-        ObjectAnimator bingoMarkAnimator = ObjectAnimator.ofFloat(bingoMark, "alpha", 0, 1);
+        ObjectAnimator bingoMarkAnimator = ObjectAnimator.ofFloat(bingoMark, "alpha", 0, 0.8f);
         bingoMarkAnimator.setRepeatMode(ValueAnimator.REVERSE);
         bingoMarkAnimator.setRepeatCount(ValueAnimator.INFINITE);
-        bingoMarkAnimator.setDuration(400);
+        bingoMarkAnimator.setDuration(BINGO_MARK_ANIMATION_DURATION);
 
 
         TypedValue titleFinalSize = new TypedValue();
         getResources().getValue(R.dimen.bingo_title_size, titleFinalSize, true);
 
         ValueAnimator textAnimator = ValueAnimator.ofFloat(0, titleFinalSize.getFloat());
-        textAnimator.setDuration(1000);
+        textAnimator.setDuration(BINGO_TEXT_ANIMATION_DURATION);
         textAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
@@ -443,6 +449,8 @@ public class BullshitBingoActivity extends Activity
 
         bingoAnimatorSet = new AnimatorSet();
         bingoAnimatorSet.playTogether(bingoMarkAnimator, textAnimator);
+
+        bingoTitle.setTextColor(bingoTextColor);
 
         bingoMark.setVisibility(View.VISIBLE);
         bingoTitle.setVisibility(View.VISIBLE);
@@ -562,6 +570,13 @@ public class BullshitBingoActivity extends Activity
 
         unselectedCardTextColor = sharedPreferences.getInt(getString(R.string.pref_color_card_text_key), r.getColor(R.color.default_card_text));
         selectedCardTextColor = sharedPreferences.getInt(getString(R.string.pref_color_card_text_selected_key), r.getColor(R.color.default_card_text_selected));
+        
+        bingoTextColor = sharedPreferences.getInt(getString(R.string.pref_color_bingo_text_key), r.getColor(R.color.default_bingo_text));
+
+        int bingoBorderWidth = r.getDimensionPixelSize(R.dimen.bingo_border_width);
+        bingoDrawable = new CustomShapeDrawable(new RectShape(),
+                bingoBorderWidth, sharedPreferences.getInt(getString(R.string.pref_color_bingo_frame_key), r.getColor(R.color.default_bingo_frame)));
+        bingoDrawable.getPaint().setColor(sharedPreferences.getInt(getString(R.string.pref_color_bingo_background_key), r.getColor(R.color.default_bingo_background)));
     }
 
     private void setCardColors(int position, TextView view) {

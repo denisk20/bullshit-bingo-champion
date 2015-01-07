@@ -17,7 +17,6 @@
                 />
         <TextView
                 android:id="@+id/game_bingo_mark"
-                android:background="@drawable/bingo_mark"
                 android:layout_width="0dp"
                 android:layout_height="0dp"/>
         <TextView
@@ -29,8 +28,9 @@
                 android:layout_centerInParent="true"
                 android:gravity="center"
                 android:visibility="invisible"
-                android:textSize="0sp" android:shadowColor="#ffff7521" android:typeface="monospace"
-                android:textStyle="bold|italic" android:textColor="#ff1d15fb"/>
+                android:textSize="0sp"
+                android:typeface="monospace"
+                android:textStyle="bold|italic" android:textColor="@color/default_bingo_text"/>
         <Button
                 android:id="@+id/share_button"
                 android:layout_width="wrap_content"

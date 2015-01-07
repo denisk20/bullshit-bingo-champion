@@ -10,4 +10,8 @@
 
     <color name="default_card_text">#000</color>
     <color name="default_card_text_selected">#000</color>
+
+    <color name="default_bingo_frame">#FFFF0000</color>
+    <color name="default_bingo_text">#ff1d15fb</color>
+    <color name="default_bingo_background">#FFfba3a4</color>
 </resources>

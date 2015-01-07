@@ -52,5 +52,20 @@
                 android:key="@string/pref_color_card_text_selected_key"
                 android:defaultValue="@color/default_card_text_selected"
                 android:title="@string/pref_title_color_card_selected_text" />
+
+        <yuku.ambilwarna.widget.AmbilWarnaPreference
+                android:key="@string/pref_color_bingo_frame_key"
+                android:defaultValue="@color/default_bingo_frame"
+                android:title="@string/pref_title_color_bingo_frame" />
+
+        <yuku.ambilwarna.widget.AmbilWarnaPreference
+                android:key="@string/pref_color_bingo_background_key"
+                android:defaultValue="@color/default_bingo_background"
+                android:title="@string/pref_title_color_bingo_background" />
+
+        <yuku.ambilwarna.widget.AmbilWarnaPreference
+                android:key="@string/pref_color_bingo_text_key"
+                android:defaultValue="@color/default_bingo_text"
+                android:title="@string/pref_title_color_bingo_text" />
     </PreferenceCategory>
 </PreferenceScreen>
