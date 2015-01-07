@@ -11,61 +11,12 @@
             android:title="@string/pref_title_reload"
             android:summary="@string/pref_summary_reload"/>
     <Preference
+            android:key="@string/pref_reset_colors_key"
+            android:title="@string/pref_title_reset_colors"
+            android:summary="@string/pref_summary_reset_colors"/>
+    <Preference
             android:key="@string/pref_show_changelog_key"
             android:title="@string/pref_title_changelog"
             android:summary="@string/pref_summary_changelog"/>
 
-    <PreferenceCategory
-            android:title="@string/pref_group_colors_title"
-            android:key="pref_colors">
-        <yuku.ambilwarna.widget.AmbilWarnaPreference
-                android:key="@string/pref_color_grid_key"
-                android:defaultValue="@color/default_grid"
-                android:title="@string/pref_title_color_background" />
-
-        <yuku.ambilwarna.widget.AmbilWarnaPreference
-                android:key="@string/pref_color_card_key"
-                android:defaultValue="@color/default_card"
-                android:title="@string/pref_title_color_card" />
-
-        <yuku.ambilwarna.widget.AmbilWarnaPreference
-                android:key="@string/pref_color_card_selected_key"
-                android:defaultValue="@color/default_card_selected"
-                android:title="@string/pref_title_color_card_selected" />
-
-        <yuku.ambilwarna.widget.AmbilWarnaPreference
-                android:key="@string/pref_color_card_border_key"
-                android:defaultValue="@color/default_card_border"
-                android:title="@string/pref_title_color_card_border" />
-
-        <yuku.ambilwarna.widget.AmbilWarnaPreference
-                android:key="@string/pref_color_card_border_selected_key"
-                android:defaultValue="@color/default_card_border_selected"
-                android:title="@string/pref_title_color_card_border_selected" />
-
-        <yuku.ambilwarna.widget.AmbilWarnaPreference
-                android:key="@string/pref_color_card_text_key"
-                android:defaultValue="@color/default_card_text"
-                android:title="@string/pref_title_color_card_text" />
-
-        <yuku.ambilwarna.widget.AmbilWarnaPreference
-                android:key="@string/pref_color_card_text_selected_key"
-                android:defaultValue="@color/default_card_text_selected"
-                android:title="@string/pref_title_color_card_selected_text" />
-
-        <yuku.ambilwarna.widget.AmbilWarnaPreference
-                android:key="@string/pref_color_bingo_frame_key"
-                android:defaultValue="@color/default_bingo_frame"
-                android:title="@string/pref_title_color_bingo_frame" />
-
-        <yuku.ambilwarna.widget.AmbilWarnaPreference
-                android:key="@string/pref_color_bingo_background_key"
-                android:defaultValue="@color/default_bingo_background"
-                android:title="@string/pref_title_color_bingo_background" />
-
-        <yuku.ambilwarna.widget.AmbilWarnaPreference
-                android:key="@string/pref_color_bingo_text_key"
-                android:defaultValue="@color/default_bingo_text"
-                android:title="@string/pref_title_color_bingo_text" />
-    </PreferenceCategory>
 </PreferenceScreen>
