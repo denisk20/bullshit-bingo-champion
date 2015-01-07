@@ -2,18 +2,19 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <CheckBoxPreference
-            android:key="pref_vibrate"
+            android:key="@string/pref_vibrate_key"
             android:title="@string/pref_title_vibrate"
             android:summary="@string/pref_summary_vibrate"
             android:defaultValue="true" />
     <Preference
-            android:key="reload_default_cards"
+            android:key="@string/pref_reload_default_cards_key"
             android:title="@string/pref_title_reload"
             android:summary="@string/pref_summary_reload"/>
     <Preference
-            android:key="show_changelog"
+            android:key="@string/pref_show_changelog_key"
             android:title="@string/pref_title_changelog"
             android:summary="@string/pref_summary_changelog"/>
+
     <PreferenceCategory
             android:title="@string/pref_group_colors_title"
             android:key="pref_colors">
@@ -21,18 +22,22 @@
                 android:key="@string/pref_color_grid_key"
                 android:defaultValue="@color/default_grid"
                 android:title="@string/pref_title_color_background" />
+
         <yuku.ambilwarna.widget.AmbilWarnaPreference
                 android:key="@string/pref_color_card_key"
                 android:defaultValue="@color/default_card"
                 android:title="@string/pref_title_color_card" />
+
         <yuku.ambilwarna.widget.AmbilWarnaPreference
                 android:key="@string/pref_color_card_selected_key"
                 android:defaultValue="@color/default_card_selected"
                 android:title="@string/pref_title_color_card_selected" />
+
         <yuku.ambilwarna.widget.AmbilWarnaPreference
                 android:key="@string/pref_color_card_border_key"
                 android:defaultValue="@color/default_card_border"
                 android:title="@string/pref_title_color_card_border" />
+
         <yuku.ambilwarna.widget.AmbilWarnaPreference
                 android:key="@string/pref_color_card_border_selected_key"
                 android:defaultValue="@color/default_card_border_selected"

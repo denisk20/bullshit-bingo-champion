@@ -67,10 +67,10 @@ public class PreferencesFragment extends PreferenceFragment {
 
         parent = getActivity();
 
-        resetButton = findPreference("reload_default_cards");
+        resetButton = findPreference(getString(R.string.pref_reload_default_cards_key));
         resetButton.setOnPreferenceClickListener(onPreferenceClickListener);
 
-        changelogButton = findPreference("show_changelog");
+        changelogButton = findPreference(getString(R.string.pref_show_changelog_key));
 
         changelogButton.setOnPreferenceClickListener(onShowChangelogListener);
 

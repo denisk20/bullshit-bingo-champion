@@ -477,7 +477,7 @@ public class BullshitBingoActivity extends Activity
     }
 
     private boolean shouldVibrate() {
-        return sharedPreferences.getBoolean("pref_vibrate", true);
+        return sharedPreferences.getBoolean(getString(R.string.pref_vibrate_key), true);
     }
 
     private void initGridView() {
