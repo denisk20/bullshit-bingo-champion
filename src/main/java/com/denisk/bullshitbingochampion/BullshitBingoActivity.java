@@ -288,8 +288,6 @@ public class BullshitBingoActivity extends Activity
 
             setCardColor(position, textView);
 
-            setViewVisibilityOnPosition(position, textView);
-
             textView.setOnTouchListener(this);
 
             textView.setTag(position);
