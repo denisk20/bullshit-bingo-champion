@@ -18,8 +18,24 @@
             android:title="@string/pref_group_colors_title"
             android:key="pref_colors">
         <yuku.ambilwarna.widget.AmbilWarnaPreference
-                android:key="your_preference_key"
-                android:defaultValue="0xff6699cc"
+                android:key="@string/pref_color_grid_key"
+                android:defaultValue="@color/default_grid"
                 android:title="@string/pref_title_color_background" />
+        <yuku.ambilwarna.widget.AmbilWarnaPreference
+                android:key="@string/pref_color_card_key"
+                android:defaultValue="@color/default_card"
+                android:title="@string/pref_title_color_card" />
+        <yuku.ambilwarna.widget.AmbilWarnaPreference
+                android:key="@string/pref_color_card_selected_key"
+                android:defaultValue="@color/default_card_selected"
+                android:title="@string/pref_title_color_card_selected" />
+        <yuku.ambilwarna.widget.AmbilWarnaPreference
+                android:key="@string/pref_color_card_border_key"
+                android:defaultValue="@color/default_card_border"
+                android:title="@string/pref_title_color_card_border" />
+        <yuku.ambilwarna.widget.AmbilWarnaPreference
+                android:key="@string/pref_color_card_border_selected_key"
+                android:defaultValue="@color/default_card_border_selected"
+                android:title="@string/pref_title_color_card_border_selected" />
     </PreferenceCategory>
 </PreferenceScreen>

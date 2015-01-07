@@ -72,4 +72,15 @@
     <string name="pref_group_colors_title">Colors</string>
     <string name="pref_title_color_background">Background color</string>
 
+    <string name="pref_color_grid_key">pref_color_grid</string>
+    <string name="pref_color_card_key">pref_color_card</string>
+    <string name="pref_color_card_selected_key">pref_color_card_selected</string>
+    <string name="pref_color_card_border_key">pref_color_card_border</string>
+    <string name="pref_color_card_border_selected_key">pref_color_card_border_selected</string>
+
+    <string name="pref_title_color_card">Unselected card color</string>
+    <string name="pref_title_color_card_selected">Selected card color</string>
+    <string name="pref_title_color_card_border">Unselected card border color</string>
+    <string name="pref_title_color_card_border_selected">Selected card border color</string>
+
 </resources>

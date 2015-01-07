@@ -12,11 +12,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.shapes.RectShape;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -147,6 +149,8 @@ public class BullshitBingoActivity extends Activity
     private TextView bingoMark;
     private TextView bingoTitle;
     private Button shareButton;
+    private CustomShapeDrawable selectedCardDrawable;
+    private CustomShapeDrawable unselectedCardDrawable;
 
     /**
      * Called when the activity is first created.
@@ -449,6 +453,12 @@ public class BullshitBingoActivity extends Activity
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        initColors();
+    }
+
+    @Override
     protected void onPause() {
         cancelVibration();
         persistIfNeeded();
@@ -531,15 +541,32 @@ public class BullshitBingoActivity extends Activity
         });
     }
 
+    private void initColors() {
+        Resources r = getResources();
+        gridView.setBackgroundColor(sharedPreferences.getInt(getString(R.string.pref_color_grid_key), r.getColor(R.color.default_grid)));
+
+        int strokeWidth = r.getDimensionPixelSize(R.dimen.card_border_width);
+
+        selectedCardDrawable = new CustomShapeDrawable(new RectShape(),
+                strokeWidth, sharedPreferences.getInt(getString(R.string.pref_color_card_border_selected_key), r.getColor(R.color.default_card_border_selected)));
+        selectedCardDrawable.getPaint().setColor(sharedPreferences.getInt(getString(R.string.pref_color_card_selected_key), r.getColor(R.color.default_card_selected)));
+
+        unselectedCardDrawable = new CustomShapeDrawable(new RectShape(),
+                strokeWidth, sharedPreferences.getInt(getString(R.string.pref_color_card_border_key), r.getColor(R.color.default_card_border)));
+        unselectedCardDrawable.getPaint().setColor(sharedPreferences.getInt(getString(R.string.pref_color_card_key), r.getColor(R.color.default_card)));
+
+        gridAdapter.notifyDataSetChanged();
+    }
+
     private void setCardColor(int position, View view) {
-        int background;
+        Drawable background;
         if (getWordDataAtPosition(position).hits > 0) {
-            background = R.drawable.back_selected;
+            background = selectedCardDrawable;
         } else {
-            background = R.drawable.back;
+            background = unselectedCardDrawable;
         }
 
-        view.setBackgroundResource(background);
+        view.setBackgroundDrawable(background);
     }
 
     private void initCardList() {
