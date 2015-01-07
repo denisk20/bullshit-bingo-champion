@@ -67,4 +67,20 @@
     <string name="changelog_title">Что нового</string>
     <string name="pref_title_changelog">Изменения</string>
     <string name="pref_summary_changelog">Показать изменения</string>
+    <string name="pref_dialog_reset_colors">Сбросить значеня всех цветов на начальные? Все искусственные цвета,
+        созданные вами, будут потеряны
+    </string>
+    <string name="pref_group_colors_title">Цвета</string>
+    <string name="pref_summary_reset_colors">Сбросить все цвета на начальные значения</string>
+    <string name="pref_title_color_background">Задний фон</string>
+    <string name="pref_title_color_bingo_background">Задний фон "Бинго"</string>
+    <string name="pref_title_color_bingo_frame">Ободок "Бинго"</string>
+    <string name="pref_title_color_bingo_text">Текст "Бинго"</string>
+    <string name="pref_title_color_card">Невыбранное слово - задний фон</string>
+    <string name="pref_title_color_card_border">Невыбранное слово - ободок</string>
+    <string name="pref_title_color_card_border_selected">Выбранное слово - ободок</string>
+    <string name="pref_title_color_card_selected">Выбранное слово - задний фон</string>
+    <string name="pref_title_color_card_selected_text">Выбранное слово - текст</string>
+    <string name="pref_title_color_card_text">Невыбранное слово - текст</string>
+    <string name="pref_title_reset_colors">Сбросить цвета</string>
 </resources>

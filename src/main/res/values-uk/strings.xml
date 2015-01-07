@@ -66,4 +66,20 @@
     <string name="changelog_title">Що нового</string>
     <string name="pref_title_changelog">Зміни</string>
     <string name="pref_summary_changelog">Показани зміни</string>
+    <string name="pref_dialog_reset_colors">Встановити всі кольори на їх початкові значення? Всі змінені кольори будуть
+        втрачені
+    </string>
+    <string name="pref_group_colors_title">Кольори</string>
+    <string name="pref_summary_reset_colors">Встановити всі кольори на їх початкові значення</string>
+    <string name="pref_title_color_background">Задній фон</string>
+    <string name="pref_title_color_bingo_background">Задній фон "Бінго"</string>
+    <string name="pref_title_color_bingo_frame">Обідок "Бінго"</string>
+    <string name="pref_title_color_bingo_text">Текст "Бінго"</string>
+    <string name="pref_title_color_card">Необране слово - задній фон</string>
+    <string name="pref_title_color_card_border">Необране слово - обідок</string>
+    <string name="pref_title_color_card_border_selected">Обране слово - обідок</string>
+    <string name="pref_title_color_card_selected">Обране слово - задній фон</string>
+    <string name="pref_title_color_card_selected_text">Обране слово - текст</string>
+    <string name="pref_title_color_card_text">Необране слово - текст</string>
+    <string name="pref_title_reset_colors">Скинути кольори</string>
 </resources>

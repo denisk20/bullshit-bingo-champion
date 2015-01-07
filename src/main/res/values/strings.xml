@@ -72,22 +72,22 @@
     <string name="pref_group_colors_title">Colors</string>
     <string name="pref_title_color_background">Background color</string>
 
-    <string name="pref_show_changelog_key">show_changelog</string>
-    <string name="pref_vibrate_key">pref_vibrate</string>
-    <string name="pref_reload_default_cards_key">reload_default_cards</string>
-    <string name="pref_reset_colors_key">pref_reset_colors</string>
+    <string name="pref_show_changelog_key" translatable="false">show_changelog</string>
+    <string name="pref_vibrate_key" translatable="false">pref_vibrate</string>
+    <string name="pref_reload_default_cards_key" translatable="false">reload_default_cards</string>
+    <string name="pref_reset_colors_key" translatable="false">pref_reset_colors</string>
 
     <!--colors. Please make sure that you add the key to prefs_colors array below-->
-    <string name="pref_color_grid_key">pref_color_grid</string>
-    <string name="pref_color_card_key">pref_color_card</string>
-    <string name="pref_color_card_selected_key">pref_color_card_selected</string>
-    <string name="pref_color_card_border_key">pref_color_card_border</string>
-    <string name="pref_color_card_border_selected_key">pref_color_card_border_selected</string>
-    <string name="pref_color_card_text_key">pref_color_card_text</string>
-    <string name="pref_color_card_text_selected_key">pref_color_card_text_selected</string>
-    <string name="pref_color_bingo_frame_key">pref_color_bingo_frame</string>
-    <string name="pref_color_bingo_background_key">pref_color_bingo_background</string>
-    <string name="pref_color_bingo_text_key">pref_color_bingo_text</string>
+    <string name="pref_color_grid_key" translatable="false">pref_color_grid</string>
+    <string name="pref_color_card_key" translatable="false">pref_color_card</string>
+    <string name="pref_color_card_selected_key" translatable="false">pref_color_card_selected</string>
+    <string name="pref_color_card_border_key" translatable="false">pref_color_card_border</string>
+    <string name="pref_color_card_border_selected_key" translatable="false">pref_color_card_border_selected</string>
+    <string name="pref_color_card_text_key" translatable="false">pref_color_card_text</string>
+    <string name="pref_color_card_text_selected_key" translatable="false">pref_color_card_text_selected</string>
+    <string name="pref_color_bingo_frame_key" translatable="false">pref_color_bingo_frame</string>
+    <string name="pref_color_bingo_background_key" translatable="false">pref_color_bingo_background</string>
+    <string name="pref_color_bingo_text_key" translatable="false">pref_color_bingo_text</string>
 
     <array name="prefs_colors">
         <item>@string/pref_color_grid_key</item>
@@ -102,12 +102,12 @@
         <item>@string/pref_color_bingo_text_key</item>
     </array>
     
-    <string name="pref_title_color_card">Unselected card color</string>
-    <string name="pref_title_color_card_selected">Selected card color</string>
-    <string name="pref_title_color_card_border">Unselected card border color</string>
-    <string name="pref_title_color_card_border_selected">Selected card border color</string>
-    <string name="pref_title_color_card_text">Unselected card text color</string>
-    <string name="pref_title_color_card_selected_text">Selected card text color</string>
+    <string name="pref_title_color_card">Unselected word color</string>
+    <string name="pref_title_color_card_selected">Selected word color</string>
+    <string name="pref_title_color_card_border">Unselected word border color</string>
+    <string name="pref_title_color_card_border_selected">Selected word border color</string>
+    <string name="pref_title_color_card_text">Unselected word text color</string>
+    <string name="pref_title_color_card_selected_text">Selected word text color</string>
     <string name="pref_title_color_bingo_frame">Bingo frame color</string>
     <string name="pref_title_color_bingo_background">Bingo background color</string>
     <string name="pref_title_color_bingo_text">Bingo text color</string>
