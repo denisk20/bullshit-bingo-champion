@@ -14,4 +14,12 @@
             android:key="show_changelog"
             android:title="@string/pref_title_changelog"
             android:summary="@string/pref_summary_changelog"/>
+    <PreferenceCategory
+            android:title="@string/pref_group_colors_title"
+            android:key="pref_colors">
+        <yuku.ambilwarna.widget.AmbilWarnaPreference
+                android:key="your_preference_key"
+                android:defaultValue="0xff6699cc"
+                android:title="@string/pref_title_color_background" />
+    </PreferenceCategory>
 </PreferenceScreen>
