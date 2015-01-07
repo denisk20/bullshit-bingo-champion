@@ -4,4 +4,8 @@
         <change>Можливість ділитися результатами гри</change>
         <change>Виправлений дефект з обиранням слів</change>
     </release>
+    <release version="1.3" versioncode="16" >
+        <change>Кольори! Бильшість кольорів інтерфейсу відтеперь можна налаштувати. Будьте креативні з UI!</change>
+        <change>DynamicGrid бібліотека оновлена для фікса Android Lollipop дефекта з перетягненням</change>
+    </release>
 </changelog>
