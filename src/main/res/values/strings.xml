@@ -79,8 +79,8 @@
 
     <!--colors. Please make sure that you add the key to prefs_colors array below-->
     <string name="pref_color_grid_key" translatable="false">pref_color_grid</string>
-    <string name="pref_color_card_key" translatable="false">pref_color_card</string>
-    <string name="pref_color_card_selected_key" translatable="false">pref_color_card_selected</string>
+    <string name="pref_color_card_background_key" translatable="false">pref_color_card</string>
+    <string name="pref_color_card_background_selected_key" translatable="false">pref_color_card_selected</string>
     <string name="pref_color_card_border_key" translatable="false">pref_color_card_border</string>
     <string name="pref_color_card_border_selected_key" translatable="false">pref_color_card_border_selected</string>
     <string name="pref_color_card_text_key" translatable="false">pref_color_card_text</string>
@@ -91,8 +91,8 @@
 
     <array name="prefs_colors">
         <item>@string/pref_color_grid_key</item>
-        <item>@string/pref_color_card_key</item>
-        <item>@string/pref_color_card_selected_key</item>
+        <item>@string/pref_color_card_background_key</item>
+        <item>@string/pref_color_card_background_selected_key</item>
         <item>@string/pref_color_card_border_key</item>
         <item>@string/pref_color_card_border_selected_key</item>
         <item>@string/pref_color_card_text_key</item>

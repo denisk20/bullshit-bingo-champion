@@ -554,17 +554,17 @@ public class BullshitBingoActivity extends Activity
 
     private void initColors() {
         Resources r = getResources();
-        gridView.setBackgroundColor(sharedPreferences.getInt(getString(R.string.pref_color_grid_key), r.getColor(R.color.default_grid)));
+        gridView.setBackgroundColor(getGridColor());
 
         int strokeWidth = r.getDimensionPixelSize(R.dimen.card_border_width);
 
         selectedCardDrawable = new CustomShapeDrawable(new RectShape(),
                 strokeWidth, sharedPreferences.getInt(getString(R.string.pref_color_card_border_selected_key), r.getColor(R.color.default_card_border_selected)));
-        selectedCardDrawable.getPaint().setColor(sharedPreferences.getInt(getString(R.string.pref_color_card_selected_key), r.getColor(R.color.default_card_selected)));
+        selectedCardDrawable.getPaint().setColor(getSelectedCardBackgroundColor());
 
         unselectedCardDrawable = new CustomShapeDrawable(new RectShape(),
                 strokeWidth, sharedPreferences.getInt(getString(R.string.pref_color_card_border_key), r.getColor(R.color.default_card_border)));
-        unselectedCardDrawable.getPaint().setColor(sharedPreferences.getInt(getString(R.string.pref_color_card_key), r.getColor(R.color.default_card)));
+        unselectedCardDrawable.getPaint().setColor(getUnselectedCardBackgroundColor());
 
         gridAdapter.notifyDataSetChanged();
 
@@ -574,9 +574,26 @@ public class BullshitBingoActivity extends Activity
         bingoTextColor = sharedPreferences.getInt(getString(R.string.pref_color_bingo_text_key), r.getColor(R.color.default_bingo_text));
 
         int bingoBorderWidth = r.getDimensionPixelSize(R.dimen.bingo_border_width);
+        int bingoStrokeColor = getBingoStrokeColor();
         bingoDrawable = new CustomShapeDrawable(new RectShape(),
-                bingoBorderWidth, sharedPreferences.getInt(getString(R.string.pref_color_bingo_frame_key), r.getColor(R.color.default_bingo_frame)));
+                bingoBorderWidth, bingoStrokeColor);
         bingoDrawable.getPaint().setColor(sharedPreferences.getInt(getString(R.string.pref_color_bingo_background_key), r.getColor(R.color.default_bingo_background)));
+    }
+
+    private int getUnselectedCardBackgroundColor() {
+        return sharedPreferences.getInt(getString(R.string.pref_color_card_background_key), getResources().getColor(R.color.default_card_background));
+    }
+
+    private int getSelectedCardBackgroundColor() {
+        return sharedPreferences.getInt(getString(R.string.pref_color_card_background_selected_key), getResources().getColor(R.color.default_card_background_selected));
+    }
+
+    private int getGridColor() {
+        return sharedPreferences.getInt(getString(R.string.pref_color_grid_key), getResources().getColor(R.color.default_grid));
+    }
+
+    private int getBingoStrokeColor() {
+        return sharedPreferences.getInt(getString(R.string.pref_color_bingo_frame_key), getResources().getColor(R.color.default_bingo_frame));
     }
 
     private void setCardColors(int position, TextView view) {
@@ -1003,6 +1020,13 @@ public class BullshitBingoActivity extends Activity
                 .withWidth(width)
                 .withHeight(height)
                 .withCardName(currentCardName)
+                /*colors*/
+                .withSelectedCardTextColor(selectedCardTextColor)
+                .withUnselectedCardTextColor(unselectedCardTextColor)
+                .withSelectedCardBackgroundColor(getSelectedCardBackgroundColor())
+                .withUnselectedCardBackgroundColor(getUnselectedCardBackgroundColor())
+                .withGridColor(getGridColor())
+                .withBingoStrokeColor(getBingoStrokeColor())
                 ;
 
         cardExporter.drawCard();

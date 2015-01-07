@@ -41,8 +41,11 @@ public class CardExporter {
     private int lineInterval = 15;
     private int gridWidth = 10;
     private int gridColor = Color.BLACK;
-    private int highlightColor = 0xFF64FAAF;
+    private int selectedCardBackgroundColor = 0xFF64FAAF;
+    private int unselectedCardBackgroundColor = Color.WHITE;
     private int bingoStrokeColor = Color.RED;
+    private int unselectedCardTextColor = Color.BLACK;
+    private int selectedCardTextColor = Color.BLACK;
 
     private int width = 1024;
     private int height = 768;
@@ -82,18 +85,33 @@ public class CardExporter {
         return this;
     }
 
-    public CardExporter withGridColor(int color) {
+    public CardExporter withGridColor(int gridColor) {
         this.gridColor = gridColor;
         return this;
     }
 
-    public CardExporter withHighlightColor(int highlightColor) {
-        this.highlightColor = highlightColor;
+    public CardExporter withSelectedCardBackgroundColor(int selectedCardBackgroundColor) {
+        this.selectedCardBackgroundColor = selectedCardBackgroundColor;
+        return this;
+    }
+
+    public CardExporter withUnselectedCardBackgroundColor(int unselectedCardBackgroundColor) {
+        this.unselectedCardBackgroundColor = unselectedCardBackgroundColor;
         return this;
     }
 
     public CardExporter withBingoStrokeColor(int bingoStrokeColor) {
         this.bingoStrokeColor = bingoStrokeColor;
+        return this;
+    }
+
+    public CardExporter withUnselectedCardTextColor(int unselectedCardTextColor) {
+        this.unselectedCardTextColor = unselectedCardTextColor;
+        return this;
+    }
+
+    public CardExporter withSelectedCardTextColor(int selectedCardTextColor) {
+        this.selectedCardTextColor = selectedCardTextColor;
         return this;
     }
 
@@ -150,18 +168,20 @@ public class CardExporter {
             float xCell = i % dim;
             float yCell = (float) Math.floor(i / dim);
 
-            if(word.hits > 0) {
-                int color = paint.getColor();
-                paint.setColor(highlightColor);
-                canvas.drawRect(xCell * cellWidth, yCell * cellHeight + TOP_MARGIN, (xCell + 1) * cellWidth, (yCell + 1) * cellHeight + TOP_MARGIN, paint);
-                paint.setColor(color);
-            }
+            boolean selected = word.hits > 0;
+
+            paint.setColor(selected ? selectedCardBackgroundColor : unselectedCardBackgroundColor);
+            canvas.drawRect(xCell * cellWidth, yCell * cellHeight + TOP_MARGIN, (xCell + 1) * cellWidth, (yCell + 1) * cellHeight + TOP_MARGIN, paint);
+
             String text = (word.word == null ? "" : word.word.trim());
 
             List<String> lines = splitIntoStringsThatFit(text.split("\\s+"), cellWidth, paint);
 
             float textBlockHeight = lines.size() * textSize + (lines.size() - 1) * lineInterval;
             float currentLineYCoord = yCell * cellHeight + cellHeight / 2 - textBlockHeight / 2 + textSize + TOP_MARGIN;
+
+            paint.setColor(selected ? selectedCardTextColor : unselectedCardTextColor);
+
             for(String line : lines) {
                 canvas.drawText(line, xCell * cellWidth + cellWidth / 2, currentLineYCoord, paint);
                 currentLineYCoord += textSize + lineInterval;

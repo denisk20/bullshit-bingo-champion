@@ -2,8 +2,8 @@
 <resources>
     <color name="default_grid">#FFF</color>
 
-    <color name="default_card">#FFF</color>
-    <color name="default_card_selected">#DBFFED</color>
+    <color name="default_card_background">#FFF</color>
+    <color name="default_card_background_selected">#DBFFED</color>
 
     <color name="default_card_border">#4fa5d5</color>
     <color name="default_card_border_selected">#4fa5d5</color>
