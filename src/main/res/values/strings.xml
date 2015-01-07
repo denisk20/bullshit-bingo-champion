@@ -77,13 +77,17 @@
     <string name="pref_color_card_selected_key">pref_color_card_selected</string>
     <string name="pref_color_card_border_key">pref_color_card_border</string>
     <string name="pref_color_card_border_selected_key">pref_color_card_border_selected</string>
+    <string name="pref_show_changelog_key">show_changelog</string>
+    <string name="pref_color_card_text_key">pref_color_card_text</string>
+    <string name="pref_vibrate_key">pref_vibrate</string>
+    <string name="pref_reload_default_cards_key">reload_default_cards</string>
+    <string name="pref_color_card_text_selected_key">pref_color_card_text_selected</string>
 
     <string name="pref_title_color_card">Unselected card color</string>
     <string name="pref_title_color_card_selected">Selected card color</string>
     <string name="pref_title_color_card_border">Unselected card border color</string>
     <string name="pref_title_color_card_border_selected">Selected card border color</string>
-    <string name="pref_vibrate_key">pref_vibrate</string>
-    <string name="pref_reload_default_cards_key">reload_default_cards</string>
-    <string name="pref_show_changelog_key">show_changelog</string>
+    <string name="pref_title_color_card_text">Unselected card text color</string>
+    <string name="pref_title_color_card_selected_text">Selected card text color</string>
 
 </resources>

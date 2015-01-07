@@ -42,5 +42,15 @@
                 android:key="@string/pref_color_card_border_selected_key"
                 android:defaultValue="@color/default_card_border_selected"
                 android:title="@string/pref_title_color_card_border_selected" />
+
+        <yuku.ambilwarna.widget.AmbilWarnaPreference
+                android:key="@string/pref_color_card_text_key"
+                android:defaultValue="@color/default_card_text"
+                android:title="@string/pref_title_color_card_text" />
+
+        <yuku.ambilwarna.widget.AmbilWarnaPreference
+                android:key="@string/pref_color_card_text_selected_key"
+                android:defaultValue="@color/default_card_text_selected"
+                android:title="@string/pref_title_color_card_selected_text" />
     </PreferenceCategory>
 </PreferenceScreen>

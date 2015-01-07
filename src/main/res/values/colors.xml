@@ -7,4 +7,7 @@
 
     <color name="default_card_border">#4fa5d5</color>
     <color name="default_card_border_selected">#4fa5d5</color>
+
+    <color name="default_card_text">#000</color>
+    <color name="default_card_text_selected">#000</color>
 </resources>

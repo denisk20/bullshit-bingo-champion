@@ -76,6 +76,7 @@ public class BullshitBingoActivity extends Activity
     };
     public static final int SETTINGS_REQUEST_CODE = 1;
     public static final String IMAGE_PNG = "image/png";
+    public static final int CARD_VIBRATION_MILLIS = 30;
 
     private SharedPreferences sharedPreferences;
 
@@ -151,6 +152,8 @@ public class BullshitBingoActivity extends Activity
     private Button shareButton;
     private CustomShapeDrawable selectedCardDrawable;
     private CustomShapeDrawable unselectedCardDrawable;
+    private int unselectedCardTextColor;
+    private int selectedCardTextColor;
 
     /**
      * Called when the activity is first created.
@@ -290,7 +293,7 @@ public class BullshitBingoActivity extends Activity
             textView.setTranslationX(0);
             textView.setTranslationY(0);
 
-            setCardColor(position, textView);
+            setCardColors(position, textView);
 
             textView.setOnTouchListener(this);
 
@@ -321,9 +324,9 @@ public class BullshitBingoActivity extends Activity
 
                 int hitsCount[] = getHitsCount();
 
-                setCardColor(position, view);
+                setCardColors(position, (TextView) view);
                 if (shouldVibrate()) {
-                    vibrator.vibrate(30);
+                    vibrator.vibrate(CARD_VIBRATION_MILLIS);
                 }
                 //todo use BingoData
                 //look for bingo among columns and rows
@@ -556,17 +559,24 @@ public class BullshitBingoActivity extends Activity
         unselectedCardDrawable.getPaint().setColor(sharedPreferences.getInt(getString(R.string.pref_color_card_key), r.getColor(R.color.default_card)));
 
         gridAdapter.notifyDataSetChanged();
+
+        unselectedCardTextColor = sharedPreferences.getInt(getString(R.string.pref_color_card_text_key), r.getColor(R.color.default_card_text));
+        selectedCardTextColor = sharedPreferences.getInt(getString(R.string.pref_color_card_text_selected_key), r.getColor(R.color.default_card_text_selected));
     }
 
-    private void setCardColor(int position, View view) {
+    private void setCardColors(int position, TextView view) {
         Drawable background;
+        int textColor;
         if (getWordDataAtPosition(position).hits > 0) {
             background = selectedCardDrawable;
+            textColor = selectedCardTextColor;
         } else {
             background = unselectedCardDrawable;
+            textColor = unselectedCardTextColor;
         }
 
         view.setBackgroundDrawable(background);
+        view.setTextColor(textColor);
     }
 
     private void initCardList() {
