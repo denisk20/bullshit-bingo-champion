@@ -6,6 +6,6 @@
     </release>
     <release version="1.3" versioncode="16" >
         <change>Colors! Most of the colors in the app are now configurable. Be creative with the UI!</change>
-        <change>Updated DynamicGrid library to fix a nasty bug on Android Lollipop with dragging</change>
+        <change>Updated DynamicGrid library to fix a nasty bug with dragging on Android Lollipop</change>
     </release>
 </changelog>
